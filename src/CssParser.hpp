@@ -39,7 +39,8 @@ namespace stylesheets
 {
 
 using PropValues = std::vector<std::string>;
-using Selector = std::vector<std::string>;
+using SelectorParts = std::vector<std::string>;
+using Selector = std::vector<SelectorParts>;
 
 class LocInfo
 {

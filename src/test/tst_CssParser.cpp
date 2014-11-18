@@ -35,17 +35,21 @@ using namespace aqt::stylesheets;
 namespace
 {
 
-std::string selectorName(const StyleSheet& ss, size_t propsetIndex, size_t selIndex)
+std::string selectorNames(const StyleSheet& ss,
+                          size_t propsetIndex,
+                          size_t selNumber,
+                          size_t selIndex0,
+                          size_t selIndex1)
 {
-  return ss.propsets[propsetIndex].selectors[0][selIndex];
+  return ss.propsets[propsetIndex].selectors[selNumber][selIndex0][selIndex1];
 }
 
 std::string selectorName(const StyleSheet& ss,
                          size_t propsetIndex,
-                         size_t selNumber,
-                         size_t selIndex)
+                         size_t selIndex0,
+                         size_t selIndex1)
 {
-  return ss.propsets[propsetIndex].selectors[selNumber][selIndex];
+  return ss.propsets[propsetIndex].selectors[0][selIndex0][selIndex1];
 }
 
 std::string getFirstValue(const PropValues& val, const std::string& def = "")
@@ -82,28 +86,34 @@ TEST(CssParserTest, ParserFromString_selectors)
     ".b { text: 'green'; }\n"
     "A B.b { background: yellow; }\n"
     "A B .b { foreground: black; }\n"
-    "A .b .c { foreground: black; }\n";
+    "A .b .c { foreground: black; }\n"
+    ".b.a { text: 'a and b'; }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 5);
-  EXPECT_EQ(selectorName(ss, 0, 0), "A.b");
+  EXPECT_EQ(ss.propsets.size(), 6);
+  EXPECT_EQ(selectorName(ss, 0, 0, 0), "A");
+  EXPECT_EQ(selectorName(ss, 0, 0, 1), ".b");
 
-  EXPECT_EQ(selectorName(ss, 1, 0), ".b");
+  EXPECT_EQ(selectorName(ss, 1, 0, 0), ".b");
 
-  EXPECT_EQ(selectorName(ss, 2, 0), "A");
-  EXPECT_EQ(selectorName(ss, 2, 1), "B.b");
+  EXPECT_EQ(selectorName(ss, 2, 0, 0), "A");
+  EXPECT_EQ(selectorName(ss, 2, 1, 0), "B");
+  EXPECT_EQ(selectorName(ss, 2, 1, 1), ".b");
 
-  EXPECT_EQ(selectorName(ss, 3, 0), "A");
-  EXPECT_EQ(selectorName(ss, 3, 1), "B");
-  EXPECT_EQ(selectorName(ss, 3, 2), ".b");
+  EXPECT_EQ(selectorName(ss, 3, 0, 0), "A");
+  EXPECT_EQ(selectorName(ss, 3, 1, 0), "B");
+  EXPECT_EQ(selectorName(ss, 3, 2, 0), ".b");
 
   EXPECT_EQ(ss.propsets[3].properties.size(), 1);
   EXPECT_EQ(ss.propsets[3].properties[0].name, "foreground");
   EXPECT_EQ(getFirstValue(ss.propsets[3].properties[0].values), std::string("black"));
 
-  EXPECT_EQ(selectorName(ss, 4, 0), "A");
-  EXPECT_EQ(selectorName(ss, 4, 1), ".b");
-  EXPECT_EQ(selectorName(ss, 4, 2), ".c");
+  EXPECT_EQ(selectorName(ss, 4, 0, 0), "A");
+  EXPECT_EQ(selectorName(ss, 4, 1, 0), ".b");
+  EXPECT_EQ(selectorName(ss, 4, 2, 0), ".c");
+
+  EXPECT_EQ(selectorName(ss, 5, 0, 0), ".b");
+  EXPECT_EQ(selectorName(ss, 5, 0, 1), ".a");
 }
 
 TEST(CssParserTest, ParserFromString_separatedSelectors)
@@ -114,14 +124,18 @@ TEST(CssParserTest, ParserFromString_separatedSelectors)
 
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(selectorName(ss, 0, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 0, 1, 0), "B");
-  EXPECT_EQ(selectorName(ss, 0, 2, 0), "C");
+  EXPECT_EQ(selectorNames(ss, 0, 0, 0, 0), "A");
+  EXPECT_EQ(selectorNames(ss, 0, 1, 0, 0), "B");
+  EXPECT_EQ(selectorNames(ss, 0, 2, 0, 0), "C");
 
-  EXPECT_EQ(selectorName(ss, 1, 0, 0), "A.a");
-  EXPECT_EQ(selectorName(ss, 1, 0, 1), "B.b");
-  EXPECT_EQ(selectorName(ss, 1, 1, 0), "A.a");
-  EXPECT_EQ(selectorName(ss, 1, 1, 1), "C.c");
+  EXPECT_EQ(selectorNames(ss, 1, 0, 0, 0), "A");
+  EXPECT_EQ(selectorNames(ss, 1, 0, 0, 1), ".a");
+  EXPECT_EQ(selectorNames(ss, 1, 0, 1, 0), "B");
+  EXPECT_EQ(selectorNames(ss, 1, 0, 1, 1), ".b");
+  EXPECT_EQ(selectorNames(ss, 1, 1, 0, 0), "A");
+  EXPECT_EQ(selectorNames(ss, 1, 1, 0, 1), ".a");
+  EXPECT_EQ(selectorNames(ss, 1, 1, 1, 0), "C");
+  EXPECT_EQ(selectorNames(ss, 1, 1, 1, 1), ".c");
 }
 
 TEST(CssParserTest, ParserFromString_childrenSelectors)
@@ -130,9 +144,11 @@ TEST(CssParserTest, ParserFromString_childrenSelectors)
 
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 1);
-  EXPECT_EQ(selectorName(ss, 0, 0), "A.b");
-  EXPECT_EQ(selectorName(ss, 0, 1), ">");
-  EXPECT_EQ(selectorName(ss, 0, 2), "B.c");
+  EXPECT_EQ(selectorName(ss, 0, 0, 0), "A");
+  EXPECT_EQ(selectorName(ss, 0, 0, 1), ".b");
+  EXPECT_EQ(selectorName(ss, 0, 1, 0), ">");
+  EXPECT_EQ(selectorName(ss, 0, 2, 0), "B");
+  EXPECT_EQ(selectorName(ss, 0, 2, 1), ".c");
 }
 
 TEST(CssParserTest, ParserFromString_properties)

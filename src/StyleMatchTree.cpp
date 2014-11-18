@@ -47,6 +47,7 @@ namespace
 
 struct PredefinedStrings {
   const std::string descendantAxisId = std::string("::desc::");
+  const std::string conjunctionIndicator = std::string("&");
   const std::string childIndicator = std::string(">");
   const std::string dot = std::string(".");
 };
@@ -114,23 +115,35 @@ MatchNode* matchAndInsertSel(MatchNode* node,
   return (node->matches[sel] = std::move(newNode)).get();
 }
 
-std::vector<std::string> transformSelector(const std::vector<std::string>& selector)
+std::vector<std::string> transformSelector(
+  const std::vector<std::vector<std::string>>& selector)
 {
   std::vector<std::string> result;
   auto last_was_symbol = false;
+  auto is_conjunction = false;
 
   for (auto sel : selector) {
-    if (sel == predefinedStrings().childIndicator) {
-      // skip
-      last_was_symbol = false;
-    } else {
-      if (last_was_symbol) {
-        result.push_back(predefinedStrings().descendantAxisId);
-        result.push_back(sel);
+    is_conjunction = false;
+    for (auto selPart : sel) {
+      if (selPart == predefinedStrings().childIndicator) {
+        // skip
+        last_was_symbol = false;
       } else {
-        result.push_back(sel);
-        last_was_symbol = true;
+        if (!is_conjunction) {
+          if (last_was_symbol) {
+            result.push_back(predefinedStrings().descendantAxisId);
+            result.push_back(selPart);
+          } else {
+            result.push_back(selPart);
+            last_was_symbol = true;
+          }
+        } else {
+          result.push_back(predefinedStrings().conjunctionIndicator);
+          result.push_back(selPart);
+          last_was_symbol = true;
+        }
       }
+      is_conjunction = true;
     }
   }
 
@@ -254,13 +267,6 @@ public:
   {
   }
 
-  MatchRec operator+(const MatchRec& rhs) const
-  {
-    MatchRec result = *this;
-    result.pNodes.insert(result.pNodes.end(), rhs.pNodes.begin(), rhs.pNodes.end());
-    return result;
-  }
-
   MatchRec& operator+=(const MatchRec& rhs)
   {
     pNodes.insert(pNodes.end(), rhs.pNodes.begin(), rhs.pNodes.end());
@@ -269,6 +275,22 @@ public:
 
   Nodes pNodes;
 };
+
+using MatchTuple = std::tuple<Specificity, PropertyDefMap>;
+using MatchResult = std::vector<MatchTuple>;
+
+void findDescendantMatchOnNode(MatchResult& result,
+                               Specificity specificity,
+                               const MatchNode* node,
+                               const PathElement& pathElt,
+                               UiItemPath::const_reverse_iterator nextEltIter,
+                               UiItemPath::const_reverse_iterator pathEltEnd);
+
+void iterateOverMatches(MatchResult& result,
+                        const MatchRec m,
+                        const PathElement& pathElt,
+                        UiItemPath::const_reverse_iterator nextEltIter,
+                        UiItemPath::const_reverse_iterator pathEltEnd);
 
 Specificity getMatchRecSpecificity(const std::tuple<Specificity, const MatchNode*>& tuple)
 {
@@ -279,9 +301,6 @@ const MatchNode* getMatchRecNode(const std::tuple<Specificity, const MatchNode*>
 {
   return std::get<1>(tuple);
 }
-
-using MatchTuple = std::tuple<Specificity, PropertyDefMap>;
-using MatchResult = std::vector<MatchTuple>;
 
 Specificity getMatchSpecificity(const MatchTuple& tuple)
 {
@@ -321,12 +340,8 @@ MatchRec findPathElement(MatchResult& result,
 
   for (const auto& className : pathElt.mClassNames) {
     std::string dotName(predefinedStrings().dot + className);
-    std::string completeName(pathElt.mTypeName + dotName);
-
     auto m2 = findPattern(result, Specificity(specificity, 1, 0), node, dotName);
-    auto m3 = findPattern(result, Specificity(specificity, 1, 1), node, completeName);
-
-    matchRec += m2 + m3;
+    matchRec += m2;
   }
 
   return matchRec;
@@ -337,31 +352,70 @@ void findMatchOnNode(MatchResult& result,
                      const MatchNode* node,
                      const PathElement& pathElt,
                      UiItemPath::const_reverse_iterator nextEltIter,
-                     UiItemPath::const_reverse_iterator pathEltEnd,
-                     bool descAxis)
+                     UiItemPath::const_reverse_iterator pathEltEnd)
 {
-  auto m1 = findPathElement(result, specificity, node, pathElt);
-  if (descAxis) {
-    if (m1.pNodes.empty()) {
-      if (nextEltIter != pathEltEnd) {
-        findMatchOnNode(result, specificity, node, *nextEltIter, std::next(nextEltIter),
-                        pathEltEnd, true);
-        return;
+  auto m = findPathElement(result, specificity, node, pathElt);
+  iterateOverMatches(result, m, pathElt, nextEltIter, pathEltEnd);
+}
+
+void iterateOverMatches(MatchResult& result,
+                        const MatchRec matchRec,
+                        const PathElement& pathElt,
+                        UiItemPath::const_reverse_iterator nextEltIter,
+                        UiItemPath::const_reverse_iterator pathEltEnd)
+{
+  auto tryToMatchConjunction = [&](Specificity specificity, const MatchNode* node) {
+    auto m =
+      findPattern(result, specificity, node, predefinedStrings().conjunctionIndicator);
+    for (const auto& tup : m.pNodes) {
+      findMatchOnNode(result, getMatchRecSpecificity(tup), getMatchRecNode(tup), pathElt,
+                      nextEltIter, pathEltEnd);
+    }
+  };
+
+  auto tryToMatchChild = [&](Specificity specificity, const MatchNode* node) {
+    if (nextEltIter != pathEltEnd) {
+      findMatchOnNode(
+        result, specificity, node, *nextEltIter, std::next(nextEltIter), pathEltEnd);
+    }
+  };
+
+  auto tryToMatchDescendant = [&](Specificity specificity, const MatchNode* node) {
+    if (nextEltIter != pathEltEnd) {
+      auto m =
+        findPattern(result, specificity, node, predefinedStrings().descendantAxisId);
+      for (const auto& tup : m.pNodes) {
+        findDescendantMatchOnNode(result, getMatchRecSpecificity(tup),
+                                  getMatchRecNode(tup), *nextEltIter,
+                                  std::next(nextEltIter), pathEltEnd);
       }
     }
-  }
+  };
 
-  for (const auto& tup : m1.pNodes) {
+  for (const auto& tup : matchRec.pNodes) {
+    auto specificity = getMatchRecSpecificity(tup);
+    auto node = getMatchRecNode(tup);
+    tryToMatchConjunction(specificity, node);
+    tryToMatchChild(specificity, node);
+    tryToMatchDescendant(specificity, node);
+  }
+}
+
+void findDescendantMatchOnNode(MatchResult& result,
+                               Specificity specificity,
+                               const MatchNode* node,
+                               const PathElement& pathElt,
+                               UiItemPath::const_reverse_iterator nextEltIter,
+                               UiItemPath::const_reverse_iterator pathEltEnd)
+{
+  auto m = findPathElement(result, specificity, node, pathElt);
+  if (m.pNodes.empty()) {
     if (nextEltIter != pathEltEnd) {
-      findMatchOnNode(result, getMatchRecSpecificity(tup), getMatchRecNode(tup),
-                      *nextEltIter, std::next(nextEltIter), pathEltEnd, false);
+      findDescendantMatchOnNode(
+        result, specificity, node, *nextEltIter, std::next(nextEltIter), pathEltEnd);
     }
-  }
-
-  auto m2 = findPattern(result, specificity, node, predefinedStrings().descendantAxisId);
-  for (const auto& tup : m2.pNodes) {
-    findMatchOnNode(result, getMatchRecSpecificity(tup), getMatchRecNode(tup), pathElt,
-                    nextEltIter, pathEltEnd, true);
+  } else {
+    iterateOverMatches(result, m, pathElt, nextEltIter, pathEltEnd);
   }
 }
 
@@ -372,7 +426,7 @@ MatchResult findMatchingRules(const StyleMatchTree& tree, const UiItemPath& path
   UiItemPath::const_reverse_iterator pathEltIter = path.rbegin();
   if (pathEltIter != path.rend()) {
     findMatchOnNode(result, Specificity(), tree.rootMatches.get(), *pathEltIter,
-                    std::next(pathEltIter), path.rend(), false);
+                    std::next(pathEltIter), path.rend());
   }
 
   return result;
@@ -527,6 +581,7 @@ std::string pathToString(const UiItemPath& path)
     } else {
       isFirst = false;
     }
+
     ss << p.mTypeName;
 
     if (!p.mClassNames.empty()) {

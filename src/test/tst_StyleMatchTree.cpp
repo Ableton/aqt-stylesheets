@@ -70,6 +70,7 @@ TEST(StyleMatchTreeTest, matchByTypeAndObjectName)
 {
   const std::string src =
     ".boo { background: red; }\n"
+    ".foo.boo { background: blue; }\n"
     "Foo.boo { background: yellow; }\n"
     "Foo > .boo { background: green; }\n";
 
@@ -83,6 +84,11 @@ TEST(StyleMatchTreeTest, matchByTypeAndObjectName)
   pm = matchPath(mt, p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("red", propertyAsString(pm, "background"));
+
+  p = {PathElement("", {"boo", "foo"})};
+  pm = matchPath(mt, p);
+  EXPECT_EQ(1, pm.size());
+  EXPECT_EQ("blue", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"boo"})};
   pm = matchPath(mt, p);
@@ -246,22 +252,24 @@ TEST(StyleMatchTreeTest, inheritedPropertiesAreLessSpecific)
 TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithManyParents)
 {
   const std::string src =
-    "          Bar { propA: 1; }\n"
-    "      Foo Bar { propB: 2; }\n"
-    "    Foo.a Bar { propC: 3; }\n"
-    "  Foo.a > Bar { propD: 4; }\n"
-    "  Foo.a Bar.b { propE: 5; }\n";
+    "          Bar     { propA: 1; }\n"
+    "      Foo Bar     { propB: 2; }\n"
+    "    Foo.a Bar     { propC: 3; }\n"
+    "  Foo.a > Bar     { propD: 4; }\n"
+    "  Foo.a   Bar.b   { propE: 5; }\n"
+    "  Foo.a.x Bar.b.y { propF: 6; }\n";
 
   StyleMatchTree mt = createMatchTree(parseStdString(src));
-  UiItemPath p = {PathElement("Foo", {"a"}), PathElement("Bar", {"b"})};
+  UiItemPath p = {PathElement("Foo", {"a", "x"}), PathElement("Bar", {"b", "y"})};
   PropertyMap pm = matchPath(mt, p);
 
-  EXPECT_EQ(5, pm.size());
+  EXPECT_EQ(6, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
   EXPECT_EQ("2", propertyAsString(pm, "propB"));
   EXPECT_EQ("3", propertyAsString(pm, "propC"));
   EXPECT_EQ("4", propertyAsString(pm, "propD"));
   EXPECT_EQ("5", propertyAsString(pm, "propE"));
+  EXPECT_EQ("6", propertyAsString(pm, "propF"));
 }
 
 TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithParent)
@@ -372,10 +380,12 @@ TEST(StyleMatchTreeTest, defaultStyleSheet)
 TEST(StyleMatchTreeTest, multipleClassNames)
 {
   const std::string src =
-    "Bar     { propA: 1 }\n"
-    "Bar.boo { propB: 2 }\n"
-    "Bar.def { propC: 3 }\n"
-    "Foo Bar { propD: 4 }\n"
+    "Bar         { propA: 1 }\n"
+    "Bar.boo     { propB: 2 }\n"
+    "Bar.def     { propC: 3 }\n"
+    "Bar.boo.def { propE: 7 }\n"
+    "Bar.def     { propC: 3 }\n"
+    "Foo Bar     { propD: 4 }\n"
     "Foo.abc Bar { propE: 5 }\n"
     "Foo.qoo Bar { propF: 6 }\n";
 
@@ -383,10 +393,11 @@ TEST(StyleMatchTreeTest, multipleClassNames)
   UiItemPath p = {PathElement("Bar", {"boo", "def"})};
   PropertyMap pm = matchPath(mt, p);
 
-  EXPECT_EQ(3, pm.size());
+  EXPECT_EQ(4, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
   EXPECT_EQ("2", propertyAsString(pm, "propB"));
   EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  EXPECT_EQ("7", propertyAsString(pm, "propE"));
 
   p = {PathElement("Foo", {"abc"}), PathElement("Bar", {"boo", "def"})};
   pm = matchPath(mt, p);
@@ -396,7 +407,7 @@ TEST(StyleMatchTreeTest, multipleClassNames)
   EXPECT_EQ("2", propertyAsString(pm, "propB"));
   EXPECT_EQ("3", propertyAsString(pm, "propC"));
   EXPECT_EQ("4", propertyAsString(pm, "propD"));
-  EXPECT_EQ("5", propertyAsString(pm, "propE"));
+  EXPECT_EQ("7", propertyAsString(pm, "propE"));
 }
 
 TEST(StyleMatchTreeTest, multipleClassNamesAndDefaultStyleSheet)
@@ -464,4 +475,38 @@ TEST(StyleMatchTreeTest, multipleClassNames_theLastOfAmbiguousDefinitionsWins)
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("yellow", propertyAsString(pm, "color"));
+}
+
+TEST(StyleMatchTreeTest, multipleClassNamesMatchChildren)
+{
+  const std::string src =
+    "Abc.mno                   { propA: 1 }\n"
+    "Abc.ixw                   { propB: 2 }\n"
+    "Bar.boo.def > Abc.mno.ixw { propC: 3 }\n";
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(3, pm.size());
+  EXPECT_EQ("1", propertyAsString(pm, "propA"));
+  EXPECT_EQ("2", propertyAsString(pm, "propB"));
+  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+}
+
+TEST(StyleMatchTreeTest, multipleClassNames_even_without_whitespace)
+{
+  const std::string src =
+    "Abc.mno                 { propA: 1 }\n"
+    "Abc.ixw                 { propB: 2 }\n"
+    "Bar.boo.def>Abc.mno.ixw { propC: 3 }\n";
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(3, pm.size());
+  EXPECT_EQ("1", propertyAsString(pm, "propA"));
+  EXPECT_EQ("2", propertyAsString(pm, "propB"));
+  EXPECT_EQ("3", propertyAsString(pm, "propC"));
 }
