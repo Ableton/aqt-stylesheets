@@ -1,0 +1,5 @@
+module Aqt.StyleSheets
+
+StyleDebugMouseArea 1.0 StyleDebugMouseArea.qml
+
+plugin StylePlugin @PATH_TO_PLUGIN@

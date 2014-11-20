@@ -1,0 +1,17 @@
+*.config       text
+*.cpp          text diff=cpp
+*.css          text
+*.hpp          text diff=cpp
+*.in           text
+*.ipp          text diff=cpp
+*.md           text
+*.png          binary
+*.qml          text
+*.style        text
+*.txt          text
+*.yml          text
+.clang-format  text
+.gitignore     text
+.gitattributes text
+LICENSE        text
+qmldir         text

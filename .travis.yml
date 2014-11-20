@@ -1,0 +1,21 @@
+language: cpp
+os: osx
+
+env:
+    matrix:
+        - CONFIGURATION=Debug
+        - CONFIGURATION=Release
+
+install:
+    - brew install qt5
+    - export PATH=/usr/local/opt/qt5/bin:$PATH
+    - git clone https://chromium.googlesource.com/external/googletest.git /Users/travis/build/googletest
+
+before_script:
+    - mkdir build && cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION -DGTEST_SOURCE=/Users/travis/build/googletest
+
+script:
+    - cmake --build .
+    - ctest -V
+    - qmlscene --quit -I ../qml ../examples/TestApp.qml
