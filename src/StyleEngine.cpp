@@ -32,6 +32,7 @@ SUPPRESS_WARNINGS
 #include <QtGui/QFontDatabase>
 #include <QtQml/QQmlEngine>
 #include <QtQml/QQmlFile>
+#include <QtQml/qqml.h>
 RESTORE_WARNINGS
 
 #include <iostream>
@@ -89,8 +90,7 @@ void StyleEngine::setStylePath(const QUrl& url)
 
     mStylePathUrl = url;
 
-    QQmlEngine pEngine(this);
-    mStylePath = pEngine.baseUrl().resolved(mStylePathUrl).toLocalFile();
+    mStylePath = qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile();
 
     if (oldPath != mStylePath) {
       mFsWatcher.addPath(mStylePath);
@@ -153,8 +153,7 @@ QVariantList StyleEngine::availableStyles()
 {
   QVariantList result;
 
-  QQmlEngine pEngine(this);
-  QDir styleDir(pEngine.baseUrl().resolved(mStylePathUrl).toLocalFile());
+  QDir styleDir(qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile());
 
   styleDir.setNameFilters(mStyleFilters);
 
@@ -198,11 +197,10 @@ void StyleEngine::onDirectoryChanged(const QString& path)
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
 {
-  QQmlEngine pEngine(this);
+  auto pEngine = qmlEngine(this);
 
   for (auto ffd : styleSheet.fontfaces) {
-
-    QUrl styleUrl = pEngine.baseUrl().resolved(mStylePathUrl);
+    QUrl styleUrl = pEngine->baseUrl().resolved(mStylePathUrl);
     QUrl fontFaceUrl = styleUrl.resolved(QUrl(QString::fromStdString(ffd.url)));
 
     QString fontFaceFile = QQmlFile::urlToLocalFileOrQrc(fontFaceUrl);
