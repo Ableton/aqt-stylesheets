@@ -24,18 +24,16 @@ import QtQuick.Layouts 1.1
 
 import Aqt.StyleSheets 1.0
 
-Rectangle {
-    id: root
-    StyleSet.name: "root"
-
+ApplicationWindow {
     width: 500
     height: 410
-    color: StyleSet.props.color("background")
 
     StyleEngine {
-        stylePath: "."
-        styleName: "style.css"
-        defaultStyleName: "default.css"
+       id: styleEngine
+       stylePath: "."
+       styleName: "style.css"
+       defaultStyleName: "default.css"
+       fileExtensions: [ "*.css" ]
     }
 
     function stateColor(colors, isPressed, def) {
@@ -45,84 +43,127 @@ Rectangle {
         return def;
     }
 
-    StyleDebugMouseArea {
-        debug: true
-    }
+    Rectangle {
+        id: root
 
-    GridLayout {
-        id: grid
-        columns: 2
-        rowSpacing: 10
-        columnSpacing: 10
+        StyleSet.name: "root"
+        anchors.fill: parent
 
-        Rectangle {
-            StyleSet.name: "one color-mixin"
-            width: 245
-            height: 200
-            color: stateColor(StyleSet.props.get("colors"), area1.pressed, "gray")
-            radius: StyleSet.props.number("radius")
-            Text {
-                text: "Hello"
-                font: StyleSet.props.font("font")
-            }
+        color: StyleSet.props.color("background")
 
-            MouseArea {
-                id: area1
-                anchors.fill: parent
-            }
+        StyleDebugMouseArea {
+            debug: true
         }
 
-        Rectangle {
-            StyleSet.name: "two"
-            width: 245
-            height: 200
-            color: StyleSet.props.color("background")
-            radius: StyleSet.props.number("radius")
-            Text {
-                text: "world"
-                font: StyleSet.props.font("font")
-            }
-            visible: StyleSet.props.boolean("visible")
-        }
+        GridLayout {
+            id: grid
+            columns: 2
+            rowSpacing: 10
+            columnSpacing: 10
 
-        Rectangle {
-            StyleSet.name: "three"
-            width: 245
-            height: 200
-            color: StyleSet.props.color("background")
-            radius: StyleSet.props.number("radius")
-            Text {
-                text: "dlrow"
-                font: StyleSet.props.font("font")
-            }
-        }
-
-        Rectangle {
-            width: 245
-            StyleSet.name: "four"
-            height: 200
-            color: StyleSet.props.color("background")
-            radius: StyleSet.props.number("radius")
-
-            Item {
-                anchors.fill: parent
-                Rectangle {
-                    StyleSet.name: "color-mixin"
-                    width: parent.width
-                    height: parent.height / 2
-                    color: stateColor(StyleSet.props.get("colors"), area1.pressed, "red")
-                    radius: StyleSet.props.number("radius")
+            Rectangle {
+                StyleSet.name: "one color-mixin"
+                width: 245
+                height: 200
+                color: stateColor(StyleSet.props.get("colors"), area1.pressed, "gray")
+                radius: StyleSet.props.number("radius")
+                Text {
+                    text: "Hello"
+                    font: StyleSet.props.font("font")
                 }
 
-                Item {
-                    width: parent.width
-                    height: parent.height / 2
-                    y: parent.height / 2
+                MouseArea {
+                    id: area1
+                    anchors.fill: parent
+                }
+            }
 
-                    Text {
-                        text: "elloH"
-                        font: StyleSet.props.font("font")
+            Rectangle {
+                StyleSet.name: "two"
+                width: 245
+                height: 200
+                color: StyleSet.props.color("background")
+                radius: StyleSet.props.number("radius")
+                Text {
+                    text: "world"
+                    font: StyleSet.props.font("font")
+                }
+                visible: StyleSet.props.boolean("visible")
+            }
+
+            Rectangle {
+                StyleSet.name: "three"
+                width: 245
+                height: 200
+                color: StyleSet.props.color("background")
+                radius: StyleSet.props.number("radius")
+                Text {
+                    text: "dlrow"
+                    font: StyleSet.props.font("font")
+                }
+            }
+
+            Rectangle {
+                width: 245
+                StyleSet.name: "four"
+                height: 200
+                color: StyleSet.props.color("background")
+                radius: StyleSet.props.number("radius")
+
+                Item {
+                    anchors.fill: parent
+                    Rectangle {
+                        StyleSet.name: "color-mixin"
+                        width: parent.width
+                        height: parent.height / 2
+                        color: stateColor(StyleSet.props.get("colors"), area1.pressed, "red")
+                        radius: StyleSet.props.number("radius")
                     }
+
+                    Item {
+                        width: parent.width
+                        height: parent.height / 2
+                        y: parent.height / 2
+
+                        Text {
+                            text: "elloH"
+                            font: StyleSet.props.font("font")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function displayStyleName(styleName) {
+        var baseName = styleName.split(".style")[0];
+        return baseName.charAt(0).toUpperCase() + baseName.slice(1);
+    }
+
+    menuBar: MenuBar {
+        Menu {
+            title: qsTr("Appearance")
+            Menu {
+                id: changeStyleMenu
+                title: qsTr("Change Theme")
+
+                Instantiator {
+                    model: styleEngine.availableStyles
+
+                    MenuItem {
+                        id: styleMenuItem
+
+                        property var styleName: modelData
+
+                        text: displayStyleName(modelData)
+
+                        checkable: true
+                        checked: styleMenuItem.styleName === styleEngine.styleName
+                        onTriggered: styleEngine.styleName = modelData
+                    }
+
+                    onObjectAdded: changeStyleMenu.insertItem(index, object)
+                    onObjectRemoved: changeStyleMenu.removeItem(object)
                 }
             }
         }
