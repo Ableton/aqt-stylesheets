@@ -121,6 +121,8 @@ class StyleEngine : public QObject, public QQmlParserStatus
    *
    * Only files with these extensions will be found as style sheets.  Default
    * is *.css only.
+   *
+   * @deprecated Use StylesDirWatcher instead
    */
   Q_PROPERTY(QVariantList fileExtensions READ fileExtensions WRITE setFileExtensions
                NOTIFY fileExtensionsChanged)
@@ -136,6 +138,8 @@ class StyleEngine : public QObject, public QQmlParserStatus
    *
    * The most like usage of this property is to build a style sheet chooser
    * (@ref StyleSheetMenu).
+   *
+   * @deprecated Use StylesDirWatcher instead
    */
   Q_PROPERTY(QVariantList availableStyles READ availableStyles NOTIFY
                availableStylesChanged)
@@ -155,10 +159,14 @@ public:
   QString defaultStyleName() const;
   void setDefaultStyleName(const QString& styleName);
 
+  /*! @deprecated Use StylesDirWatcher instead */
   QVariantList fileExtensions() const;
+  /*! @deprecated Use StylesDirWatcher instead */
   void setFileExtensions(const QVariantList& exts);
 
-  // returns a list of URL with available style files
+  /*! returns a list of URL with available style files
+   *
+   * @deprecated Use StylesDirWatcher instead */
   QVariantList availableStyles();
 
   virtual void classBegin();
