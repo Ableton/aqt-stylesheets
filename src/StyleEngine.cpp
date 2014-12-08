@@ -64,13 +64,16 @@ void setGlobalStyleEngine(StyleEngine* pEngine)
 
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
-  , mStyleName("style.rc")
   , mChangeCount(0)
+  , mStylesDir(this)
 {
-  mStyleFilters.push_back("*.css");
+  connect(&mFsWatcher, SIGNAL(fileChanged(const QString&)), this,
+          SLOT(onFileChanged(const QString&)));
 
-  connect(&mFsWatcher, SIGNAL(directoryChanged(const QString&)), this,
-          SLOT(onDirectoryChanged(const QString&)));
+  connect(&mStylesDir, SIGNAL(availableStylesChanged()), this,
+          SIGNAL(availableStylesChanged()));
+  connect(
+    &mStylesDir, SIGNAL(fileExtensionsChanged()), this, SIGNAL(fileExtensionsChanged()));
 }
 
 int StyleEngine::changeCount() const
@@ -85,16 +88,12 @@ QUrl StyleEngine::stylePath() const
 
 void StyleEngine::setStylePath(const QUrl& url)
 {
-  if (mStylePathUrl != url) {
-    QString oldPath = mStylePath;
+  mStylesDir.setStylePath(url);
 
+  if (mStylePathUrl != url) {
     mStylePathUrl = url;
 
     mStylePath = qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile();
-
-    if (oldPath != mStylePath) {
-      mFsWatcher.addPath(mStylePath);
-    }
 
     loadStyle();
   }
@@ -108,7 +107,16 @@ QString StyleEngine::styleName() const
 void StyleEngine::setStyleName(const QString& styleName)
 {
   if (mStyleName != styleName) {
+    QDir styleDir(mStylePath);
+    if (!mStyleName.isEmpty() && styleDir.exists(mStyleName)) {
+      mFsWatcher.removePath(styleDir.absoluteFilePath(mStyleName));
+    }
+
     mStyleName = styleName;
+
+    if (!mStyleName.isEmpty() && styleDir.exists(mStyleName)) {
+      mFsWatcher.addPath(styleDir.absoluteFilePath(mStyleName));
+    }
 
     loadStyle();
 
@@ -124,7 +132,16 @@ QString StyleEngine::defaultStyleName() const
 void StyleEngine::setDefaultStyleName(const QString& styleName)
 {
   if (mDefaultStyleName != styleName) {
+    QDir styleDir(mStylePath);
+    if (!mDefaultStyleName.isEmpty() && styleDir.exists(mDefaultStyleName)) {
+      mFsWatcher.removePath(styleDir.absoluteFilePath(mDefaultStyleName));
+    }
+
     mDefaultStyleName = styleName;
+
+    if (!mDefaultStyleName.isEmpty() && styleDir.exists(mDefaultStyleName)) {
+      mFsWatcher.addPath(styleDir.absoluteFilePath(mDefaultStyleName));
+    }
 
     loadStyle();
 
@@ -134,36 +151,17 @@ void StyleEngine::setDefaultStyleName(const QString& styleName)
 
 QVariantList StyleEngine::fileExtensions() const
 {
-  return mFileExtensions;
+  return mStylesDir.fileExtensions();
 }
 
 void StyleEngine::setFileExtensions(const QVariantList& exts)
 {
-  mFileExtensions = exts;
-  mStyleFilters.clear();
-
-  for (auto ext : mFileExtensions) {
-    mStyleFilters.push_back(ext.toString());
-  }
-
-  Q_EMIT fileExtensionsChanged();
+  mStylesDir.setFileExtensions(exts);
 }
 
 QVariantList StyleEngine::availableStyles()
 {
-  QVariantList result;
-
-  QDir styleDir(qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile());
-
-  styleDir.setNameFilters(mStyleFilters);
-
-  QStringList styleFiles =
-    styleDir.entryList(QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
-  for (auto str : styleFiles) {
-    result.append(str);
-  }
-
-  return result;
+  return mStylesDir.availableStyleSheetNames();
 }
 
 PropertyMap StyleEngine::matchPath(const UiItemPath& path)
@@ -176,23 +174,9 @@ std::string StyleEngine::describeMatchedPath(const UiItemPath& path)
   return aqt::stylesheets::describeMatchedPath(mStyleTree, path);
 }
 
-void StyleEngine::onDirectoryChanged(const QString& path)
+void StyleEngine::onFileChanged(const QString& )
 {
   loadStyle();
-
-  bool found = false;
-  for (auto s : mFsWatcher.directories()) {
-    if (s == mStylePath) {
-      found = true;
-      break;
-    }
-  }
-
-  if (!found) {
-    mFsWatcher.addPath(path);
-  }
-
-  Q_EMIT availableStylesChanged();
 }
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
@@ -229,7 +213,7 @@ StyleSheet StyleEngine::loadStyleSheet(const QString& stylePath, const QString& 
   QDir path(stylePath);
   QString styleFilePath = path.absoluteFilePath(styleName);
 
-  if (!QFile::exists(styleFilePath)) {
+  if (styleFilePath.isEmpty() || !QFile::exists(styleFilePath)) {
     styleSheetsLogError() << "Style '" << styleFilePath.toStdString() << "' not found";
   } else {
     styleSheetsLogInfo() << "Load style from '" << styleFilePath.toStdString() << "' ...";

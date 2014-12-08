@@ -23,6 +23,7 @@ THE SOFTWARE.
 #pragma once
 
 #include "StyleMatchTree.hpp"
+#include "StylesDirWatcher.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
@@ -190,7 +191,7 @@ Q_SIGNALS:
   void availableStylesChanged();
 
 private Q_SLOTS:
-  void onDirectoryChanged(const QString& path);
+  void onFileChanged(const QString& path);
 
 private:
   void loadStyle();
@@ -200,15 +201,16 @@ private:
 private:
   QUrl mStylePathUrl;
   QString mStylePath;
+
   QString mStyleName;
   QString mDefaultStyleName;
-  QVariantList mFileExtensions;
-  QStringList mStyleFilters;
 
   StyleMatchTree mStyleTree;
   QFileSystemWatcher mFsWatcher;
   int mChangeCount;
   std::map<QString, int> mFontIdCache;
+
+  StylesDirWatcher mStylesDir;
 };
 
 } // namespace stylesheets
