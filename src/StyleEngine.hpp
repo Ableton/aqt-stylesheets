@@ -94,6 +94,9 @@ class StyleEngine : public QObject, public QQmlParserStatus
    * StyleEngine is instantiated.  It must resolve to a local file path.  The
    * StyleEngine is actively watching this folder.  Appearing or disappearing
    * style sheet file will fire availableStylesChanged() signals.
+   *
+   * @deprecated Use styleSheetSource and defaultStyleSheetSource properties
+   * instead.  For watching folders of style sheets use StylesDirWatcher.
    */
   Q_PROPERTY(QUrl stylePath READ stylePath WRITE setStylePath)
 
@@ -107,12 +110,18 @@ class StyleEngine : public QObject, public QQmlParserStatus
    *
    * The style sheet file name can be set during app runtime.  This will load
    * the new style sheet and update all StyleSet.props in the app accordingly.
+   *
+   * @see styleName property
+   *
+   * @deprecated Use styleSheetSource property instead.
    */
   Q_PROPERTY(QString styleName READ styleName WRITE setStyleName NOTIFY styleNameChanged)
 
   /*! Contains the file name of the default style sheet
    *
    * @see styleName property
+   *
+   * @deprecated Use defaultStyleSheetSource property instead.
    */
   Q_PROPERTY(QString defaultStyleName READ defaultStyleName WRITE setDefaultStyleName
                NOTIFY defaultStyleNameChanged)
@@ -122,7 +131,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
    * Only files with these extensions will be found as style sheets.  Default
    * is *.css only.
    *
-   * @deprecated Use StylesDirWatcher instead
+   * @deprecated Use StylesDirWatcher instead.
    */
   Q_PROPERTY(QVariantList fileExtensions READ fileExtensions WRITE setFileExtensions
                NOTIFY fileExtensionsChanged)
@@ -139,10 +148,36 @@ class StyleEngine : public QObject, public QQmlParserStatus
    * The most like usage of this property is to build a style sheet chooser
    * (@ref StyleSheetMenu).
    *
-   * @deprecated Use StylesDirWatcher instead
+   * @deprecated Use StylesDirWatcher instead.
    */
   Q_PROPERTY(QVariantList availableStyles READ availableStyles NOTIFY
                availableStylesChanged)
+
+
+  /*! Contains the source url of the current style sheet
+   *
+   * The style sheet file is actively watched and, if changing, reloaded.  New
+   * or changing properties will fire styleChanged(int) signals.  There's no
+   * need though to actively monitor this signal since properties requested
+   * via the StyleSet attached type will automatically connect to the style
+   * engine.
+   *
+   * The style sheet url can be set during app runtime.  This will load the
+   * new style sheet and update all StyleSet.props in the app accordingly.
+   *
+   * The URL is resolved relative to the location of the QML file in which the
+   * StyleEngine is instantiated.
+   */
+  Q_PROPERTY(QUrl styleSheetSource READ styleSheetSource WRITE setStyleSheetSource NOTIFY
+               styleSheetSourceChanged REVISION 1)
+
+  /*! Contains the source url of the default style sheet
+   *
+   * @see styleSheetSource property
+   */
+  Q_PROPERTY(QUrl defaultStyleSheetSource READ defaultStyleSheetSource WRITE
+               setDefaultStyleSheetSource NOTIFY defaultStyleSheetSourceChanged
+                 REVISION 1)
 
 public:
   /*! @cond DOXYGEN_IGNORE */
@@ -150,13 +185,26 @@ public:
 
   int changeCount() const;
 
+  QUrl styleSheetSource() const;
+  void setStyleSheetSource(const QUrl& url);
+
+  QUrl defaultStyleSheetSource() const;
+  void setDefaultStyleSheetSource(const QUrl& url);
+
+
+  /*! @deprecated Use StylesDirWatcher instead. */
   QUrl stylePath() const;
+  /*! @deprecated Use StylesDirWatcher instead. */
   void setStylePath(const QUrl& path);
 
+  /*! @deprecated Use styleSheetSource instead. */
   QString styleName() const;
+  /*! @deprecated Use setStyleSheetSource instead. */
   void setStyleName(const QString& styleName);
 
+  /*! @deprecated Use defaultStyleSheetSource instead. */
   QString defaultStyleName() const;
+  /*! @deprecated Use setDefaultStyleSheetSource instead. */
   void setDefaultStyleName(const QString& styleName);
 
   /*! @deprecated Use StylesDirWatcher instead */
@@ -198,20 +246,46 @@ Q_SIGNALS:
   /*! Fires when the list of style sheets in the stylePath folder changes */
   void availableStylesChanged();
 
+  Q_REVISION(1) void styleSheetSourceChanged(const QUrl& url);
+  Q_REVISION(1) void defaultStyleSheetSourceChanged(const QUrl& url);
+
 private Q_SLOTS:
   void onFileChanged(const QString& path);
 
 private:
+  class SourceUrl
+  {
+  public:
+    void set(const QUrl& url, StyleEngine* pParent, QFileSystemWatcher& watcher);
+    QString toLocalFile(StyleEngine* pParent) const;
+
+    QUrl url() const
+    {
+      return mSourceUrl;
+    }
+
+    bool isEmpty() const
+    {
+      return mSourceUrl.isEmpty();
+    }
+
+    QUrl mSourceUrl;
+  };
+
   void loadStyle();
-  StyleSheet loadStyleSheet(const QString& stylePath, const QString& styleName);
+  StyleSheet loadStyleSheet(const SourceUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
 
-private:
-  QUrl mStylePathUrl;
-  QString mStylePath;
+  void updateSourceUrls();
 
-  QString mStyleName;
-  QString mDefaultStyleName;
+private:
+  QUrl mStylePathUrl;        //!< @deprecated
+  QString mStylePath;        //!< @deprecated
+  QString mStyleName;        //!< @deprecated
+  QString mDefaultStyleName; //!< @deprecated
+
+  SourceUrl mStyleSheetSourceUrl;
+  SourceUrl mDefaultStyleSheetSourceUrl;
 
   StyleMatchTree mStyleTree;
   QFileSystemWatcher mFsWatcher;
