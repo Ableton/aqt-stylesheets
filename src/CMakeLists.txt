@@ -41,6 +41,8 @@ add_library(StylePlugin MODULE
   StyleSet.cpp
   StyleSet.hpp
   StyleSet.ipp
+  StylesDirWatcher.cpp
+  StylesDirWatcher.hpp
 )
 target_link_libraries(StylePlugin StyleSheetParser Qt5::Quick)
 
