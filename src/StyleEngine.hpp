@@ -66,12 +66,16 @@ Q_SIGNALS:
  * to create more than one instance will print a warning leaving the first
  * instance untouched.
  *
+ * The style engine supports up to two stylesheets specified by the
+ * styleSheetSource and defaultStyleSheetSource properties.  Rules from the
+ * former take precedence of the those from the later.
+ *
  * @par Example
  * @code
  * ApplicationWindow {
  *   StyleEngine {
- *     stylePath: "../Assets/StyleSheets/"
- *     styleName: "default.css"
+ *     styleSheetSource: "../Assets/bright.css"
+ *     defaultStyleSheetSource: "Resources/default.css"
  *   }
  * }
  * @endcode
@@ -88,7 +92,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
   Q_DISABLE_COPY(StyleEngine)
   Q_INTERFACES(QQmlParserStatus)
 
-  /*! Contains the URL of folder containing style sheets
+  /*! @public Contains the URL of folder containing style sheets
    *
    * The URL is resolved relative to the location of the QML file in which the
    * StyleEngine is instantiated.  It must resolve to a local file path.  The
@@ -100,7 +104,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
    */
   Q_PROPERTY(QUrl stylePath READ stylePath WRITE setStylePath)
 
-  /*! Contains the file name of the current style sheet
+  /*! @public Contains the file name of the current style sheet
    *
    * The style sheet file is actively watched and, if changing, reloaded.  New
    * or changing properties will fire styleChanged(int) signals.  There's no
@@ -117,7 +121,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
    */
   Q_PROPERTY(QString styleName READ styleName WRITE setStyleName NOTIFY styleNameChanged)
 
-  /*! Contains the file name of the default style sheet
+  /*! @public Contains the file name of the default style sheet
    *
    * @see styleName property
    *
@@ -126,7 +130,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
   Q_PROPERTY(QString defaultStyleName READ defaultStyleName WRITE setDefaultStyleName
                NOTIFY defaultStyleNameChanged)
 
-  /*! Defines the list of support file extensions
+  /*! @public Defines the list of support file extensions
    *
    * Only files with these extensions will be found as style sheets.  Default
    * is *.css only.
@@ -136,7 +140,8 @@ class StyleEngine : public QObject, public QQmlParserStatus
   Q_PROPERTY(QVariantList fileExtensions READ fileExtensions WRITE setFileExtensions
                NOTIFY fileExtensionsChanged)
 
-  /*! Contains the list of all style sheet files found in the stylePath folder
+  /*! @public Contains the list of all style sheet files found in the
+   * stylePath folder
    *
    * Contains all files in the folder given by the stylePath property.
    * Only files ending in the @c *.css extension are listed.
@@ -154,7 +159,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
                availableStylesChanged)
 
 
-  /*! Contains the source url of the current style sheet
+  /*! @public Contains the source url of the current style sheet
    *
    * The style sheet file is actively watched and, if changing, reloaded.  New
    * or changing properties will fire styleChanged(int) signals.  There's no
@@ -167,13 +172,17 @@ class StyleEngine : public QObject, public QQmlParserStatus
    *
    * The URL is resolved relative to the location of the QML file in which the
    * StyleEngine is instantiated.
+   *
+   * @since 1.1
    */
   Q_PROPERTY(QUrl styleSheetSource READ styleSheetSource WRITE setStyleSheetSource NOTIFY
                styleSheetSourceChanged REVISION 1)
 
-  /*! Contains the source url of the default style sheet
+  /*! @public Contains the source url of the default style sheet
    *
    * @see styleSheetSource property
+   *
+   * @since 1.1
    */
   Q_PROPERTY(QUrl defaultStyleSheetSource READ defaultStyleSheetSource WRITE
                setDefaultStyleSheetSource NOTIFY defaultStyleSheetSourceChanged
@@ -246,7 +255,15 @@ Q_SIGNALS:
   /*! Fires when the list of style sheets in the stylePath folder changes */
   void availableStylesChanged();
 
+  /*! Emitted when the style sheet source URL changes.
+   *
+   * @since 1.1
+   */
   Q_REVISION(1) void styleSheetSourceChanged(const QUrl& url);
+  /*! Emitted when the default style sheet source URL changes.
+   *
+   * @since 1.1
+   */
   Q_REVISION(1) void defaultStyleSheetSourceChanged(const QUrl& url);
 
 private Q_SLOTS:

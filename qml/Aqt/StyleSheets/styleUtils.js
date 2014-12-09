@@ -1,6 +1,6 @@
 /**
  * @namespace Aqt.StyleSheets
- * Utilities for working with styles.
+ * Utilities for working with stylesheets.
  *
  * @version 1.0
  */
@@ -9,8 +9,8 @@
 
 "use strict";
 
-/**
- * @fn string conditionalName(array pairs)
+/*!
+ * @fn string conditionalName(array pairs);
  *
  * Maps a list of (boolean, string) pairs to a string that is
  * the concatenation of all the strings for which the boolean
