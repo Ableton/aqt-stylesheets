@@ -1,0 +1,7 @@
+Test {
+    numSelections: 8;
+}
+
+QQuickText {
+    number: 1;
+}
