@@ -22,18 +22,22 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 
-import Aqt.StyleSheets 1.0
+import Aqt.StyleSheets 1.1
 
 ApplicationWindow {
     width: 500
     height: 410
 
     StyleEngine {
-       id: styleEngine
-       stylePath: "."
-       styleName: "style.css"
-       defaultStyleName: "default.css"
-       fileExtensions: [ "*.css" ]
+        id: styleEngine
+        styleSheetSource: "./style.css"
+        defaultStyleSheetSource: "./default.css"
+    }
+
+    StylesDirWatcher {
+        id: stylesDirWatcher
+        stylePath: "."
+        fileExtensions: ["*.css"]
     }
 
     function stateColor(colors, isPressed, def) {
@@ -135,8 +139,9 @@ ApplicationWindow {
         }
     }
 
-    function displayStyleName(styleName) {
-        var baseName = styleName.split(".style")[0];
+    function displayStyleName(styleUrl) {
+        var tokens = styleUrl.toString().split(/\/|\\/),
+            baseName = tokens[tokens.length - 1].split(/.css$/)[0]
         return baseName.charAt(0).toUpperCase() + baseName.slice(1);
     }
 
@@ -148,18 +153,18 @@ ApplicationWindow {
                 title: qsTr("Change Theme")
 
                 Instantiator {
-                    model: styleEngine.availableStyles
+                    model: stylesDirWatcher.availableStyles
 
                     MenuItem {
                         id: styleMenuItem
 
-                        property var styleName: modelData
+                        property var styleSource: modelData
 
                         text: displayStyleName(modelData)
 
                         checkable: true
-                        checked: styleMenuItem.styleName === styleEngine.styleName
-                        onTriggered: styleEngine.styleName = modelData
+                        checked: styleMenuItem.styleSource === styleEngine.styleSheetSource
+                        onTriggered: styleEngine.styleSheetSource = styleSource
                     }
 
                     onObjectAdded: changeStyleMenu.insertItem(index, object)

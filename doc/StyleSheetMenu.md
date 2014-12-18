@@ -6,17 +6,23 @@ Create a StyleEngine in your main application:
     import QtQuick 2.3
     import QtQuick.Controls 1.2
 
-    import Aqt.StyleSheets 1.0
+    import Aqt.StyleSheets 1.1
 
     ApplicationWindow {
         StyleEngine {
             id: styleEngine
-            stylePath: "."
-            styleName: "style.css"
+            styleSheetSource: "style.css"
         }
 
-        function displayStyleName(styleName) {
-            var baseName = styleName.split(".css")[0];
+        StylesDirWatcher {
+           id: stylesDirWatcher
+           stylePath: "."
+           fileExtensions: ["*.css"]
+        }
+
+        function displayStyleName(styleUrl) {
+            var tokens = styleUrl.toString().split(/\/|\\/),
+                baseName = tokens[tokens.length - 1].split(/.css$/)[0]
             return baseName.charAt(0).toUpperCase() + baseName.slice(1);
         }
 
@@ -28,18 +34,18 @@ Create a StyleEngine in your main application:
                     title: qsTr("Change Theme")
 
                     Instantiator {
-                        model: styleEngine.availableStyles
+                        model: stylesDirWatcher.availableStyles
 
                         MenuItem {
                             id: styleMenuItem
 
-                            property var styleName: modelData
+                            property var styleSource: modelData
 
                             text: displayStyleName(modelData)
 
                             checkable: true
-                            checked: styleMenuItem.styleName === styleEngine.styleName
-                            onTriggered: styleEngine.styleName = modelData
+                            checked: styleMenuItem.styleSource === styleEngine.styleSheetSource
+                            onTriggered: styleEngine.styleSheetSource = styleSource
                         }
 
                         onObjectAdded: changeStyleMenu.insertItem(index, object)

@@ -115,36 +115,27 @@ struct PropertyConvertTraits;
  * return expected values until the StyleEngine is actually initialized.
  *
  * @par Import in QML:
- * <pre>
- * import Aqt.StyleSheets 1.0
- * </pre>
+ * ```import Aqt.StyleSheets 1.0```
  * @since 1.0
  */
 class StyleSet : public QObject
 {
   Q_OBJECT
 
-  /*! Contains the path for the element this StyleSet is attached to.
+  /*! @public Contains the path for the element this StyleSet is attached to.
    *
-   * @property QString path
+   * The path will look similar to this:
    *
-   * The path has the following syntax:
+   * ```QQuickRectangle.root/QQuickRowLayout/QQuickItem.box/QQuickText```
    *
-   * <pre>
-   * path      ::= element ( '/' element )*
-   * element   ::= typename [ '.' ( classnames | classname ) ]
-   * typename  ::= SYMBOL
-   * classnames ::= '{' classname ( ',' classname )* '}'
-   * classname ::= SYMBOL
-   * </pre>
-   *
-   * E.g.: @c QQuickRectangle.root/QQuickRowLayout/QQuickItem.box/QQuickText
-   *
-   * The path is mostly useful for debugging purposes.
+   * and reads from root to leaf, i.e. the left most token is the element at
+   * the root of the QML object hierarchy.  The path is mostly useful for
+   * debugging purposes.
    */
   Q_PROPERTY(QString path READ path)
 
-  /*! Contains the style properties for the element this StyleSet is attached to
+  /*! @public Contains the style properties for the element this StyleSet is
+   * attached to
    *
    * @par Example:
    * @code
@@ -166,7 +157,7 @@ class StyleSet : public QObject
 // at all.  doxygen's @property tag somehow ends up in the function section,
 // which is not very helpful.
 #ifdef DOXYGEN_GENERATED
-  /*! Contains the style class name
+  /*! @public Contains the style class name
    *
    * The style class name is part of the element path used for matching selector
    * rules.  This name forms the "dot" part of an elements selector name.
@@ -219,8 +210,10 @@ public:
    *
    * Looks up the style property named @p key and returns it as is.  The
    * output time is either a @c string (@c QString) or a list of strings (@c
-   * QVariantList).  If there's no such property returns and invalid @c
-   * QVariant (which maps as @c undefined into Javascript/QML).
+   * QVariantList).
+   *
+   * @note If there's no such property returns an invalid @c QVariant which
+   * maps to @c undefined into Javascript/QML.
    *
    * @par Example:
    * @code

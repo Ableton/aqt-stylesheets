@@ -18,7 +18,7 @@ Let's start with a small example.
     import QtQuick 2.3
     import QtQuick.Layouts 1.1
 
-    import Aqt.StyleSheets 1.0                                            // [1]
+    import Aqt.StyleSheets 1.1                                            // [1]
 
 
     Rectangle {
@@ -26,9 +26,8 @@ Let's start with a small example.
         height: 50
 
         StyleEngine {                                                     // [2]
-            stylePath: "."
-            styleName: "HelloWorld.css"
-            defaultStyleName: "default.css"                               // [2b]
+            styleSheetSource: "HelloWorld.css"
+            defaultStyleSheetSource: "default.css"                        // [2b]
         }
 
         StyleSet.name: "root"                                             // [3]
@@ -63,17 +62,18 @@ There are some things going on here:
 
 2. Setup the style engine.  You have to do this exactly once in your
    application (you will get warnings, if you try to set up more than one
-   style engine), and pass it the path (`stylePath`) where to look for
-   style sheets and the filename of the style sheet to use (`styleName`).
-   These properties are dynamic, so if you change their values during
-   runtime the style engine will reset itself to the new path and style
-   sheet.  The style engine will also watch the specified style sheet file,
-   i.e. if you go to change it while the application is running it will
-   automatically reload it send property changes to all style listeners.
+   style engine), and pass it url of the style sheet to use
+   (`styleSheetSource`).  Currently this can only be a local file url.
+   This property is dynamic, so if you change its values during runtime the
+   style engine will reset itself to the style sheet.  It will will also
+   watch the specified file, i.e. if you go to change it while the
+   application is running it will automatically reload it and send property
+   changes to all style listeners.
 
-   The `defaultStyleName` property defines a second stylesheet, which has a
-   lower weight than the one set with the `stylePath` property.  Its
-   purpose is to define the "default" definitions for properties.
+   The `defaultStyleSheetSource` property defines a second stylesheet,
+   which has a lower weight than the one set with the `styleSheetSource`
+   property.  Its purpose is to define the "default" or "fallback"
+   definitions for properties.
 
 3. Specify a style classname to owning instance (here the outer
    `Rectangle`).  See below.
@@ -115,9 +115,9 @@ So how is this working?
 
 The `StyleSet` attached property maintains a path for each object it is
 attached to.  This path is build from the *type name* and the *style class
-name* (as set by the attached StyleSet.name property) of each item from the
-element attached to until the root of application.  You can show the path
-for each element using the `StyleSet.path` attached property, e.g. by
+name(s)* (as set by the attached StyleSet.name property) of each item from
+the element attached to until the root of application.  You can show the
+path for each element using the `StyleSet.path` attached property, e.g. by
 adding a line like this to an element:
 
     Component.onCompleted: console.log("Path:", StyleSet.path)
@@ -129,15 +129,15 @@ If you put this into the Text elements in the example above you get:
 
 The type name is the typeName as QML will report it.  For base QtQuick
 classes this is something like `QQuickRectangle`, `QQuickText`,
-`QQuickItem`, etc.  For custom, use build types is the same name as you
-would use in QML code, i.e. a type defined in the file `FooBar.qml` would
-be `FooBar`.
+`QQuickItem`, etc.  For custom, user build types this is the same name as
+you would use in QML code.  I.e. a type defined in the file `FooBar.qml`
+would be `FooBar`.
 
 The style class name is empty by default, but can be set with
 `StyleSet.name` attached property.
 
 When style property bindings are resolved these element paths are matched
-against the selector rules from the loaded style sheet
+against the selector rules from the loaded style sheet(s)
 (e.g. `QQuickRectangle > QQuickText`).  The precedence rules in this style
 engine work similar to CSS, but are simpler (because at lot of details are
 not supported).  Simply put the rules are:
@@ -150,12 +150,12 @@ not supported).  Simply put the rules are:
   3. If two rules have the same specificity the one defined last in a
      source file wins;
 
-  4. A definition in the user style sheet (set with `styleName` property)
-     overrules the one in the default stylesheet (set with
-     `defaultStyleName` property).
+  4. A definition in the user style sheet (set with `styleSheetSource`
+     property) overrules the one in the default stylesheet (set with
+     `defaultStyleSheetSource` property).
 
 (*) The *specificity* for a element path is computed by counting the number
-of parts matching to selectors.  This engine knows about two kinds of
+of parts matching in selectors.  This engine knows about two kinds of
 things to match: *typenames* and *stylenames*.  Each *typename* matching
 with a selector rule increases the typename specificity, each *stylename*
 the style specificity.  A element path "Foo.root/Bar" matching a rule "Foo
@@ -169,8 +169,8 @@ From the example above we can see:
   * `QQuickRectangle > QQuickText` is more specific than the very generic
     `QQuickText` rule.  It matches exactly one element.  (If you would add
     a rule `QQuickRectangle QQuickText` this would seem to be less specific
-    than the `QQuickRectangle > QQuickText` rule, but is not due to CSS's
-    specificity).
+    than the `QQuickRectangle > QQuickText` rule, but is not, it has indeed
+    exactly the same specificity).
 
   * There is no `font` property in the style sheet so the system is using
     some fallback - it will most likely complain (if there is no `font`
@@ -193,9 +193,9 @@ thus the result will be:
 Types you're probably interested in when using this
 ---------------------------------------------------
 
-When working with this in QML you should know how the two types
-`StyleEngine` and `StyleSet` are behaving.  The rest of the classes are
-internal types mostly, which you probably never have to know about.
+When working with this in QML you should know how the types `StyleEngine`
+and `StyleSet` are behaving.  The rest of the classes are internal types
+mostly, which you probably never have to know about.
 
   * [StyleEngine](@ref aqt::stylesheets::StyleEngine) the access to the
     style engine singleton.

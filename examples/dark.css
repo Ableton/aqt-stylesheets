@@ -20,29 +20,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "StylePlugin.hpp"
-
-#include "StyleEngine.hpp"
-#include "StylesDirWatcher.hpp"
-#include "StyleSet.hpp"
-#include "Warnings.hpp"
-
-SUPPRESS_WARNINGS
-#include <QtQml/QQmlComponent>
-#include <QtQml/QQmlEngine>
-RESTORE_WARNINGS
-
-void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
-{
-  qmlRegisterUncreatableType<aqt::stylesheets::StyleSet>(
-    pUri, 1, 0, "StyleSet", "StyleSet is exposed as an attached property");
-  qmlRegisterType<aqt::stylesheets::StyleEngine>(pUri, 1, 0, "StyleEngine");
-  qmlRegisterType<aqt::stylesheets::StyleEngine,1>(pUri, 1, 1, "StyleEngine");
-  qmlRegisterType<aqt::stylesheets::StylesDirWatcher>(pUri, 1, 1, "StylesDirWatcher");
+.root {
+  background: "darkblue";
 }
 
-#if !defined(NOT_INCLUDE_MOC)
-SUPPRESS_WARNINGS
-#include "moc_StylePlugin.cpp"
-RESTORE_WARNINGS
-#endif
+.color-mixin {
+  colors: "silver", "pink";
+}
+
+QQuickRectangle QQuickRectangle {
+  background: "darkcyan";
+}
+
+QQuickRectangle.one {
+  background: "orange";
+}
+
+QQuickRectangle.two {
+  background: "darkorange";
+  visible: true;
+}
+
+QQuickRectangle.three {
+  background: "dimgray";
+}
+
+QQuickRectangle.four {
+  background: "DarkOliveGreen";
+}
+
+.four QQuickRectangle {
+  background: "DodgerBlue";
+  radius: 5.0;
+}
+
+.three QQuickText {
+  font: "60px serif";
+}
