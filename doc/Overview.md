@@ -1,4 +1,4 @@
-Stylesheets for QML                {#mainpage}
+Stylesheets for QML
 ===================
 
 This project contains classes and types which allow to use CSS like styling
