@@ -212,11 +212,9 @@ void StyleEngine::onFileChanged(const QString&)
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
 {
-  auto pEngine = qmlEngine(this);
-
   for (auto ffd : styleSheet.fontfaces) {
-    QUrl styleUrl = pEngine->baseUrl().resolved(mStylePathUrl);
-    QUrl fontFaceUrl = styleUrl.resolved(QUrl(QString::fromStdString(ffd.url)));
+    QUrl fontFaceUrl =
+      mStyleSheetSourceUrl.url().resolved(QUrl(QString::fromStdString(ffd.url)));
 
     QString fontFaceFile = QQmlFile::urlToLocalFileOrQrc(fontFaceUrl);
 
