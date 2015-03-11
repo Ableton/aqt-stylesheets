@@ -132,7 +132,7 @@ class StyleSet : public QObject
    * the root of the QML object hierarchy.  The path is mostly useful for
    * debugging purposes.
    */
-  Q_PROPERTY(QString path READ path)
+  Q_PROPERTY(QString path READ path NOTIFY pathChanged)
 
   /*! @public Contains the style properties for the element this StyleSet is
    * attached to
@@ -334,6 +334,13 @@ Q_SIGNALS:
    */
   void propsChanged();
 
+  /*! Fires when the path of the item changes
+   *
+   * Whenever the location of the object his StyleSet is attached to changes
+   * the StyleSet will fire this signal.
+   */
+  void pathChanged(const QString& path);
+
 public Q_SLOTS:
   /*! @cond DOXYGEN_IGNORE */
   void onStyleChanged(int changeCount);
@@ -362,7 +369,7 @@ class StyleSetAttached : public QObject
   Q_OBJECT
 
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-  Q_PROPERTY(QString path READ path)
+  Q_PROPERTY(QString path READ path NOTIFY pathChanged)
   Q_PROPERTY(aqt::stylesheets::StyleSet* props READ props NOTIFY propsChanged)
   Q_PROPERTY(QString styleInfo READ styleInfo NOTIFY propsChanged)
 
@@ -382,6 +389,7 @@ public:
 Q_SIGNALS:
   void propsChanged();
   void nameChanged(const QString& name);
+  void pathChanged(const QString& path);
 
 private Q_SLOTS:
   void onStyleEngineChanged(aqt::stylesheets::StyleEngine* pEngine);
