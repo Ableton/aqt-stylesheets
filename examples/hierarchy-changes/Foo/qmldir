@@ -1,0 +1,3 @@
+module Foo
+
+singleton Bar 1.0 Bar.qml
