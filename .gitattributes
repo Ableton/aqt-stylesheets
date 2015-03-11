@@ -5,8 +5,10 @@
 *.in           text
 *.ipp          text diff=cpp
 *.md           text
+*.otf          binary
 *.png          binary
 *.qml          text
+*.sfd          text
 *.style        text
 *.txt          text
 *.yml          text

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-2015 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,6 @@ SUPPRESS_WARNINGS
 #include <QtQml/QQmlFile>
 #include <QtQml/qqml.h>
 RESTORE_WARNINGS
-
 
 namespace aqt
 {
@@ -136,8 +135,8 @@ void StylesDirWatcher::updateStyleFiles()
     QDir styleDir(mStylePath);
     styleDir.setNameFilters(mStyleFilters);
 
-    QStringList styleFiles = styleDir.entryList(QDir::NoDotAndDotDot | QDir::Files,
-                                                QDir::Name);
+    QStringList styleFiles =
+      styleDir.entryList(QDir::NoDotAndDotDot | QDir::Files, QDir::Name);
     if (styleFiles != mStyleSheetFiles) {
       mStyleSheetFiles.swap(styleFiles);
       Q_EMIT availableStylesChanged();

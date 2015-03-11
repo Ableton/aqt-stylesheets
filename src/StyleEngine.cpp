@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-2015 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -174,7 +174,8 @@ void StyleEngine::updateSourceUrls()
     }
 
     if (!mDefaultStyleName.isEmpty() && styleDir.exists(mDefaultStyleName)) {
-      setDefaultStyleSheetSource(QUrl::fromLocalFile(styleDir.absoluteFilePath(mDefaultStyleName)));
+      setDefaultStyleSheetSource(
+        QUrl::fromLocalFile(styleDir.absoluteFilePath(mDefaultStyleName)));
     }
   }
 }
@@ -204,18 +205,16 @@ std::string StyleEngine::describeMatchedPath(const UiItemPath& path)
   return aqt::stylesheets::describeMatchedPath(mStyleTree, path);
 }
 
-void StyleEngine::onFileChanged(const QString& )
+void StyleEngine::onFileChanged(const QString&)
 {
   loadStyle();
 }
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
 {
-  auto pEngine = qmlEngine(this);
-
   for (auto ffd : styleSheet.fontfaces) {
-    QUrl styleUrl = pEngine->baseUrl().resolved(mStylePathUrl);
-    QUrl fontFaceUrl = styleUrl.resolved(QUrl(QString::fromStdString(ffd.url)));
+    QUrl fontFaceUrl =
+      mStyleSheetSourceUrl.url().resolved(QUrl(QString::fromStdString(ffd.url)));
 
     QString fontFaceFile = QQmlFile::urlToLocalFileOrQrc(fontFaceUrl);
 
@@ -310,7 +309,6 @@ StyleEngine* StyleEngineHost::globalStyleEngine()
 {
   return globalStyleEngineImpl();
 }
-
 
 //----------------------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-2015 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -158,7 +158,6 @@ class StyleEngine : public QObject, public QQmlParserStatus
   Q_PROPERTY(QVariantList availableStyles READ availableStyles NOTIFY
                availableStylesChanged)
 
-
   /*! @public Contains the source url of the current style sheet
    *
    * The style sheet file is actively watched and, if changing, reloaded.  New
@@ -199,7 +198,6 @@ public:
 
   QUrl defaultStyleSheetSource() const;
   void setDefaultStyleSheetSource(const QUrl& url);
-
 
   /*! @deprecated Use StylesDirWatcher instead. */
   QUrl stylePath() const;
