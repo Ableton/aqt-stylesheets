@@ -463,7 +463,7 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
     if (pItem != nullptr) {
       connect(pItem, SIGNAL(parentChanged(QQuickItem*)), this,
               SLOT(onParentChanged(QQuickItem*)));
-    } else {
+    } else if (p->parent() != nullptr) {
       styleSheetsLogInfo() << "Parent to StyleSetAttached is not a QQuickItem but '"
                            << p->metaObject()->className() << "'. "
                            << "Hierarchy changes for this component won't be detected.";
