@@ -20,6 +20,7 @@
 
 add_executable(QmlTestRunner
   TestRunner.cpp
+  TestUtils.hpp
 )
 target_compile_options(QmlTestRunner
   PUBLIC ${cxx11_options} ${warning_options})

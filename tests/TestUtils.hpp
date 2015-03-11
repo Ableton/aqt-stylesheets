@@ -20,19 +20,55 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "TestUtils.hpp"
+#pragma once
 
 #include "../src/Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtQml/QQmlComponent>
-#include <QtQuickTest/quicktest.h>
+#include <QtCore/QObject>
+#include <QtCore/QRegularExpression>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
+#include <QtTest/QTest>
 RESTORE_WARNINGS
 
-int main(int argc, char** argv)
-{
-  qmlRegisterType<aqt::stylesheets::tests::TestUtils>(
-    "Aqt.StyleSheets.Tests", 1, 0, "TestUtils");
+/*! @cond DOXYGEN_IGNORE */
 
-  return quick_test_main(argc, argv, "tst_Main", ".");
-}
+namespace aqt
+{
+namespace stylesheets
+{
+namespace tests
+{
+
+class TestUtils : public QObject
+{
+  Q_OBJECT
+  Q_ENUMS(LogLevel)
+
+public:
+  TestUtils(QObject* pParent = nullptr)
+    : QObject(pParent)
+  {
+  }
+
+  enum LogLevel { Debug = QtDebugMsg, Warning = QtWarningMsg, Critical = QtCriticalMsg };
+
+  Q_INVOKABLE void expectMessage(LogLevel level, QVariant pattern)
+  {
+    if (pattern.userType() == QMetaType::QRegularExpression) {
+      QTest::ignoreMessage(QtMsgType(level), pattern.toRegularExpression());
+    } else if (pattern.userType() == QMetaType::QRegExp) {
+      QTest::ignoreMessage(
+        QtMsgType(level), QRegularExpression(pattern.toRegExp().pattern()));
+    } else {
+      QTest::ignoreMessage(QtMsgType(level), pattern.toString().toUtf8().data());
+    }
+  }
+};
+
+} // namespace tests
+} // namespace stylesheets
+} // namespace aqt
+
+/*! @endcond */
