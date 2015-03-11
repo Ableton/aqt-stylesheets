@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-15 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -525,6 +525,7 @@ void StyleSetAttached::setName(const QString& val)
     }
 
     Q_EMIT nameChanged(mName);
+    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
   }
 }
 
@@ -551,6 +552,8 @@ void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)
   if (pNewParent != nullptr && pParent != nullptr) {
     mPath = traversePathUp(pParent);
     setupStyle();
+
+    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
   }
 }
 
