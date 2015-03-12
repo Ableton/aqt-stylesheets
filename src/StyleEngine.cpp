@@ -244,6 +244,10 @@ StyleSheet StyleEngine::loadStyleSheet(const SourceUrl& srcurl)
 
     if (styleFilePath.isEmpty() || !QFile::exists(styleFilePath)) {
       styleSheetsLogError() << "Style '" << styleFilePath.toStdString() << "' not found";
+
+      Q_EMIT exception(QString::fromLatin1("styleSheetNotFound"),
+                       QString::fromLatin1("Style '%1' not found.").arg(styleFilePath));
+
     } else {
       styleSheetsLogInfo() << "Load style from '" << styleFilePath.toStdString()
                            << "' ...";
@@ -256,8 +260,16 @@ StyleSheet StyleEngine::loadStyleSheet(const SourceUrl& srcurl)
         return styleSheet;
       } catch (const ParseException& e) {
         styleSheetsLogError() << e.message() << ": " << e.errorContext();
+
+        Q_EMIT exception(QString::fromLatin1("parsingStyleSheetfailed"),
+                         QString::fromLatin1("Parsing style sheet failed '%1'.")
+                           .arg(QString::fromStdString(e.message())));
       } catch (const std::ios_base::failure& fail) {
         styleSheetsLogError() << "loading style sheet failed: " << fail.what();
+
+        Q_EMIT exception(QString::fromLatin1("loadingStyleSheetFailed"),
+                         QString::fromLatin1("Loading style sheet failed '%1'.")
+                           .arg(QString::fromStdString(fail.what())));
       }
     }
   }

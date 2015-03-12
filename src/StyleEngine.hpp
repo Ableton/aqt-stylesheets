@@ -264,6 +264,16 @@ Q_SIGNALS:
    */
   Q_REVISION(1) void defaultStyleSheetSourceChanged(const QUrl& url);
 
+  /*! Emitted when any part of the style sheet subsystem has to report some
+   *  exceptional situation
+   *
+   * @param type Indicates a type of exception, like "font-not-found", etc.
+   * @param message Some descriptive message
+   *
+   * @since 1.1
+   */
+  Q_REVISION(1) void exception(const QString& type, const QString& message);
+
 private Q_SLOTS:
   void onFileChanged(const QString& path);
 

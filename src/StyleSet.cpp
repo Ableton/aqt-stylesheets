@@ -362,6 +362,9 @@ bool StyleSet::getImpl(QVariant& value, const QString& key) const
   if (!mpEngine.isNull() && mChangeCount == mpEngine->changeCount()) {
     styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
                             << pathToString(mPath) << ")";
+    Q_EMIT mpEngine->exception(QString::fromLatin1("propertyNotFound"),
+                               QString::fromLatin1("Property '%1' not found (%2)")
+                                 .arg(key, QString::fromStdString(pathToString(mPath))));
   }
 
   return false;
@@ -467,6 +470,12 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
       styleSheetsLogInfo() << "Parent to StyleSetAttached is not a QQuickItem but '"
                            << p->metaObject()->className() << "'. "
                            << "Hierarchy changes for this component won't be detected.";
+
+      if (!mpEngine.isNull()) {
+        Q_EMIT mpEngine->exception(
+          QString::fromLatin1("noParentChangeReports"),
+          QString::fromLatin1("Hierarchy changes for this component won't be detected"));
+      }
     }
 
     mPath = traversePathUp(p);
