@@ -31,4 +31,5 @@ target_link_libraries(QmlTestRunner
 
 add_test(NAME QMLIntegrationTests
          COMMAND QmlTestRunner -import "${PROJECT_SOURCE_DIR}/qml"
+                               -import "${CMAKE_CURRENT_SOURCE_DIR}"
          WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests")

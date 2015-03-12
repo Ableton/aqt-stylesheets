@@ -9,6 +9,8 @@ import Aqt.StyleSheets.Tests 1.0 as AqtTests
 
 import "testUtils.js" as TestUtils
 
+import Foo 1.0 as Foo
+
 Item {
     id: scene
 
@@ -75,6 +77,42 @@ Item {
             });
             compare(spy.count, 1);
             compare(spy.signalArguments[0][0], "noParentChangeReports");
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: singletonCase
+
+        Item {
+            property alias textValue: textObj.text
+            Rectangle {
+                StyleSet.name: "root"
+                anchors.fill: parent
+
+                Text {
+                    id: textObj
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Foo.Bar.textValue
+                    font.pixelSize: 72
+                }
+            }
+        }
+    }
+
+    TestCase {
+        name: "styleset props to singleton objects do not warn"
+        when: windowShown
+
+        function test_basePropertyLookup() {
+            compare(spy.count, 0);
+            TestUtils.withComponent(singletonCase, scene, {}, function(comp) {
+                compare(comp.textValue, "B");
+            });
+            compare(spy.count, 0);
         }
     }
 }
