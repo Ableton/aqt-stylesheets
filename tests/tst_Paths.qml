@@ -1,8 +1,9 @@
 // Copyright (c) 2015 Ableton AG, Berlin
 
 import QtQuick 2.3
-import QtTest 1.0
+import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
+import QtTest 1.0
 
 import Aqt.StyleSheets 1.1
 import Aqt.StyleSheets.Tests 1.0 as AqtTests
@@ -110,6 +111,36 @@ Item {
         function test_basePropertyLookup() {
             compare(spy.count, 0);
             TestUtils.withComponent(singletonCase, scene, {}, function(comp) {
+                compare(comp.textValue, "B");
+            });
+            compare(spy.count, 0);
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: windowsCase
+
+        ApplicationWindow {
+            id: root
+            StyleSet.name: "root"
+
+            width: 130
+            height: 120
+
+            property var textValue: StyleSet.props.get("text")
+        }
+    }
+
+    TestCase {
+        name: "styleset props to windows do not warn"
+        when: windowShown
+
+        function test_basePropertyLookup() {
+            compare(spy.count, 0);
+            TestUtils.withComponent(windowsCase, scene, {}, function(comp) {
                 compare(comp.textValue, "B");
             });
             compare(spy.count, 0);
