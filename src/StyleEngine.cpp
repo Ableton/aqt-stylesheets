@@ -230,6 +230,10 @@ void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
         QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
         styleSheetsLogDebug() << " -> family: " << fontFamily.toStdString();
         mFontIdCache[fontFaceFile] = fontId;
+      } else {
+        Q_EMIT exception(
+          QString::fromLatin1("fontWasNotLoaded"),
+          QString::fromLatin1("Could not find font in font registry after loading."));
       }
     } else {
       styleSheetsLogDebug() << " [" << fontCacheIt->second << "]";
@@ -247,7 +251,6 @@ StyleSheet StyleEngine::loadStyleSheet(const SourceUrl& srcurl)
 
       Q_EMIT exception(QString::fromLatin1("styleSheetNotFound"),
                        QString::fromLatin1("Style '%1' not found.").arg(styleFilePath));
-
     } else {
       styleSheetsLogInfo() << "Load style from '" << styleFilePath.toStdString()
                            << "' ...";
