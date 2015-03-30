@@ -20,6 +20,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-Bar, QObject, .root {
-  text: "B";
+#include "TestUtils.hpp"
+
+#include "../src/Warnings.hpp"
+
+SUPPRESS_WARNINGS
+#include <QtQml/QQmlComponent>
+#include <QtQuickTest/quicktest.h>
+RESTORE_WARNINGS
+
+int main(int argc, char** argv)
+{
+  qmlRegisterType<aqt::stylesheets::tests::TestUtils>(
+    "Aqt.StyleSheets.Tests", 1, 0, "TestUtils");
+
+  return quick_test_main(argc, argv, "tst_Main", ".");
 }
