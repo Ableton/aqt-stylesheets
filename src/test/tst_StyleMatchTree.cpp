@@ -27,6 +27,7 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
+#include <QtGui/QColor>
 #include <gtest/gtest.h>
 RESTORE_WARNINGS
 
@@ -47,6 +48,11 @@ namespace
 QString propertyAsString(PropertyMap pm, const char* pPropertyName)
 {
   return pm[QString(pPropertyName)].value<QString>();
+}
+
+QColor propertyAsColor(PropertyMap pm, const char* pPropertyName)
+{
+  return pm[QString(pPropertyName)].value<QColor>();
 }
 } // anon namespace
 
@@ -509,4 +515,112 @@ TEST(StyleMatchTreeTest, multipleClassNames_even_without_whitespace)
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
   EXPECT_EQ("2", propertyAsString(pm, "propB"));
   EXPECT_EQ("3", propertyAsString(pm, "propC"));
+}
+
+//----------------------------------------------------------------------------------------
+
+TEST(StyleMatchTreeTest, rgbColors_with_percentage_value)
+{
+  const std::string src =
+    ".foo { color: rgb(0%, 25%, 100%); }\n"
+    ".bar { color: rgb(10%, 75%, 95%); }\n";
+
+  StyleSheet ss = parseStdString(src);
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  {
+    UiItemPath p = {PathElement("Bar", {"foo"})};
+    PropertyMap pm = matchPath(mt, p);
+
+    EXPECT_EQ(1, pm.size());
+    EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
+    EXPECT_EQ(0x40, propertyAsColor(pm, "color").green());
+    EXPECT_EQ(0xff, propertyAsColor(pm, "color").blue());
+    EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+  }
+
+  {
+    UiItemPath p = {PathElement("Bar", {"bar"})};
+    PropertyMap pm = matchPath(mt, p);
+
+    EXPECT_EQ(1, pm.size());
+    EXPECT_EQ(0x1a, propertyAsColor(pm, "color").red());
+    EXPECT_EQ(0xbf, propertyAsColor(pm, "color").green());
+    EXPECT_EQ(0xf2, propertyAsColor(pm, "color").blue());
+    EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+  }
+}
+
+TEST(StyleMatchTreeTest, rgbColors)
+{
+  const std::string src = ".foo { color: rgb(0, 16, 32); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(ss.propsets.size(), 1);
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"foo"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(1, pm.size());
+  EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
+  EXPECT_EQ(0x10, propertyAsColor(pm, "color").green());
+  EXPECT_EQ(0x20, propertyAsColor(pm, "color").blue());
+  EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+}
+
+
+TEST(StyleMatchTreeTest, rgbaColors)
+{
+  const std::string src = ".foo { color: rgba(0, 16, 32, 0.5); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(ss.propsets.size(), 1);
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"foo"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(1, pm.size());
+  EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
+  EXPECT_EQ(0x10, propertyAsColor(pm, "color").green());
+  EXPECT_EQ(0x20, propertyAsColor(pm, "color").blue());
+  EXPECT_EQ(0x80, propertyAsColor(pm, "color").alpha());
+}
+
+
+TEST(StyleMatchTreeTest, hslColors)
+{
+  const std::string src = ".foo { color: hsl(120, 100%, 50%); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(ss.propsets.size(), 1);
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"foo"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(1, pm.size());
+  EXPECT_EQ(120, propertyAsColor(pm, "color").hslHue());
+  EXPECT_NEAR(1.0f, propertyAsColor(pm, "color").hslSaturationF(), 0.00001f);
+  EXPECT_NEAR(0.5f, propertyAsColor(pm, "color").lightnessF(), 0.00001f);
+}
+
+
+TEST(StyleMatchTreeTest, hslaColors)
+{
+  const std::string src = ".foo { color: hsla(359, 97%, 13%, 0.23); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(ss.propsets.size(), 1);
+
+  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  UiItemPath p = {PathElement("Bar", {"foo"})};
+  PropertyMap pm = matchPath(mt, p);
+
+  EXPECT_EQ(1, pm.size());
+  EXPECT_EQ(359, propertyAsColor(pm, "color").hslHue());
+  EXPECT_NEAR(0.97f, propertyAsColor(pm, "color").hslSaturationF(), 0.00001f);
+  EXPECT_NEAR(0.13f, propertyAsColor(pm, "color").lightnessF(), 0.00001f);
+  EXPECT_NEAR(0.23f, propertyAsColor(pm, "color").alphaF(), 0.00001f);
 }

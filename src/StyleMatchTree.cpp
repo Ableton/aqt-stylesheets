@@ -24,9 +24,11 @@ THE SOFTWARE.
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
+#include "Log.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QtCore>
+#include <QtGui/QColor>
 #include <boost/assert.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -34,6 +36,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -52,8 +55,151 @@ const std::string kDescendantAxisId = "::desc::";
 const std::string kConjunctionIndicator = "&";
 const std::string kChildIndicator = ">";
 const std::string kDot = ".";
+const std::string kRgbaColorExpr = "rgba";
+const std::string kRgbColorExpr = "rgb";
+const std::string kHslaColorExpr = "hsla";
+const std::string kHslColorExpr = "hsl";
 RESTORE_WARNINGS
 
+float clampFloat(float val)
+{
+  if (val < 0) {
+    return 0.0f;
+  } else if (val > 1.0f) {
+    return 1.0f;
+  }
+
+  return val;
+}
+
+int clamp8Bit(int val)
+{
+  if (val < 0) {
+    return 0;
+  } else if (val > 255) {
+    return 255;
+  }
+
+  return val;
+}
+int rgbColorOrPercentage(const std::string& arg)
+{
+  if (!arg.empty()) {
+    try {
+      if (arg.back() == '%') {
+        auto factor = std::stof(arg.substr(0, arg.size() - 1));
+        return clamp8Bit(int(std::round(255 * factor / 100.0f)));
+      } else {
+        return clamp8Bit(std::stoi(arg));
+      }
+    } catch (const std::invalid_argument&) {
+    } catch (const std::out_of_range&) {
+    }
+  }
+
+  return 0;
+}
+
+int transformAlphaFromFloatRatio(const std::string& arg)
+{
+  if (!arg.empty()) {
+    try {
+      auto factor = std::stof(arg);
+      return clamp8Bit(int(std::round(256 * factor)));
+    } catch (const std::invalid_argument&) {
+    } catch (const std::out_of_range&) {
+    }
+  }
+
+  return 0;
+}
+
+float hslHue(const std::string& arg)
+{
+  if (!arg.empty()) {
+    try {
+      return clampFloat(std::stoi(arg) / 360.0f);
+    } catch (const std::invalid_argument&) {
+    } catch (const std::out_of_range&) {
+    }
+  }
+  return 0.0f;
+}
+
+float percentageToFactor(const std::string& arg)
+{
+  if (!arg.empty()) {
+    try {
+      if (arg.back() == '%') {
+        return clampFloat(std::stoi(arg.substr(0, arg.size() - 1)) / 100.0f);
+      }
+    } catch (const std::invalid_argument&) {
+    } catch (const std::out_of_range&) {
+    }
+  }
+  return 100.0f;
+}
+
+float factorFromFloat(const std::string& arg)
+{
+  if (!arg.empty()) {
+    try {
+      return clampFloat(std::stof(arg));
+    } catch (const std::invalid_argument&) {
+    } catch (const std::out_of_range&) {
+    }
+  }
+  return 0.0f;
+}
+
+QVariant makeRgbaColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 4u) {
+    return QVariant(QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
+                           rgbColorOrPercentage(args[2]),
+                           transformAlphaFromFloatRatio(args[3])));
+  } else {
+    styleSheetsLogWarning() << kRgbaColorExpr << "() expression expects 4 arguments";
+  }
+  return QVariant();
+}
+
+QVariant makeRgbColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 3u) {
+    return QVariant(QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
+                           rgbColorOrPercentage(args[2]), 0xff));
+  } else {
+    styleSheetsLogWarning() << kRgbColorExpr << "() expression expects 3 arguments";
+  }
+  return QVariant();
+}
+
+QVariant makeHslaColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 4u) {
+    QColor color;
+    color.setHslF(hslHue(args[0]), percentageToFactor(args[1]),
+                  percentageToFactor(args[2]), factorFromFloat(args[3]));
+    return QVariant(color);
+  } else {
+    styleSheetsLogWarning() << kHslaColorExpr << "() expression expects 3 arguments";
+  }
+  return QVariant();
+}
+
+QVariant makeHslColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 3u) {
+    QColor color;
+    color.setHslF(
+      hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0f);
+    return QVariant(color);
+  } else {
+    styleSheetsLogWarning() << kHslColorExpr << "() expression expects 3 arguments";
+  }
+  return QVariant();
+}
 
 struct PropdefVisitor : public boost::static_visitor<QVariant> {
   QVariant operator()(const std::string& value)
@@ -63,6 +209,23 @@ struct PropdefVisitor : public boost::static_visitor<QVariant> {
 
   QVariant operator()(const Expression& expr)
   {
+    using ExprEvaluator = std::function<QVariant(const std::vector<std::string>&)>;
+    using FuncMap = std::unordered_map<std::string, ExprEvaluator>;
+
+    static FuncMap funcMap = {
+      {kRgbaColorExpr, &makeRgbaColor},
+      {kRgbColorExpr, &makeRgbColor},
+      {kHslaColorExpr, &makeHslaColor},
+      {kHslColorExpr, &makeHslColor},
+    };
+
+    auto iFind = funcMap.find(expr.name);
+    if (iFind != funcMap.end()) {
+      return iFind->second(expr.args);
+    } else {
+      styleSheetsLogWarning() << "Unsupported expression '" << expr.name << "'";
+    }
+
     return QVariant();
   }
 };
