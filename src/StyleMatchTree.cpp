@@ -45,18 +45,13 @@ using namespace aqt::stylesheets;
 namespace
 {
 
-struct PredefinedStrings {
-  const std::string descendantAxisId = std::string("::desc::");
-  const std::string conjunctionIndicator = std::string("&");
-  const std::string childIndicator = std::string(">");
-  const std::string dot = std::string(".");
-};
+SUPPRESS_WARNINGS
+const std::string kDescendantAxisId = "::desc::";
+const std::string kConjunctionIndicator = "&";
+const std::string kChildIndicator = ">";
+const std::string kDot = ".";
+RESTORE_WARNINGS
 
-const PredefinedStrings& predefinedStrings()
-{
-  static PredefinedStrings keys;
-  return keys;
-}
 
 QVariantList stdStringListToVariantList(const std::vector<std::string>& vec)
 {
@@ -125,20 +120,20 @@ std::vector<std::string> transformSelector(
   for (auto sel : selector) {
     is_conjunction = false;
     for (auto selPart : sel) {
-      if (selPart == predefinedStrings().childIndicator) {
+      if (selPart == kChildIndicator) {
         // skip
         last_was_symbol = false;
       } else {
         if (!is_conjunction) {
           if (last_was_symbol) {
-            result.push_back(predefinedStrings().descendantAxisId);
+            result.push_back(kDescendantAxisId);
             result.push_back(selPart);
           } else {
             result.push_back(selPart);
             last_was_symbol = true;
           }
         } else {
-          result.push_back(predefinedStrings().conjunctionIndicator);
+          result.push_back(kConjunctionIndicator);
           result.push_back(selPart);
           last_was_symbol = true;
         }
@@ -339,7 +334,7 @@ MatchRec findPathElement(MatchResult& result,
     findPattern(result, Specificity(specificity, 0, 1), node, pathElt.mTypeName);
 
   for (const auto& className : pathElt.mClassNames) {
-    std::string dotName(predefinedStrings().dot + className);
+    std::string dotName(kDot + className);
     auto m2 = findPattern(result, Specificity(specificity, 1, 0), node, dotName);
     matchRec += m2;
   }
@@ -365,8 +360,7 @@ void iterateOverMatches(MatchResult& result,
                         UiItemPath::const_reverse_iterator pathEltEnd)
 {
   auto tryToMatchConjunction = [&](Specificity specificity, const MatchNode* node) {
-    auto m =
-      findPattern(result, specificity, node, predefinedStrings().conjunctionIndicator);
+    auto m = findPattern(result, specificity, node, kConjunctionIndicator);
     for (const auto& tup : m.pNodes) {
       findMatchOnNode(result, getMatchRecSpecificity(tup), getMatchRecNode(tup), pathElt,
                       nextEltIter, pathEltEnd);
@@ -382,8 +376,7 @@ void iterateOverMatches(MatchResult& result,
 
   auto tryToMatchDescendant = [&](Specificity specificity, const MatchNode* node) {
     if (nextEltIter != pathEltEnd) {
-      auto m =
-        findPattern(result, specificity, node, predefinedStrings().descendantAxisId);
+      auto m = findPattern(result, specificity, node, kDescendantAxisId);
       for (const auto& tup : m.pNodes) {
         findDescendantMatchOnNode(result, getMatchRecSpecificity(tup),
                                   getMatchRecNode(tup), *nextEltIter,
