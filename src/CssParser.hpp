@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-15 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
+#include <boost/variant/variant.hpp>
 RESTORE_WARNINGS
 
 #include <string>
@@ -38,7 +39,15 @@ namespace aqt
 namespace stylesheets
 {
 
-using PropValues = std::vector<std::string>;
+class Expression
+{
+public:
+  std::string name;
+  std::vector<std::string> args;
+};
+
+using PropertyValue = boost::variant<std::string, Expression>;
+using PropValues = std::vector<PropertyValue>;
 using SelectorParts = std::vector<std::string>;
 using Selector = std::vector<SelectorParts>;
 
@@ -56,6 +65,7 @@ public:
   int line;
   int column;
 };
+
 
 class Property
 {
