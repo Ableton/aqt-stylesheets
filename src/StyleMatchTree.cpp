@@ -29,6 +29,8 @@ SUPPRESS_WARNINGS
 #include <QtCore/QtCore>
 #include <boost/assert.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
 RESTORE_WARNINGS
 
 #include <algorithm>
@@ -53,11 +55,24 @@ const std::string kDot = ".";
 RESTORE_WARNINGS
 
 
-QVariantList stdStringListToVariantList(const std::vector<std::string>& vec)
+struct PropdefVisitor : public boost::static_visitor<QVariant> {
+  QVariant operator()(const std::string& value)
+  {
+    return QVariant(QString::fromStdString(value));
+  }
+
+  QVariant operator()(const Expression& expr)
+  {
+    return QVariant();
+  }
+};
+
+QVariantList stdStringListToVariantList(const PropValues& vec)
 {
   QVariantList list;
-  for (auto str : vec) {
-    list.append(QVariant(QString::fromStdString(str)));
+  for (const auto& value : vec) {
+    PropdefVisitor visitor;
+    list.append(boost::apply_visitor(visitor, value));
   }
   return list;
 }
@@ -68,12 +83,16 @@ PropertyDefMap makeProperties(const std::vector<Property>& props, const int sour
 
   for (const auto& prop : props) {
     SourceLocation propSrcLoc(sourceLayer, prop.locInfo);
-    auto propDef =
-      prop.values.size() == 1
-        ? PropertyDef(propSrcLoc, QVariant(QString::fromStdString(prop.values[0])))
-        : PropertyDef(propSrcLoc, stdStringListToVariantList(prop.values));
 
-    properties.insert(std::make_pair(prop.name, propDef));
+    if (prop.values.size() == 1) {
+      PropdefVisitor visitor;
+      auto propDef =
+        PropertyDef(propSrcLoc, boost::apply_visitor(visitor, prop.values[0]));
+      properties.insert(std::make_pair(prop.name, propDef));
+    } else {
+      auto propDef = PropertyDef(propSrcLoc, stdStringListToVariantList(prop.values));
+      properties.insert(std::make_pair(prop.name, propDef));
+    }
   }
 
   return properties;
