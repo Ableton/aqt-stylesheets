@@ -19,9 +19,12 @@
 # THE SOFTWARE.
 
 add_library(StyleSheetParser
+  Convert.hpp
+  Convert.cpp
   CssParser.cpp
   CssParser.hpp
   Log.hpp
+  Property.hpp
   StyleMatchTree.cpp
   StyleMatchTree.hpp
   Warnings.hpp

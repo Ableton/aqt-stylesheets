@@ -25,6 +25,8 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <boost/variant/get.hpp>
+#include <boost/variant/variant.hpp>
 #include <gtest/gtest.h>
 RESTORE_WARNINGS
 
@@ -54,8 +56,26 @@ std::string selectorName(const StyleSheet& ss,
 
 std::string getFirstValue(const PropValues& val, const std::string& def = "")
 {
-  return !val.empty() ? val[0] : def;
+  if (!val.empty()) {
+    if (const std::string* str = boost::get<std::string>(&val[0])) {
+      return *str;
+    }
+  }
+
+  return def;
 }
+
+Expression getExpr(const PropValues& val, size_t idx, const Expression& def = {})
+{
+  if (!val.empty()) {
+    if (const Expression* expr = boost::get<Expression>(&val[idx])) {
+      return *expr;
+    }
+  }
+
+  return def;
+}
+
 
 size_t getNumberOfValues(const PropValues& val)
 {
@@ -314,6 +334,44 @@ TEST(CssParserTest, ParserFromString_fontFaceDeclarations)
   EXPECT_EQ(ss.fontfaces.size(), 1);
 
   EXPECT_EQ(ss.fontfaces[0].url, "../../Assets/times.ttf");
+}
+
+//----------------------------------------------------------------------------------------
+
+TEST(CssParserTest, ParserFromString_Expressions)
+{
+  const std::string src = "foo { bar: url('hello world'); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(1, ss.propsets.size());
+  EXPECT_EQ(1, ss.propsets[0].properties.size());
+  EXPECT_EQ(1, getNumberOfValues(ss.propsets[0].properties[0].values));
+
+  EXPECT_EQ(std::string("url"), getExpr(ss.propsets[0].properties[0].values, 0).name);
+  EXPECT_EQ((std::vector<std::string>{"hello world"}),
+            getExpr(ss.propsets[0].properties[0].values, 0).args);
+}
+
+TEST(CssParserTest, ParserFromString_ExpressionsInLists)
+{
+  const std::string src =
+    "foo { bar: rgba(123, 45, 92, 0.1), "
+    "           foo(), "
+    "           hsla(320, 100%, 20%, 0.3); }\n";
+
+  StyleSheet ss = parseStdString(src);
+  EXPECT_EQ(1, ss.propsets.size());
+  EXPECT_EQ(1, ss.propsets[0].properties.size());
+
+  EXPECT_EQ(std::string("rgba"), getExpr(ss.propsets[0].properties[0].values, 0).name);
+  EXPECT_EQ((std::vector<std::string>{"123", "45", "92", "0.1"}),
+            getExpr(ss.propsets[0].properties[0].values, 0).args);
+  EXPECT_EQ(std::string("foo"), getExpr(ss.propsets[0].properties[0].values, 1).name);
+  EXPECT_TRUE(getExpr(ss.propsets[0].properties[0].values, 1).args.empty());
+
+  EXPECT_EQ(std::string("hsla"), getExpr(ss.propsets[0].properties[0].values, 2).name);
+  EXPECT_EQ((std::vector<std::string>{"320", "100%", "20%", "0.3"}),
+            getExpr(ss.propsets[0].properties[0].values, 2).args);
 }
 
 /* Missing tests:

@@ -22,80 +22,66 @@ THE SOFTWARE.
 
 #pragma once
 
-#include <typeinfo>
+#include "Convert.hpp"
 
 namespace aqt
 {
 namespace stylesheets
 {
 
-namespace detail
+namespace detail {
+template<typename T>
+struct TypeName;
+
+template<>
+struct TypeName<double>
 {
+  const char* operator()() const { return "dobule"; }
+};
+
+template<>
+struct TypeName<bool>
+{
+  const char* operator()() const { return "bool"; }
+};
+
+template<>
+struct TypeName<QFont>
+{
+  const char* operator()() const { return "font"; }
+};
+
+template<>
+struct TypeName<QString>
+{
+  const char* operator()() const { return "string"; }
+};
+
+template<>
+struct TypeName<QColor>
+{
+  const char* operator()() const { return "color"; }
+};
+
+} // detail namespace
+
 
 template <typename T>
-struct LookupPropertyTrait {
-};
-
-template <>
-struct LookupPropertyTrait<QColor> {
-  static const int qTypeId = QMetaType::QColor;
-  static const char* typeName()
-  {
-    return "color";
-  }
-};
-
-template <>
-struct LookupPropertyTrait<double> {
-  static const int qTypeId = QMetaType::Double;
-  static const char* typeName()
-  {
-    return "double";
-  }
-};
-
-template <>
-struct LookupPropertyTrait<bool> {
-  static const int qTypeId = QMetaType::Bool;
-  static const char* typeName()
-  {
-    return "bool";
-  }
-};
-
-template <typename T>
-struct PropertyConvertTraits {
-  const char* typeName() const
-  {
-    return detail::LookupPropertyTrait<T>::typeName();
-  }
-
-  bool convert(T& result, QVariant& value) const
-  {
-    int qTypeId = detail::LookupPropertyTrait<T>::qTypeId;
-    if (value.canConvert(qTypeId) && value.convert(qTypeId)) {
-      result = value.value<T>();
-      return true;
-    }
-    return false;
-  }
-};
-
-} // namespace detail
-
-template <typename T, typename Traits>
-T StyleSet::lookupProperty(const QString& key, Traits traits) const
+T StyleSet::lookupProperty(const QString& key) const
 {
-  QVariant value;
+  PropValues values;
 
-  if (getImpl(value, key)) {
-    T result;
-    if (traits.convert(result, value)) {
-      return result;
+  if (getImpl(values, key)) {
+    if (values.size() == 1) {
+      auto result = convertProperty<T>(values[0]);
+      if (result) {
+        return result.get();
+      }
     }
 
     qWarning("Property %s is not convertible to a %s (%s)", key.toStdString().c_str(),
-             traits.typeName(), pathToString(mPath).c_str());
+             detail::TypeName<T>()(),
+             pathToString(mPath).c_str());
   }
 
   return T();
