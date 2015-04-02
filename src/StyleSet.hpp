@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 #pragma once
 
+#include "Property.hpp"
 #include "StyleMatchTree.hpp"
 #include "Warnings.hpp"
 
@@ -45,15 +46,6 @@ namespace stylesheets
 
 class StyleEngine;
 class StyleSetAttached;
-
-/*! @cond DOXYGEN_IGNORE */
-namespace detail
-{
-template <typename T>
-struct PropertyConvertTraits;
-}
-
-/*! @endcond */
 
 /*! An attached type used for accessing CSS like style settings
  *
@@ -347,10 +339,10 @@ public Q_SLOTS:
 
 private:
   QObject* grandParent();
-  bool getImpl(QVariant& value, const QString& key) const;
+  bool getImpl(PropValues& value, const QString& key) const;
 
-  template <typename T, typename Traits = detail::PropertyConvertTraits<T>>
-  T lookupProperty(const QString& key, Traits traits = Traits()) const;
+  template <typename T>
+  T lookupProperty(const QString& key) const;
 
 private:
   friend class StyleSetAttached;

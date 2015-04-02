@@ -23,6 +23,7 @@ THE SOFTWARE.
 #pragma once
 
 #include "CssParser.hpp"
+#include "Property.hpp"
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
@@ -72,14 +73,14 @@ public:
 class PropertyDef
 {
 public:
-  PropertyDef(const SourceLocation& loc, const QVariant& value)
+  PropertyDef(const SourceLocation& loc, const PropValues& values)
     : mSourceLoc(loc)
-    , mValue(value)
+    , mValues(values)
   {
   }
 
   SourceLocation mSourceLoc;
-  QVariant mValue;
+  PropValues mValues;
 };
 
 using PropertyDefMap = std::unordered_map<std::string, PropertyDef>;
@@ -204,7 +205,7 @@ using UiItemPath = std::vector<PathElement>;
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path);
 std::string pathToString(const UiItemPath& path);
 
-using PropertyMap = std::map<QString, QVariant>;
+using PropertyMap = std::map<QString, PropValues>;
 
 #if defined(DEBUG)
 void dumpPropertyMap(const PropertyMap& properties);

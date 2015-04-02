@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 #include "StyleMatchTree.hpp"
 
+#include "Convert.hpp"
 #include "CssParser.hpp"
 #include "Warnings.hpp"
 
@@ -29,30 +30,32 @@ SUPPRESS_WARNINGS
 #include <QtCore/QString>
 #include <QtGui/QColor>
 #include <gtest/gtest.h>
+#include <boost/variant/get.hpp>
 RESTORE_WARNINGS
 
 #include <iostream>
 
 //========================================================================================
 
-// This must live outside of any namespace, otherwise C++ won't match QString
-static void PrintTo(const QString& str, ::std::ostream* os)
-{
-  *os << "\"" << str.toStdString() << "\"";
-}
-
 using namespace aqt::stylesheets;
 
 namespace
 {
-QString propertyAsString(PropertyMap pm, const char* pPropertyName)
+std::string propertyAsString(PropertyMap pm, const char* pPropertyName)
 {
-  return pm[QString(pPropertyName)].value<QString>();
+  if (const std::string* str = boost::get<std::string>(&pm[QString(pPropertyName)][0])) {
+    return *str;
+  }
+  return std::string();
 }
 
 QColor propertyAsColor(PropertyMap pm, const char* pPropertyName)
 {
-  return pm[QString(pPropertyName)].value<QColor>();
+  auto result = convertProperty<QColor>(pm[QString(pPropertyName)][0]);
+  if (result) {
+    return *result;
+  }
+  return QColor();
 }
 } // anon namespace
 
