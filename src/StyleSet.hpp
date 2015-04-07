@@ -200,9 +200,8 @@ public:
 
   /*! Returns the style property named @p key
    *
-   * Looks up the style property named @p key and returns it as is.  The
-   * output time is either a @c string (@c QString) or a list of strings (@c
-   * QVariantList).
+   * Looks up the style property named @p key and returns it as is.  The output
+   * is either a @c string (@c QString) or a list of strings (@c QVariantList).
    *
    * @note If there's no such property returns an invalid @c QVariant which
    * maps to @c undefined into Javascript/QML.
@@ -341,6 +340,30 @@ public:
    * @endcode
    */
   Q_INVOKABLE QFont font(const QString& key) const;
+
+  /*! Returns the style property @p key as a string
+   *
+   * Looks up the style property named @p key and interprets its value as a
+   * string.  If there's no such property @p key, first value can not be
+   * converted to a string (esp. a CSS expression like `rgb()` can not be
+   * converted), or the property has multiple values prints a warning and
+   * returns an empty string.
+   *
+   * @par Example:
+   * @code
+   * Text {
+   *   text: StyleSet.props.string("title")
+   * }
+   * @endcode
+   *
+   * @note The main difference to the generic get() function is that it will
+   *       always return a single value only, where get() might return a list of
+   *       strings.  This accessor should be used therefore when a single string
+   *       is expected.
+   *
+   * @since 1.2
+   */
+  Q_REVISION(2) Q_INVOKABLE QString string(const QString& key) const;
 
   /*! @cond DOXYGEN_IGNORE */
   void loadProperties(QObject* pRefObject);

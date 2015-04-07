@@ -306,6 +306,11 @@ bool StyleSet::boolean(const QString& key) const
   return lookupProperty<bool>(key);
 }
 
+QString StyleSet::string(const QString& key) const
+{
+  return lookupProperty<QString>(key);
+}
+
 void StyleSet::onStyleChanged(int changeCount)
 {
   if (mChangeCount != changeCount) {

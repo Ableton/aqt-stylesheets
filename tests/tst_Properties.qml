@@ -61,6 +61,62 @@ Item {
     //--------------------------------------------------------------------------
 
     Component {
+        id: stringLookupScene
+
+        Item {
+            property alias gaz: rect1.gaz
+
+            Rectangle {
+                id: rect1
+                StyleSet.name: "root"
+                anchors.fill: parent
+
+                property var gaz: StyleSet.props.string("gaz")
+            }
+        }
+    }
+
+    Component {
+        id: badStringLookupScene
+
+        Item {
+            property alias foo: rect1b.foo
+
+            Rectangle {
+                id: rect1b
+                StyleSet.name: "root"
+                anchors.fill: parent
+
+                property var foo: StyleSet.props.string("foo")
+            }
+        }
+    }
+
+    TestCase {
+        name: "lookup a string"
+        when: windowShown
+
+        function test_lookupASingleString() {
+            TestUtils.withComponent(stringLookupScene, scene, {}, function(comp) {
+                // single string
+                compare(comp.gaz, "hello world!");
+            });
+        }
+
+        function test_lookupASingleString_fails() {
+            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+                                     /^.*Property.*is not convertible.*QString.*/);
+            TestUtils.withComponent(badStringLookupScene, scene, {}, function(comp) {
+                // multiple string fails, props.string() returns an empty string.
+                compare(comp.foo, "");
+            });
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
         id: multipleColorsScene
 
         Item {
