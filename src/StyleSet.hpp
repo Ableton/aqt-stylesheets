@@ -225,6 +225,8 @@ public:
    * - by RGB string, e.g. @c \#3f4f5f
    * - by ARGB string, e.g. @c \#a0ff0022.
    * - then special @c transparent color
+   * - CSS color expressions like `rgb(120, 64, 230)` or `hsla(340, 20%,
+   *   34%, 0.5)`.
    *
    * Style property names can be any string, but typically end with @c
    * "-color".

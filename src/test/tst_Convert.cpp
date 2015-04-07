@@ -123,3 +123,120 @@ TEST(Convert, colors_failing)
   EXPECT_EQ(
     QColor(), *convertProperty<QColor>(PropertyValue(std::string("hello world"))));
 }
+
+TEST(Convert, colors_rgb_expression)
+{
+  EXPECT_EQ(
+    QColor(254, 112, 1, 255), *convertProperty<QColor>(Expression{
+                                "rgb", std::vector<std::string>{"254", "112", "1"}}));
+
+  EXPECT_EQ(QColor(254, 128, 255, 255),
+            *convertProperty<QColor>(
+              Expression{"rgb", std::vector<std::string>{"254", "50%", "100%"}}));
+}
+
+TEST(Convert, colors_rgb_expression_fails)
+{
+  // rgb() requires exactly 3 parameters
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgb", std::vector<std::string>{"254", "112", "1", "0.5"}}));
+
+  EXPECT_FALSE(
+    convertProperty<QColor>(Expression{"rgb", std::vector<std::string>{"254"}}));
+
+  // rgb() requires integers or percentage, not floats for the color channel
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgb", std::vector<std::string>{"0.1", "1.0", "0.3"}}));
+}
+
+TEST(Convert, colors_rgba_expression)
+{
+  EXPECT_EQ(QColor(254, 112, 1, 128),
+            *convertProperty<QColor>(
+              Expression{"rgba", std::vector<std::string>{"254", "112", "1", "0.5"}}));
+
+  EXPECT_EQ(QColor(64, 128, 255, 0),
+            *convertProperty<QColor>(
+              Expression{"rgba", std::vector<std::string>{"25%", "50%", "100%", "0.0"}}));
+}
+
+TEST(Convert, colors_rgba_expression_fails)
+{
+  // rgba() requires exactly 4 parameters
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgba", std::vector<std::string>{"254", "112", "1"}}));
+
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgba", std::vector<std::string>{"254", "112", "23", "0.5", "712"}}));
+
+  // rgba() requires integers or percentage for the color channels, but a float
+  // for the alpha channel
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgba", std::vector<std::string>{"0.1", "1.0", "0.3", "0.4"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"rgba", std::vector<std::string>{"100%", "100%", "100%", "100%"}}));
+
+  // BUT: the following expression works, because "12" is a rather large float
+  // which is clamped to 1.0f (=255).
+  EXPECT_EQ(QColor(128, 64, 0, 255),
+            *convertProperty<QColor>(
+              Expression{"rgba", std::vector<std::string>{"128", "64", "0", "12"}}));
+}
+
+TEST(Convert, colors_hsl_expression)
+{
+  QColor c1;
+  c1.setHslF(0.25, 0.25, 0.75, 1.0);
+
+  EXPECT_EQ(c1, *convertProperty<QColor>(
+                  Expression{"hsl", std::vector<std::string>{"90", "25%", "75%"}}));
+
+  QColor c2;
+  c2.setHslF(1.0, 0.0, 1.0, 1.0);
+  EXPECT_EQ(c2, *convertProperty<QColor>(
+                  Expression{"hsl", std::vector<std::string>{"375", "0%", "100%"}}));
+}
+
+TEST(Convert, colors_hsl_expression_fails)
+{
+  // hsl() needs exactly 3 arguments
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsl", std::vector<std::string>{"90", "25%", "75%", "0.1"}}));
+
+  // arguments are degrees, percentage, percantage
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsl", std::vector<std::string>{"90%", "0%", "100%"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsl", std::vector<std::string>{"255", "50", "100"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsl", std::vector<std::string>{"0.5", "0.75", "1.0"}}));
+}
+
+TEST(Convert, colors_hsla_expression)
+{
+  QColor c1;
+  c1.setHslF(0.25, 0.25, 0.75, 0.6);
+
+  EXPECT_EQ(c1, *convertProperty<QColor>(Expression{
+                  "hsla", std::vector<std::string>{"90", "25%", "75%", "0.6"}}));
+
+  QColor c2;
+  c2.setHslF(1.0, 0.0, 1.0, 1.0);
+  EXPECT_EQ(c2, *convertProperty<QColor>(Expression{
+                  "hsla", std::vector<std::string>{"375", "0%", "100%", "1.0"}}));
+}
+
+TEST(Convert, colors_hsla_expression_fails)
+{
+  // hsla() needs exactly 4 arguments
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsla", std::vector<std::string>{"90", "25%", "75%"}}));
+
+  // arguments are degrees, percentage, percantage
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsla", std::vector<std::string>{"90%", "0%", "100%", "20%"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsla", std::vector<std::string>{"255", "50", "100", "75"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsla", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
+}

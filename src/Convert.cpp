@@ -30,7 +30,9 @@ SUPPRESS_WARNINGS
 #include <QtGui/QFont>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
+#include <boost/algorithm/clamp.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
@@ -52,6 +54,10 @@ namespace
 {
 
 SUPPRESS_WARNINGS
+const std::string kRgbaColorExpr = "rgba";
+const std::string kRgbColorExpr = "rgb";
+const std::string kHslaColorExpr = "hsla";
+const std::string kHslColorExpr = "hsl";
 const std::string kTrue = "true";
 const std::string kYes = "yes";
 const std::string kFalse = "false";
@@ -167,6 +173,136 @@ QFont fontDeclarationToFont(const QString& fontDecl)
   return font;
 }
 
+//----------------------------------------------------------------------------------------
+
+struct Undefined {
+};
+using ExprValue = boost::variant<Undefined, QColor>;
+
+int rgbColorOrPercentage(const std::string& arg)
+{
+  if (!arg.empty() && arg.back() == '%') {
+    auto factor = boost::lexical_cast<float>(arg.substr(0, arg.size() - 1));
+    return boost::algorithm::clamp(int(std::round(255 * factor / 100.0f)), 0, 255);
+  }
+
+  return boost::algorithm::clamp(boost::lexical_cast<int>(arg), 0, 255);
+}
+
+int transformAlphaFromFloatRatio(const std::string& arg)
+{
+  auto factor = boost::lexical_cast<float>(arg);
+  return boost::algorithm::clamp(int(std::round(256 * factor)), 0, 255);
+}
+
+float hslHue(const std::string& arg)
+{
+  return boost::algorithm::clamp(boost::lexical_cast<int>(arg) / 360.0f, 0.0f, 1.0f);
+}
+
+float percentageToFactor(const std::string& arg)
+{
+  if (!arg.empty() && arg.back() == '%') {
+    return boost::algorithm::clamp(
+      boost::lexical_cast<int>(arg.substr(0, arg.size() - 1)) / 100.0f, 0.0f, 1.0f);
+  }
+
+  throw boost::bad_lexical_cast();
+}
+
+float factorFromFloat(const std::string& arg)
+{
+  return boost::algorithm::clamp(boost::lexical_cast<float>(arg), 0.0f, 1.0f);
+}
+
+ExprValue makeRgbaColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 4u) {
+    try {
+      return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
+                    rgbColorOrPercentage(args[2]), transformAlphaFromFloatRatio(args[3]));
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kRgbaColorExpr << "() expression with bad value";
+    }
+  } else {
+    styleSheetsLogWarning() << kRgbaColorExpr << "() expression expects 4 arguments";
+  }
+  return Undefined();
+}
+
+ExprValue makeRgbColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 3u) {
+    try {
+      return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
+                    rgbColorOrPercentage(args[2]), 0xff);
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kRgbColorExpr << "() expression with bad value";
+    }
+  } else {
+    styleSheetsLogWarning() << kRgbColorExpr << "() expression expects 3 arguments";
+  }
+  return Undefined();
+}
+
+ExprValue makeHslaColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 4u) {
+    try {
+      QColor color;
+      color.setHslF(hslHue(args[0]), percentageToFactor(args[1]),
+                    percentageToFactor(args[2]), factorFromFloat(args[3]));
+      return color;
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kHslaColorExpr << "() expression with bad values";
+    }
+  } else {
+    styleSheetsLogWarning() << kHslaColorExpr << "() expression expects 3 arguments";
+  }
+  return Undefined();
+}
+
+ExprValue makeHslColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 3u) {
+    try {
+      QColor color;
+      color.setHslF(
+        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0f);
+      return color;
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";
+    }
+  } else {
+    styleSheetsLogWarning() << kHslColorExpr << "() expression expects 3 arguments";
+  }
+  return Undefined();
+}
+
+//------------------------------------------------------------------------------
+
+ExprValue evaluateExpression(const Expression& expr)
+{
+  using ExprEvaluator = std::function<ExprValue(const std::vector<std::string>&)>;
+  using FuncMap = std::unordered_map<std::string, ExprEvaluator>;
+
+  static FuncMap funcMap = {
+    {kRgbaColorExpr, &makeRgbaColor},
+    {kRgbColorExpr, &makeRgbColor},
+    {kHslaColorExpr, &makeHslaColor},
+    {kHslColorExpr, &makeHslColor},
+  };
+
+  auto iFind = funcMap.find(expr.name);
+  if (iFind != funcMap.end()) {
+    return iFind->second(expr.args);
+  } else {
+    styleSheetsLogWarning() << "Unsupported expression '" << expr.name << "'";
+  }
+
+  return Undefined();
+}
+
 struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> {
   boost::optional<QColor> operator()(const std::string& value)
   {
@@ -179,7 +315,13 @@ struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> 
 
   boost::optional<QColor> operator()(const Expression& expr)
   {
-    styleSheetsLogWarning() << "Unsupported expression '" << expr.name << "'";
+    auto value = evaluateExpression(expr);
+    if (const QColor* color = boost::get<QColor>(&value)) {
+      return *color;
+    } else {
+      styleSheetsLogWarning() << "Not a color expression '" << expr.name << "'";
+    }
+
     return boost::none;
   }
 };
