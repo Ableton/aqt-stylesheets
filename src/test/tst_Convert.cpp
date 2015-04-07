@@ -99,6 +99,24 @@ TEST(Convert, fonts_with_partial_specification)
   EXPECT_EQ(QFont::MixedCase, f->capitalization());
 }
 
+TEST(Convert, fonts_with_float_size)
+{
+  auto f = convertProperty<QFont>(PropertyValue(std::string("12.7pt Arial")));
+
+  EXPECT_TRUE(f);
+  EXPECT_EQ(QLatin1String("Arial"), f->family());
+  EXPECT_EQ(12.7, f->pointSizeF());
+}
+
+TEST(Convert, fonts_with_pixelsize)
+{
+  auto f = convertProperty<QFont>(PropertyValue(std::string("18px Arial")));
+
+  EXPECT_TRUE(f);
+  EXPECT_EQ(QLatin1String("Arial"), f->family());
+  EXPECT_EQ(18, f->pixelSize());
+}
+
 //----------------------------------------------------------------------------------------
 
 TEST(Convert, colors_rgb_hash)

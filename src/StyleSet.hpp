@@ -304,7 +304,7 @@ public:
    *
    * @par Example for font specs:
    * @code
-   *   italic 12px Calibre
+   *   italic 14.5pt Calibre
    *   oblique smallcaps bold 24px Arial
    * @endcode
    *

@@ -117,8 +117,8 @@ QFont::Weight takeFontWeightFromTokenList(QStringList& tokens)
 }
 
 struct FontSize {
-  int pixelSize = -1;
-  int pointSize = -1;
+  int pixelSize = 0;
+  qreal pointSize = 0.0f;
 };
 
 /**
@@ -133,8 +133,8 @@ FontSize takeFontSizeFromTokenList(QStringList& tokens)
 
     if (sizeStr.contains(QRegExp("^\\d+px$"))) {
       fontSize.pixelSize = sizeStr.split(QRegExp("px")).at(0).toInt();
-    } else if (sizeStr.contains(QRegExp("^\\d+pt$"))) {
-      fontSize.pointSize = sizeStr.split(QRegExp("pt")).at(0).toInt();
+    } else if (sizeStr.contains(QRegExp("^\\d+(\\.\\d+)?pt$"))) {
+      fontSize.pointSize = sizeStr.split(QRegExp("pt")).at(0).toDouble();
     } else {
       tokens.prepend(sizeStr);
     }
@@ -164,7 +164,10 @@ QFont fontDeclarationToFont(const QString& fontDecl)
   const FontSize size = takeFontSizeFromTokenList(tokens);
   const QString familyName = tokens.join(' ');
 
-  QFont font(familyName, size.pointSize, weight);
+  QFont font(familyName, 0, weight);
+  if (size.pointSize > 0) {
+    font.setPointSizeF(size.pointSize);
+  }
   if (size.pixelSize > 0) {
     font.setPixelSize(size.pixelSize);
   }
