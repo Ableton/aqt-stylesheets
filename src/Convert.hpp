@@ -77,5 +77,8 @@ boost::optional<T> convertProperty(const PropertyValue& value, Traits traits = T
   return traits.convert(value);
 }
 
+QVariant convertValueToVariant(const PropertyValue& value);
+QVariantList convertValueToVariantList(const PropValues& values);
+
 } // namespace stylesheets
 } // namespace aqt

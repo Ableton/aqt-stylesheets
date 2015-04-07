@@ -392,5 +392,53 @@ boost::optional<bool> PropertyValueConvertTraits<bool>::convert(
   return boost::none;
 }
 
+//----------------------------------------------------------------------------------------
+
+namespace
+{
+struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
+  QVariant operator()(const std::string& value)
+  {
+    return QVariant(QString::fromStdString(value));
+  }
+
+  QVariant operator()(const Expression& expr)
+  {
+    struct ExprValueToVariantVisitor : public boost::static_visitor<QVariant> {
+      QVariant operator()(const Undefined&)
+      {
+        return QVariant();
+      }
+
+      QVariant operator()(const QColor& color)
+      {
+        return QVariant(color);
+      }
+    };
+
+    auto exprValue = evaluateExpression(expr);
+
+    ExprValueToVariantVisitor visitor;
+    return boost::apply_visitor(visitor, exprValue);
+  }
+};
+} // anon namespace
+
+QVariant convertValueToVariant(const PropertyValue& value)
+{
+  PropValueToVariantVisitor visitor;
+  return boost::apply_visitor(visitor, value);
+}
+
+QVariantList convertValueToVariantList(const PropValues& values)
+{
+  QVariantList result;
+  for (const auto& propValue : values) {
+    result.push_back(convertValueToVariant(propValue));
+  }
+
+  return result;
+}
+
 } // namespace stylesheets
 } // namespace aqt
