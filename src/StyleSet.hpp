@@ -226,9 +226,8 @@ public:
 
   /*! Returns the style property @p key as a @c QColor.
    *
-   * Looks up the style property named @p key and interprets its first value as
-   * a color specification.  All common color specs QML supports can be used
-   * here:
+   * Looks up the style property named @p key and interprets its value as a
+   * color specification.  All common color specs QML supports can be used here:
    *
    * - by name, e.g. @c red, @c black, @c yellow
    * - by RGB string, e.g. @c \#3f4f5f
@@ -238,8 +237,9 @@ public:
    * Style property names can be any string, but typically end with @c
    * "-color".
    *
-   * If there's no such property @p key or its first values can not be
-   * converted to a @c QColor prints a warning.
+   * If there's no such property @p key, the property has multiple values, or
+   * the property's value can not be converted to a `QColor` prints a warning
+   * and returns a default `QColor`.
    *
    * @par Example:
    * @code
@@ -252,9 +252,15 @@ public:
 
   /*! Returns the style property @p key as a boolean value
    *
-   * Looks up the style property named @p key and interprets its first value
-   * as a boolean.  If there's no such property @p key or its first value can
-   * not be converted to a boolean value prints a warning.
+   * Looks up the style property named @p key and interprets its value as a
+   * boolean.  If there's no such property @p key, its value can not be
+   * converted to a boolean, or the property has multiple values prints a
+   * warning and returns false.
+   *
+   * Only the following conversions are supported:
+   *
+   * - "true", "yes" -> true
+   * - "false", "no" -> false
    *
    * @par Example:
    * @code
@@ -267,9 +273,10 @@ public:
 
   /*! Returns the style property @p key as a number
    *
-   * Looks up the style property named @p key and interprets its first value
-   * as a number (a double).  If there's no such property @p key or its first
-   * value can not be converted to a double prints a warning.
+   * Looks up the style property named @p key and interprets its value as a
+   * number (a double).  If there's no such property @p key, its value can not
+   * be converted to a double, or the property has multiple values prints a
+   * warning and return 0.0.
    *
    * @par Example:
    * @code
@@ -282,23 +289,24 @@ public:
 
   /*! Returns the style property @p key as a @c QFont
    *
-   * Looks up the style property named @p key and interprets its first value as
-   * a CSS like font specification.  The font string has the format:
+   * Looks up the style property named @p key and interprets its value as a CSS
+   * like font specification.  The font string has the format (with the terms in
+   * `[]` being optional; the order is important though):
    *
    * <pre>
-   * style capMode weight size familyName
+   * [style] [capMode] [weight] [size] familyName
    * </pre>
    *
    * Where the following values are defined:
    *
-   * - __style__: italic, upright, oblique
-   * - __weight__: light, regular, demibold, bold
-   * - __capMode__: mixedcase, alluppercase, alllowercase, smallcaps, capitalize
+   * - __style__: `italic`, `upright`, `oblique`
+   * - __weight__: `light`, `regular`, `demibold`, `bold`
+   * - __capMode__: `mixedcase`, `alluppercase`, `alllowercase`, `smallcaps`, `capitalize`
    *
-   * The __size__ can either be given in pixels or points (e.g. @c 12px or @c 11pt).
-   * The __familyName__ is any valid family name currently installed on the
-   * system, loaded via @c FontLoader or directive or via the @c font-face
-   * declaration from a style sheet.
+   * The __size__ can either be given in pixels or points (e.g. @c 12px or @c
+   * 11pt).  The __familyName__ is any valid family name currently installed on
+   * the system, loaded via a @c FontLoader or via the @c font-face declaration
+   * from a style sheet.
    *
    * @par Example for font specs:
    * @code
@@ -306,8 +314,9 @@ public:
    *   oblique smallcaps bold 24px Arial
    * @endcode
    *
-   * If there's no such property @p key or its first value can not be
-   * converted to a font spec prints a warning.
+   * If there's no such property @p key, its value can not be converted to a
+   * font spec, or the property has multiple values prints a warning and returns
+   * a default constructed QFont.
    *
    * @par Example:
    * @code
