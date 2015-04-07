@@ -178,7 +178,6 @@ PropertyMap effectivePropertyMap(QObject* pObj, int currentChangeCount)
 
 } // anon namespace
 
-
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
   , mChangeCount(0)
@@ -260,12 +259,7 @@ QVariant StyleSet::get(const QString& key) const
     if (conv) {
       return QVariant::fromValue(*conv);
     }
-  }
-  else {
-    // TODO.  We should actually check each propValue what would be the best
-    // thing for it to convert, too.  -> Let's make a
-    // convertProperty<QVariantList>() overload which drives a variant
-    // visitor.
+  } else {
     QVariantList result;
     for (const auto& propValue : values) {
       auto conv = convertProperty<QString>(propValue);
@@ -280,6 +274,17 @@ QVariant StyleSet::get(const QString& key) const
   return QVariant();
 }
 
+QVariant StyleSet::values(const QString& key) const
+{
+  PropValues values;
+  getImpl(values, key);
+
+  if (values.size() == 1) {
+    return convertValueToVariant(values[0]);
+  }
+
+  return convertValueToVariantList(values);
+}
 
 QColor StyleSet::color(const QString& key) const
 {

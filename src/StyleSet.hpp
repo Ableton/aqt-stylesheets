@@ -216,6 +216,27 @@ public:
    */
   Q_INVOKABLE QVariant get(const QString& key) const;
 
+  /*! Returns the style property named @p key
+   *
+   * Looks up the style property named @p key, evaluates expressions and returns
+   * the result.  The output is either a @c string (@c QString), the resulting
+   * type of a CSS value expression (e.g. `rgb()`, `url()`, etc.) or a list of
+   * these types (@c QVariantList).
+   *
+   * @note If there's no such property this method will return an default
+   *       constructed @c QVariant which maps to `undefined` in Javascript/QML.
+   *
+   * @par Example:
+   * @code
+   * Rectangle {
+   *   color: StyleSet.props.values("clip-colors")[clipColorId]
+   * }
+   * @endcode
+   *
+   * @since 1.2
+   */
+  Q_REVISION(2) Q_INVOKABLE QVariant values(const QString& key) const;
+
   /*! Returns the style property @p key as a @c QColor.
    *
    * Looks up the style property named @p key and interprets its value as a
