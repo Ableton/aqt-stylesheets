@@ -258,3 +258,61 @@ TEST(Convert, colors_hsla_expression_fails)
   EXPECT_FALSE(convertProperty<QColor>(
     Expression{"hsla", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
 }
+
+TEST(Convert, colors_hsb_expression)
+{
+  QColor c1;
+  c1.setHsvF(0.25, 0.25, 0.75, 1.0);
+
+  EXPECT_EQ(c1, *convertProperty<QColor>(
+                  Expression{"hsb", std::vector<std::string>{"90", "25%", "75%"}}));
+
+  QColor c2;
+  c2.setHsvF(1.0, 0.0, 1.0, 1.0);
+  EXPECT_EQ(c2, *convertProperty<QColor>(
+                  Expression{"hsb", std::vector<std::string>{"375", "0%", "100%"}}));
+}
+
+TEST(Convert, colors_hsb_expression_fails)
+{
+  // hsb() needs exactly 3 arguments
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsb", std::vector<std::string>{"90", "25%", "75%", "0.1"}}));
+
+  // arguments are degrees, percentage, percantage
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsb", std::vector<std::string>{"90%", "0%", "100%"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsb", std::vector<std::string>{"255", "50", "100"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsb", std::vector<std::string>{"0.5", "0.75", "1.0"}}));
+}
+
+TEST(Convert, colors_hsba_expression)
+{
+  QColor c1;
+  c1.setHsvF(0.25, 0.25, 0.75, 0.6);
+
+  EXPECT_EQ(c1, *convertProperty<QColor>(Expression{
+                  "hsba", std::vector<std::string>{"90", "25%", "75%", "0.6"}}));
+
+  QColor c2;
+  c2.setHsvF(1.0, 0.0, 1.0, 1.0);
+  EXPECT_EQ(c2, *convertProperty<QColor>(Expression{
+                  "hsba", std::vector<std::string>{"375", "0%", "100%", "1.0"}}));
+}
+
+TEST(Convert, colors_hsba_expression_fails)
+{
+  // hsba() needs exactly 4 arguments
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsba", std::vector<std::string>{"90", "25%", "75%"}}));
+
+  // arguments are degrees, percentage, percantage
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsba", std::vector<std::string>{"90%", "0%", "100%", "20%"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsba", std::vector<std::string>{"255", "50", "100", "75"}}));
+  EXPECT_FALSE(convertProperty<QColor>(
+    Expression{"hsba", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
+}

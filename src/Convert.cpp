@@ -58,6 +58,8 @@ const std::string kRgbaColorExpr = "rgba";
 const std::string kRgbColorExpr = "rgb";
 const std::string kHslaColorExpr = "hsla";
 const std::string kHslColorExpr = "hsl";
+const std::string kHsbaColorExpr = "hsba";
+const std::string kHsbColorExpr = "hsb";
 const std::string kTrue = "true";
 const std::string kYes = "yes";
 const std::string kFalse = "false";
@@ -282,6 +284,40 @@ ExprValue makeHslColor(const std::vector<std::string>& args)
   return Undefined();
 }
 
+ExprValue makeHsbaColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 4u) {
+    try {
+      QColor color;
+      color.setHsvF(hslHue(args[0]), percentageToFactor(args[1]),
+                    percentageToFactor(args[2]), factorFromFloat(args[3]));
+      return color;
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kHslaColorExpr << "() expression with bad values";
+    }
+  } else {
+    styleSheetsLogWarning() << kHslaColorExpr << "() expression expects 3 arguments";
+  }
+  return Undefined();
+}
+
+ExprValue makeHsbColor(const std::vector<std::string>& args)
+{
+  if (args.size() == 3u) {
+    try {
+      QColor color;
+      color.setHsvF(
+        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0f);
+      return color;
+    } catch (const boost::bad_lexical_cast&) {
+      styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";
+    }
+  } else {
+    styleSheetsLogWarning() << kHslColorExpr << "() expression expects 3 arguments";
+  }
+  return Undefined();
+}
+
 //------------------------------------------------------------------------------
 
 ExprValue evaluateExpression(const Expression& expr)
@@ -294,6 +330,8 @@ ExprValue evaluateExpression(const Expression& expr)
     {kRgbColorExpr, &makeRgbColor},
     {kHslaColorExpr, &makeHslaColor},
     {kHslColorExpr, &makeHslColor},
+    {kHsbaColorExpr, &makeHsbaColor},
+    {kHsbColorExpr, &makeHsbColor},
   };
 
   auto iFind = funcMap.find(expr.name);

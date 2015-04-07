@@ -261,6 +261,21 @@ public:
    *   color: StyleSet.props.color("background-color")
    * }
    * @endcode
+   *
+   * The following CSS color expressions are supported:
+   *
+   * - `rgb(r, g, b)` where `r` (red), `g` (green), and `b` (blue) can be
+   *   integers from `0` to `255` or percentage values (e.g. `97%`).
+   * - `rgba(r, g, b, a)`, like `rgb()`, `a` (alpha) is a float from `0.0` to
+   *   `1.0`.
+   * - `hsl(h, s, l)` where `h` (hue) is an integer value from `0` to `359` and
+   *   `s` (saturation) and `l` (lightness) are percentage values (e.g. `45%`).
+   * - `hsla(h, s, l, a)` like `hsl()`, `a` (alpha) is a float from `0.0` to
+       `1.0`.
+   * - `hsb(h, s, b)`, like `hsl()`, but instead of lightness takes `b`
+   *   (brightness) as percentage.
+   * - `hsba(h, s, b, a)`, like `hsla()`, but instead of lightness takes `b`
+   *   (brightness) as percentage.
    */
   Q_INVOKABLE QColor color(const QString& key) const;
 
