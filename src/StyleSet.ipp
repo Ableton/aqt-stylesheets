@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-15 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#include <typeinfo>
+#include "Convert.hpp"
+#include "Log.hpp"
 
 namespace aqt
 {
@@ -31,71 +32,43 @@ namespace stylesheets
 
 namespace detail
 {
-
 template <typename T>
-struct LookupPropertyTrait {
-};
+struct TypeName;
 
-template <>
-struct LookupPropertyTrait<QColor> {
-  static const int qTypeId = QMetaType::QColor;
-  static const char* typeName()
-  {
-    return "color";
-  }
-};
-
-template <>
-struct LookupPropertyTrait<double> {
-  static const int qTypeId = QMetaType::Double;
-  static const char* typeName()
-  {
-    return "double";
-  }
-};
-
-template <>
-struct LookupPropertyTrait<bool> {
-  static const int qTypeId = QMetaType::Bool;
-  static const char* typeName()
-  {
-    return "bool";
-  }
-};
-
-template <typename T>
-struct PropertyConvertTraits {
-  const char* typeName() const
-  {
-    return detail::LookupPropertyTrait<T>::typeName();
+#define AQT_DEFINE_TYPENAME(_T_)                                                         \
+  template <>                                                                            \
+  struct TypeName<_T_> {                                                                 \
+    const char* operator()() const                                                       \
+    {                                                                                    \
+      return #_T_;                                                                       \
+    }                                                                                    \
   }
 
-  bool convert(T& result, QVariant& value) const
-  {
-    int qTypeId = detail::LookupPropertyTrait<T>::qTypeId;
-    if (value.canConvert(qTypeId) && value.convert(qTypeId)) {
-      result = value.value<T>();
-      return true;
-    }
-    return false;
-  }
-};
+AQT_DEFINE_TYPENAME(double);
+AQT_DEFINE_TYPENAME(bool);
+AQT_DEFINE_TYPENAME(QFont);
+AQT_DEFINE_TYPENAME(QString);
+AQT_DEFINE_TYPENAME(QColor);
 
+#undef AQT_DEFINE_TYPENAME
 } // namespace detail
 
-template <typename T, typename Traits>
-T StyleSet::lookupProperty(const QString& key, Traits traits) const
+template <typename T>
+T StyleSet::lookupProperty(const QString& key) const
 {
-  QVariant value;
+  PropValues values;
 
-  if (getImpl(value, key)) {
-    T result;
-    if (traits.convert(result, value)) {
-      return result;
+  if (getImpl(values, key)) {
+    if (values.size() == 1) {
+      auto result = convertProperty<T>(values[0]);
+      if (result) {
+        return result.get();
+      }
     }
 
-    qWarning("Property %s is not convertible to a %s (%s)", key.toStdString().c_str(),
-             traits.typeName(), pathToString(mPath).c_str());
+    styleSheetsLogWarning() << "Property " << key.toStdString()
+                            << " is not convertible to a '" << detail::TypeName<T>()()
+                            << "' (" << pathToString(mPath) << ")";
   }
 
   return T();

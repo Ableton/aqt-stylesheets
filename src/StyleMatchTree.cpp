@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
+#include "Log.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QtCore>
@@ -34,6 +35,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -54,29 +56,6 @@ const std::string kChildIndicator = ">";
 const std::string kDot = ".";
 RESTORE_WARNINGS
 
-
-struct PropdefVisitor : public boost::static_visitor<QVariant> {
-  QVariant operator()(const std::string& value)
-  {
-    return QVariant(QString::fromStdString(value));
-  }
-
-  QVariant operator()(const Expression& expr)
-  {
-    return QVariant();
-  }
-};
-
-QVariantList stdStringListToVariantList(const PropValues& vec)
-{
-  QVariantList list;
-  for (const auto& value : vec) {
-    PropdefVisitor visitor;
-    list.append(boost::apply_visitor(visitor, value));
-  }
-  return list;
-}
-
 PropertyDefMap makeProperties(const std::vector<Property>& props, const int sourceLayer)
 {
   PropertyDefMap properties;
@@ -84,15 +63,8 @@ PropertyDefMap makeProperties(const std::vector<Property>& props, const int sour
   for (const auto& prop : props) {
     SourceLocation propSrcLoc(sourceLayer, prop.locInfo);
 
-    if (prop.values.size() == 1) {
-      PropdefVisitor visitor;
-      auto propDef =
-        PropertyDef(propSrcLoc, boost::apply_visitor(visitor, prop.values[0]));
-      properties.insert(std::make_pair(prop.name, propDef));
-    } else {
-      auto propDef = PropertyDef(propSrcLoc, stdStringListToVariantList(prop.values));
-      properties.insert(std::make_pair(prop.name, propDef));
-    }
+    auto propDef = PropertyDef(propSrcLoc, prop.values);
+    properties.insert(std::make_pair(prop.name, propDef));
   }
 
   return properties;
@@ -464,7 +436,7 @@ void mergePropertiesIntoPropertyMap(PropertyMap& dest,
     auto foundIt = locationMap.find(propdef.first);
     if (foundIt == locationMap.end()
         || isPropLessSpecificPred(foundIt->second, propdef.second.mSourceLoc)) {
-      dest[QString::fromStdString(propdef.first)] = propdef.second.mValue;
+      dest[QString::fromStdString(propdef.first)] = propdef.second.mValues;
       locationMap[propdef.first] = propdef.second.mSourceLoc;
     }
   }
@@ -500,13 +472,49 @@ std::ostream& operator<<(std::ostream& os, const SourceLocation& srcloc)
   return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const PropValues& values)
+{
+  class StreamVisitor : public boost::static_visitor<>
+  {
+    std::ostream& mStream;
+
+  public:
+    StreamVisitor(std::ostream& stream)
+      : mStream(stream)
+    {
+    }
+
+    void operator()(const std::string& value)
+    {
+      mStream << value;
+    }
+
+    void operator()(const Expression& expr)
+    {
+      mStream << expr.name << "(";
+      for (const auto& arg : expr.args) {
+        mStream << arg << ", ";
+      }
+      mStream << ")";
+    }
+  };
+
+  StreamVisitor visitor(os);
+  for (const auto& value : values) {
+    boost::apply_visitor(visitor, value);
+    os << ", ";
+  }
+
+  return os;
+}
+
 void dumpPropertyDefMap(const PropertyDefMap& properties,
                         std::ostream& stream = std::cout)
 {
   stream << "{" << std::endl;
   for (const auto& it : properties) {
-    stream << "  " << it.first << ": " << it.second.mValue.toString().toStdString()
-           << " //" << it.second.mSourceLoc << std::endl;
+    stream << "  " << it.first << ": " << it.second.mValues << " //"
+           << it.second.mSourceLoc << std::endl;
   }
   stream << "}" << std::endl;
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Ableton AG, Berlin
+# Copyright (c) 2014-15 Ableton AG, Berlin
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,12 @@
 # THE SOFTWARE.
 
 add_library(StyleSheetParser
+  Convert.hpp
+  Convert.cpp
   CssParser.cpp
   CssParser.hpp
   Log.hpp
+  Property.hpp
   StyleMatchTree.cpp
   StyleMatchTree.hpp
   Warnings.hpp
