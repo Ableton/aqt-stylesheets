@@ -29,6 +29,7 @@ THE SOFTWARE.
   #define SUPPRESS_WARNINGS \
     _Pragma("clang diagnostic push") \
     _Pragma("clang diagnostic ignored \"-Wconversion\"") \
+    _Pragma("clang diagnostic ignored \"-Wconditional-uninitialized\"") \
     _Pragma("clang diagnostic ignored \"-Wcovered-switch-default\"") \
     _Pragma("clang diagnostic ignored \"-Wdeprecated\"") \
     _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
