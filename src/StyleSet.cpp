@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 #include "StyleSet.hpp"
 
+#include "Convert.hpp"
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleEngine.hpp"
@@ -29,9 +30,11 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <QtQuick/QQuickItem>
 #include <QtQml/QQmlEngine>
+#include <QtQuick/QQuickItem>
+#include <boost/optional.hpp>
 RESTORE_WARNINGS
 
 #include <iostream>
@@ -173,131 +176,7 @@ PropertyMap effectivePropertyMap(QObject* pObj, int currentChangeCount)
   return traverseParentChain<PropertyMap>(pObj, visitor);
 }
 
-/**
-If the first token in the list is a font style token,
-convert it to a font style and remove it from the list.
-*/
-QFont::Style takeFontStyleFromTokenList(QStringList& tokens)
-{
-  static const std::map<QString, QFont::Style> dictionary = {
-    {"italic", QFont::StyleItalic},
-    {"upright", QFont::StyleNormal},
-    {"oblique", QFont::StyleOblique}};
-
-  return (!tokens.isEmpty() && dictionary.count(tokens.at(0)))
-           ? dictionary.at(tokens.takeFirst())
-           : QFont::StyleNormal;
-}
-
-/**
-If the first token in the list is a capitalization style token,
-convert it to a capitalization style and remove it from the list.
-*/
-QFont::Capitalization takeCapitalizationStyleFromTokenList(QStringList& tokens)
-{
-  static const std::map<QString, QFont::Capitalization> dictionary = {
-    {"mixedcase", QFont::MixedCase},
-    {"alluppercase", QFont::AllUppercase},
-    {"alllowercase", QFont::AllLowercase},
-    {"smallcaps", QFont::SmallCaps},
-    {"capitalize", QFont::Capitalize}};
-
-  return (!tokens.isEmpty() && dictionary.count(tokens.at(0)))
-           ? dictionary.at(tokens.takeFirst())
-           : QFont::MixedCase;
-}
-
-/**
-If the first token in the list is a font weight token,
-convert it to a font weight and remove it from the list.
-*/
-QFont::Weight takeFontWeightFromTokenList(QStringList& tokens)
-{
-  static const std::map<QString, QFont::Weight> dictionary = {
-    {"light", QFont::Light},
-    {"bold", QFont::Bold},
-    {"demibold", QFont::DemiBold},
-    {"black", QFont::Black},
-    {"regular", QFont::Normal}};
-
-  return (!tokens.isEmpty() && dictionary.count(tokens.at(0)))
-           ? dictionary.at(tokens.takeFirst())
-           : QFont::Normal;
-}
-
-struct FontSize {
-  int pixelSize = -1;
-  int pointSize = -1;
-};
-
-/**
-If the first token in the list is a font size token,
-convert it to a font size and remove it from the list.
-*/
-FontSize takeFontSizeFromTokenList(QStringList& tokens)
-{
-  FontSize fontSize;
-  if (!tokens.isEmpty()) {
-    const QString sizeStr = tokens.takeFirst();
-
-    if (sizeStr.contains(QRegExp("^\\d+px$"))) {
-      fontSize.pixelSize = sizeStr.split(QRegExp("px")).at(0).toInt();
-    } else if (sizeStr.contains(QRegExp("^\\d+pt$"))) {
-      fontSize.pointSize = sizeStr.split(QRegExp("pt")).at(0).toInt();
-    } else {
-      tokens.prepend(sizeStr);
-    }
-  }
-  return fontSize;
-}
-
-/**
-Extract the font style from the string.
-
-Font declarations must conform to a limited subset of the W3 font spec
-(http://www.w3.org/TR/css3-fonts/#font-prop), see the following:
-
-@code
-// <style> <variant> <weight> <size> <family>
-// e.g.:
-font: "italic smallcaps bold 16px Times New Roman"
-@endcode
-*/
-QFont fontDeclarationToFont(const QString& fontDecl)
-{
-  QStringList tokens = fontDecl.split(QRegExp("\\s* \\s*"), QString::SkipEmptyParts);
-
-  const QFont::Style fontStyle = takeFontStyleFromTokenList(tokens);
-  const QFont::Capitalization capMode = takeCapitalizationStyleFromTokenList(tokens);
-  const QFont::Weight weight = takeFontWeightFromTokenList(tokens);
-  const FontSize size = takeFontSizeFromTokenList(tokens);
-  const QString familyName = tokens.join(' ');
-
-  QFont font(familyName, size.pointSize, weight);
-  if (size.pixelSize > 0) {
-    font.setPixelSize(size.pixelSize);
-  }
-  font.setCapitalization(capMode);
-  font.setStyle(fontStyle);
-  return font;
-}
-
-struct FontPropertyConvertTraits {
-  const char* typeName() const
-  {
-    return "font";
-  }
-
-  bool convert(QFont& result, QVariant& value) const
-  {
-    if (value.canConvert(QMetaType::QString)) {
-      result = fontDeclarationToFont(value.toString());
-      return true;
-    }
-    return false;
-  }
-};
-}
+} // anon namespace
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
@@ -351,7 +230,7 @@ bool StyleSet::isSet(const QString& key) const
   return mProperties.find(key) != mProperties.end();
 }
 
-bool StyleSet::getImpl(QVariant& value, const QString& key) const
+bool StyleSet::getImpl(PropValues& value, const QString& key) const
 {
   PropertyMap::const_iterator it = mProperties.find(key);
   if (it != mProperties.end()) {
@@ -372,9 +251,39 @@ bool StyleSet::getImpl(QVariant& value, const QString& key) const
 
 QVariant StyleSet::get(const QString& key) const
 {
-  QVariant value;
-  getImpl(value, key);
-  return value;
+  PropValues values;
+  getImpl(values, key);
+
+  if (values.size() == 1) {
+    auto conv = convertProperty<QString>(values[0]);
+    if (conv) {
+      return QVariant::fromValue(*conv);
+    }
+  } else {
+    QVariantList result;
+    for (const auto& propValue : values) {
+      auto conv = convertProperty<QString>(propValue);
+      if (conv) {
+        result.push_back(conv.get());
+      }
+    }
+
+    return result;
+  }
+
+  return QVariant();
+}
+
+QVariant StyleSet::values(const QString& key) const
+{
+  PropValues values;
+  getImpl(values, key);
+
+  if (values.size() == 1) {
+    return convertValueToVariant(values[0]);
+  }
+
+  return convertValueToVariantList(values);
 }
 
 QColor StyleSet::color(const QString& key) const
@@ -384,7 +293,7 @@ QColor StyleSet::color(const QString& key) const
 
 QFont StyleSet::font(const QString& key) const
 {
-  return lookupProperty<QFont>(key, FontPropertyConvertTraits());
+  return lookupProperty<QFont>(key);
 }
 
 double StyleSet::number(const QString& key) const
@@ -395,6 +304,11 @@ double StyleSet::number(const QString& key) const
 bool StyleSet::boolean(const QString& key) const
 {
   return lookupProperty<bool>(key);
+}
+
+QString StyleSet::string(const QString& key) const
+{
+  return lookupProperty<QString>(key);
 }
 
 void StyleSet::onStyleChanged(int changeCount)

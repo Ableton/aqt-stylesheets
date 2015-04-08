@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 Ableton AG, Berlin
+Copyright (c) 2015 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,31 +20,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "StylePlugin.hpp"
+#pragma once
 
-#include "StyleEngine.hpp"
-#include "StylesDirWatcher.hpp"
-#include "StyleSet.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtQml/QQmlComponent>
-#include <QtQml/QQmlEngine>
+#include <boost/variant/variant.hpp>
 RESTORE_WARNINGS
 
-void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
+#include <string>
+#include <vector>
+
+/*! @cond DOXYGEN_IGNORE */
+
+namespace aqt
 {
-  qmlRegisterUncreatableType<aqt::stylesheets::StyleSet>(
-    pUri, 1, 0, "StyleSet", "StyleSet is exposed as an attached property");
-  qmlRegisterUncreatableType<aqt::stylesheets::StyleSet, 2>(
-    pUri, 1, 2, "StyleSet", "StyleSet is exposed as an attached property");
-  qmlRegisterType<aqt::stylesheets::StyleEngine>(pUri, 1, 0, "StyleEngine");
-  qmlRegisterType<aqt::stylesheets::StyleEngine, 1>(pUri, 1, 1, "StyleEngine");
-  qmlRegisterType<aqt::stylesheets::StylesDirWatcher>(pUri, 1, 1, "StylesDirWatcher");
-}
+namespace stylesheets
+{
 
-#if !defined(NOT_INCLUDE_MOC)
-SUPPRESS_WARNINGS
-#include "moc_StylePlugin.cpp"
-RESTORE_WARNINGS
-#endif
+class Expression
+{
+public:
+  std::string name;
+  std::vector<std::string> args;
+};
+
+using PropertyValue = boost::variant<std::string, Expression>;
+using PropValues = std::vector<PropertyValue>;
+
+class LocInfo
+{
+public:
+  LocInfo()
+    : byteofs(0)
+    , line(0)
+    , column(0)
+  {
+  }
+
+  int byteofs;
+  int line;
+  int column;
+};
+
+class Property
+{
+public:
+  std::string name;
+  PropValues values;
+  LocInfo locInfo;
+};
+
+} // namespace stylesheets
+} // namespace aqt
+
+/*! @endcond */

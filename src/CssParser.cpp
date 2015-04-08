@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-15 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +80,12 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::vector<aqt::stylesheets::Propset>, propsets)
   (std::vector<aqt::stylesheets::FontFaceDecl>, fontfaces)
   )
+
+BOOST_FUSION_ADAPT_STRUCT(
+  aqt::stylesheets::Expression,
+  (std::string, name)
+  (std::vector<std::string>, args)
+  )
 // clang-format on
 
 namespace
@@ -150,13 +156,25 @@ struct StyleSheetGrammar
     quoted_string   = lexeme['"' >> +(char_ - '"') >> '"']
                       | lexeme['\'' >> +(char_ - '\'') >> '\''];
     color           = char_('#') >> +(qi::xdigit);
-    number          = +(qi::digit | char_('-') | char_('.'));
-    atom_value      = quoted_string
+    number          = +(qi::digit | char_('-') | char_('.')) >> *char_('%');
+
+    atom_value       = quoted_string
                       | number
                       | color
                       | identifier;
-    values          = atom_value [push_back(_val, _1)]
+
+    args            = atom_value [push_back(_val, _1)]
                       >> *(lit(',') > atom_value [push_back(_val, _1)]);
+    expression      = identifier[at_c<0>(_val) = _1]
+                      >> lit('(') >> *(args[at_c<1>(_val) = _1]) >> lit(')');
+
+    value           = quoted_string
+                      | number
+                      | color
+                      | expression
+                      | identifier;
+    values          = value [push_back(_val, _1)]
+                      >> *(lit(',') > value [push_back(_val, _1)]);
 
     value_pair      = identifier[at_c<0>(_val) = _1]
                       >> lit(':') >> values[at_c<1>(_val) = _1]
@@ -200,8 +218,11 @@ struct StyleSheetGrammar
     values.name("value");
     number.name("number");
     atom_value.name("atomic value");
+    value.name("value");
     value_pair.name("key-value-pair");
     child_sel.name("child");
+    args.name("args");
+    expression.name("expression");
 
     on_success(propset, locationAnnotator(_val, _1));
     on_success(value_pair, locationAnnotator(_val, _1));
@@ -222,10 +243,13 @@ struct StyleSheetGrammar
   qi::rule<Iterator, std::string(), ascii::space_type> quoted_string;
   qi::rule<Iterator, aqt::stylesheets::Property(), ascii::space_type> value_pair;
   qi::rule<Iterator, std::string(), ascii::space_type> atom_value;
+  qi::rule<Iterator, aqt::stylesheets::PropertyValue(), ascii::space_type> value;
   qi::rule<Iterator, aqt::stylesheets::PropValues(), ascii::space_type> values;
+  qi::rule<Iterator, std::vector<std::string>(), ascii::space_type> args;
   qi::rule<Iterator, aqt::stylesheets::Propset(), ascii::space_type> propset;
   qi::rule<Iterator, aqt::stylesheets::FontFaceDecl(), ascii::space_type> fontfacedecl;
   qi::rule<Iterator, aqt::stylesheets::StyleSheet(), ascii::space_type> stylesheet;
+  qi::rule<Iterator, aqt::stylesheets::Expression(), ascii::space_type> expression;
 
   qi::rule<Iterator, boost::spirit::unused_type> cpp_comment;
   qi::rule<Iterator, boost::spirit::unused_type> c_comment;

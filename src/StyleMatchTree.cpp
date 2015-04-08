@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Ableton AG, Berlin
+Copyright (c) 2014-15 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,14 +24,18 @@ THE SOFTWARE.
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
+#include "Log.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QtCore>
 #include <boost/assert.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
 RESTORE_WARNINGS
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -45,27 +49,12 @@ using namespace aqt::stylesheets;
 namespace
 {
 
-struct PredefinedStrings {
-  const std::string descendantAxisId = std::string("::desc::");
-  const std::string conjunctionIndicator = std::string("&");
-  const std::string childIndicator = std::string(">");
-  const std::string dot = std::string(".");
-};
-
-const PredefinedStrings& predefinedStrings()
-{
-  static PredefinedStrings keys;
-  return keys;
-}
-
-QVariantList stdStringListToVariantList(const std::vector<std::string>& vec)
-{
-  QVariantList list;
-  for (auto str : vec) {
-    list.append(QVariant(QString::fromStdString(str)));
-  }
-  return list;
-}
+SUPPRESS_WARNINGS
+const std::string kDescendantAxisId = "::desc::";
+const std::string kConjunctionIndicator = "&";
+const std::string kChildIndicator = ">";
+const std::string kDot = ".";
+RESTORE_WARNINGS
 
 PropertyDefMap makeProperties(const std::vector<Property>& props, const int sourceLayer)
 {
@@ -73,11 +62,8 @@ PropertyDefMap makeProperties(const std::vector<Property>& props, const int sour
 
   for (const auto& prop : props) {
     SourceLocation propSrcLoc(sourceLayer, prop.locInfo);
-    auto propDef =
-      prop.values.size() == 1
-        ? PropertyDef(propSrcLoc, QVariant(QString::fromStdString(prop.values[0])))
-        : PropertyDef(propSrcLoc, stdStringListToVariantList(prop.values));
 
+    auto propDef = PropertyDef(propSrcLoc, prop.values);
     properties.insert(std::make_pair(prop.name, propDef));
   }
 
@@ -125,20 +111,20 @@ std::vector<std::string> transformSelector(
   for (auto sel : selector) {
     is_conjunction = false;
     for (auto selPart : sel) {
-      if (selPart == predefinedStrings().childIndicator) {
+      if (selPart == kChildIndicator) {
         // skip
         last_was_symbol = false;
       } else {
         if (!is_conjunction) {
           if (last_was_symbol) {
-            result.push_back(predefinedStrings().descendantAxisId);
+            result.push_back(kDescendantAxisId);
             result.push_back(selPart);
           } else {
             result.push_back(selPart);
             last_was_symbol = true;
           }
         } else {
-          result.push_back(predefinedStrings().conjunctionIndicator);
+          result.push_back(kConjunctionIndicator);
           result.push_back(selPart);
           last_was_symbol = true;
         }
@@ -339,7 +325,7 @@ MatchRec findPathElement(MatchResult& result,
     findPattern(result, Specificity(specificity, 0, 1), node, pathElt.mTypeName);
 
   for (const auto& className : pathElt.mClassNames) {
-    std::string dotName(predefinedStrings().dot + className);
+    std::string dotName(kDot + className);
     auto m2 = findPattern(result, Specificity(specificity, 1, 0), node, dotName);
     matchRec += m2;
   }
@@ -365,8 +351,7 @@ void iterateOverMatches(MatchResult& result,
                         UiItemPath::const_reverse_iterator pathEltEnd)
 {
   auto tryToMatchConjunction = [&](Specificity specificity, const MatchNode* node) {
-    auto m =
-      findPattern(result, specificity, node, predefinedStrings().conjunctionIndicator);
+    auto m = findPattern(result, specificity, node, kConjunctionIndicator);
     for (const auto& tup : m.pNodes) {
       findMatchOnNode(result, getMatchRecSpecificity(tup), getMatchRecNode(tup), pathElt,
                       nextEltIter, pathEltEnd);
@@ -382,8 +367,7 @@ void iterateOverMatches(MatchResult& result,
 
   auto tryToMatchDescendant = [&](Specificity specificity, const MatchNode* node) {
     if (nextEltIter != pathEltEnd) {
-      auto m =
-        findPattern(result, specificity, node, predefinedStrings().descendantAxisId);
+      auto m = findPattern(result, specificity, node, kDescendantAxisId);
       for (const auto& tup : m.pNodes) {
         findDescendantMatchOnNode(result, getMatchRecSpecificity(tup),
                                   getMatchRecNode(tup), *nextEltIter,
@@ -452,7 +436,7 @@ void mergePropertiesIntoPropertyMap(PropertyMap& dest,
     auto foundIt = locationMap.find(propdef.first);
     if (foundIt == locationMap.end()
         || isPropLessSpecificPred(foundIt->second, propdef.second.mSourceLoc)) {
-      dest[QString::fromStdString(propdef.first)] = propdef.second.mValue;
+      dest[QString::fromStdString(propdef.first)] = propdef.second.mValues;
       locationMap[propdef.first] = propdef.second.mSourceLoc;
     }
   }
@@ -488,13 +472,49 @@ std::ostream& operator<<(std::ostream& os, const SourceLocation& srcloc)
   return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const PropValues& values)
+{
+  class StreamVisitor : public boost::static_visitor<>
+  {
+    std::ostream& mStream;
+
+  public:
+    StreamVisitor(std::ostream& stream)
+      : mStream(stream)
+    {
+    }
+
+    void operator()(const std::string& value)
+    {
+      mStream << value;
+    }
+
+    void operator()(const Expression& expr)
+    {
+      mStream << expr.name << "(";
+      for (const auto& arg : expr.args) {
+        mStream << arg << ", ";
+      }
+      mStream << ")";
+    }
+  };
+
+  StreamVisitor visitor(os);
+  for (const auto& value : values) {
+    boost::apply_visitor(visitor, value);
+    os << ", ";
+  }
+
+  return os;
+}
+
 void dumpPropertyDefMap(const PropertyDefMap& properties,
                         std::ostream& stream = std::cout)
 {
   stream << "{" << std::endl;
   for (const auto& it : properties) {
-    stream << "  " << it.first << ": " << it.second.mValue.toString().toStdString()
-           << " //" << it.second.mSourceLoc << std::endl;
+    stream << "  " << it.first << ": " << it.second.mValues << " //"
+           << it.second.mSourceLoc << std::endl;
   }
   stream << "}" << std::endl;
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-15 Ableton AG, Berlin
+Copyright (c) 2015 Ableton AG, Berlin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,85 +23,62 @@ THE SOFTWARE.
 #pragma once
 
 #include "Property.hpp"
-
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
-#include <boost/variant/variant.hpp>
+#include <QtCore/QVariant>
+#include <QtGui/QColor>
+#include <QtGui/QFont>
+#include <QtQml/qqml.h>
+#include <boost/optional.hpp>
 RESTORE_WARNINGS
 
 #include <string>
-#include <vector>
 
-/*! @cond DOXYGEN_IGNORE */
 
 namespace aqt
 {
 namespace stylesheets
 {
 
-using SelectorParts = std::vector<std::string>;
-using Selector = std::vector<SelectorParts>;
+/*! @cond DOXYGEN_IGNORE */
+template <typename T>
+struct PropertyValueConvertTraits;
 
-class Propset
-{
-public:
-  std::vector<Selector> selectors;
-  std::vector<Property> properties;
-  LocInfo locInfo;
+template <>
+struct PropertyValueConvertTraits<QFont> {
+  boost::optional<QFont> convert(const PropertyValue& value) const;
 };
 
-class FontFaceDecl
-{
-public:
-  std::string url;
+template <>
+struct PropertyValueConvertTraits<QColor> {
+  boost::optional<QColor> convert(const PropertyValue& value) const;
 };
 
-class StyleSheet
-{
-public:
-  std::vector<Propset> propsets;
-  std::vector<FontFaceDecl> fontfaces;
+template <>
+struct PropertyValueConvertTraits<QString> {
+  boost::optional<QString> convert(const PropertyValue& value) const;
 };
 
-class ParseException
-{
-public:
-  ParseException(const std::string& msg, const std::string& errorContext = "")
-    : mMsg(msg)
-    , mErrorContext(errorContext)
-  {
-  }
-
-  std::string message() const
-  {
-    return mMsg;
-  }
-  std::string errorContext() const
-  {
-    return mErrorContext;
-  }
-
-private:
-  std::string mMsg;
-  std::string mErrorContext;
+template <>
+struct PropertyValueConvertTraits<double> {
+  boost::optional<double> convert(const PropertyValue& value) const;
 };
 
-StyleSheet parseStdString(const std::string& data);
-StyleSheet parseString(const QString& path);
+template <>
+struct PropertyValueConvertTraits<bool> {
+  boost::optional<bool> convert(const PropertyValue& value) const;
+};
 
-/*! Read and parse the style sheet file from @path
- *
- * @return the parsed style sheet
- *
- * @throw std::ios_base::failure exception on IO error or if the file at @path
- *        can not be opened.
- * @throw ParseException when the stylesheet could not be parsed
- */
-StyleSheet parseStyleFile(const QString& path);
+template <typename T, typename Traits = PropertyValueConvertTraits<T>>
+boost::optional<T> convertProperty(const PropertyValue& value, Traits traits = Traits())
+{
+  return traits.convert(value);
+}
+
+QVariant convertValueToVariant(const PropertyValue& value);
+QVariantList convertValueToVariantList(const PropValues& values);
 
 } // namespace stylesheets
 } // namespace aqt
-
-/*! @endcond */

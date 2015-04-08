@@ -28,6 +28,7 @@ target_compile_options(gtest_internal PUBLIC
   ${cxx11_options} -Wno-global-constructors)
 
 add_executable(StyleSheetParserTest
+  tst_Convert.cpp
   tst_CssParser.cpp
   tst_StyleMatchTree.cpp
 )
