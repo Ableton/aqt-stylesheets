@@ -27,6 +27,7 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
+#include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
@@ -68,6 +69,11 @@ struct PropertyValueConvertTraits<double> {
 template <>
 struct PropertyValueConvertTraits<bool> {
   boost::optional<bool> convert(const PropertyValue& value) const;
+};
+
+template <>
+struct PropertyValueConvertTraits<QUrl> {
+  boost::optional<QUrl> convert(const PropertyValue& value) const;
 };
 
 template <typename T, typename Traits = PropertyValueConvertTraits<T>>
