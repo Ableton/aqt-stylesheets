@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <QtCore/QUrl>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <QtQml/QQmlEngine>
@@ -309,6 +310,20 @@ bool StyleSet::boolean(const QString& key) const
 QString StyleSet::string(const QString& key) const
 {
   return lookupProperty<QString>(key);
+}
+
+QUrl StyleSet::url(const QString& key) const
+{
+  Property prop;
+  auto url = lookupProperty<QUrl>(prop, key);
+
+  if (mpEngine) {
+    auto baseUrl = prop.mSourceLoc.mSourceLayer == 0 ? mpEngine->defaultStyleSheetSource()
+                                                     : mpEngine->styleSheetSource();
+    return baseUrl.resolved(url);
+  }
+
+  return url;
 }
 
 void StyleSet::onStyleChanged(int changeCount)

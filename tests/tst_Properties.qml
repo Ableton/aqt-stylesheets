@@ -208,4 +208,46 @@ Item {
             });
         }
     }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: urlLookupScene
+
+        Item {
+            property alias absUrl: rect5.absUrl
+            property alias absUrl2: rect5.absUrl2
+            property alias iconSize: img1.sourceSize
+
+            Rectangle {
+                id: rect5
+                StyleSet.name: "url-test"
+                anchors.fill: parent
+
+                property var absUrl: StyleSet.props.url("icon")
+                property var absUrl2: StyleSet.props.url("icon2")
+            }
+
+            Image {
+                id: img1
+                StyleSet.name: "dot"
+                source: StyleSet.props.url("dot-icon")
+            }
+        }
+    }
+
+    TestCase {
+        name: "lookup an url"
+        when: windowShown
+
+        function test_lookupAnUrl() {
+            TestUtils.withComponent(urlLookupScene, scene, {}, function(comp) {
+                compare(comp.absUrl, "http://www.eyestep.org/images/icon.srv?nm=loud");
+                compare(comp.absUrl2, "ableton:assets/images/dots.png");
+                compare(comp.iconSize.width, 2);
+                compare(comp.iconSize.height, 2);
+            });
+        }
+    }
 }
