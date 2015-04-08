@@ -30,7 +30,6 @@ SUPPRESS_WARNINGS
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <QtQml/qqml.h>
 #include <boost/optional.hpp>
 RESTORE_WARNINGS
 
