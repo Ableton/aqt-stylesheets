@@ -176,4 +176,36 @@ Item {
             });
         }
     }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: missingPropertyScene
+
+        Item {
+            property alias notExisting: rect2.notExisting
+
+            Rectangle {
+                id: rect2
+                StyleSet.name: "root"
+                anchors.fill: parent
+
+                property var notExisting: StyleSet.props.get("not-existing")
+            }
+        }
+    }
+
+    TestCase {
+        name: "lookup missing properties."
+        when: windowShown
+
+        function test_lookupNotExistingProperty() {
+            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+                                     /^.*Property.*not-existing.*/);
+            TestUtils.withComponent(missingPropertyScene, scene, {}, function(comp) {
+                compare(comp.notExisting, undefined);
+            });
+        }
+    }
 }

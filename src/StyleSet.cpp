@@ -259,7 +259,7 @@ QVariant StyleSet::get(const QString& key) const
     if (conv) {
       return QVariant::fromValue(*conv);
     }
-  } else {
+  } else if (values.size() > 1) {
     QVariantList result;
     for (const auto& propValue : values) {
       auto conv = convertProperty<QString>(propValue);
