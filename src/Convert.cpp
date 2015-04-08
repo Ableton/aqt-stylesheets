@@ -466,7 +466,7 @@ QVariant convertValueToVariant(const PropertyValue& value)
   return boost::apply_visitor(visitor, value);
 }
 
-QVariantList convertValueToVariantList(const PropValues& values)
+QVariantList convertValueToVariantList(const PropertyValues& values)
 {
   QVariantList result;
   for (const auto& propValue : values) {

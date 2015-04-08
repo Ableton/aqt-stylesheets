@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 
 #include "StyleMatchTree.hpp"
+#include "CssParser.hpp"
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
@@ -43,9 +44,10 @@ RESTORE_WARNINGS
 #include <unordered_map>
 #include <vector>
 
-using namespace aqt;
-using namespace aqt::stylesheets;
-
+namespace aqt
+{
+namespace stylesheets
+{
 namespace
 {
 
@@ -56,14 +58,86 @@ const std::string kChildIndicator = ">";
 const std::string kDot = ".";
 RESTORE_WARNINGS
 
-PropertyDefMap makeProperties(const std::vector<Property>& props, const int sourceLayer)
+using PropertyDefMap = std::unordered_map<std::string, Property>;
+
+/*! The basic building block for a "match tree"
+ *
+ * A StyleMatchTree is constructed as a tree of @c MatchNode instances.  It
+ * is built over the selectors defined in a style sheet.  Each node is a
+ * dictionary of type/class name mapping to further match nodes.
+ * Ultimately, a match node carries a set of property definitions (in
+ * member propmap).
+ *
+ * The tree is built upside down: A selector "A B C" leads to a tree
+ * starting at the root "C".
+ *
+ * All selectors from all stylesheets are merged in one matchnode tree,
+ * i.e. the two selectors "Gaz > Bar" and "Foo > Gaz > Bar" will result in
+ * a match node tree like this (where "{}" denote the empty property
+ * definition set):
+ *
+ * @code
+ * Bar -> {}
+ *   Gaz -> { properties }
+ *     Foo -> { properties }
+ * @endcode
+ *
+ * Note the properties both at node "Gaz" and "Bar".
+ *
+ * Descendants selectors are constructed using the special axis denotator
+ * "::desc::".  A selector "Foo > Gaz Bar" will be constructed like this:
+ *
+ * @code
+ * Bar -> {}
+ *   ::desc:: -> {}
+ *     Gaz -> {}
+ *       Foo -> { properties }
+ * @endcode
+ */
+class MatchNode
+{
+public:
+  MatchNode()
+  {
+  }
+
+  MatchNode(const PropertyDefMap* pProperties)
+  {
+    if (pProperties) {
+      properties = *pProperties;
+    }
+  }
+
+  MatchNode(const MatchNode&) = delete;
+  MatchNode& operator=(const MatchNode&) = delete;
+
+  PropertyDefMap properties;
+
+  using Matches = std::unordered_map<std::string, std::unique_ptr<MatchNode>>;
+  Matches matches;
+};
+
+class StyleMatchTree : public IStyleMatchTree
+{
+public:
+  StyleMatchTree()
+    : rootMatches(estd::make_unique<MatchNode>())
+  {
+  }
+
+  std::unique_ptr<MatchNode> rootMatches;
+};
+
+PropertyDefMap makeProperties(const std::vector<PropertySpec>& props,
+                              const int sourceLayer)
 {
   PropertyDefMap properties;
 
   for (const auto& prop : props) {
-    SourceLocation propSrcLoc(sourceLayer, prop.locInfo);
+    SourceLocation propSrcLoc(prop.mSourceLoc);
+    propSrcLoc.mSourceLayer = sourceLayer;
 
-    auto propDef = PropertyDef(propSrcLoc, prop.values);
+    auto propDef = Property(propSrcLoc, prop.values);
     properties.insert(std::make_pair(prop.name, propDef));
   }
 
@@ -136,7 +210,7 @@ std::vector<std::string> transformSelector(
   return result;
 }
 
-void mergePropSet(MatchNode* parent, int sourceLayer, const Propset& ps)
+void mergePropSet(MatchNode* parent, int sourceLayer, const PropertySpecSet& ps)
 {
   auto properties = makeProperties(ps.properties, sourceLayer);
 
@@ -155,11 +229,6 @@ void mergePropSet(MatchNode* parent, int sourceLayer, const Propset& ps)
 
 } // anon namespace
 
-namespace aqt
-{
-namespace stylesheets
-{
-
 void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& src)
 {
   for (auto const& prop : src) {
@@ -172,20 +241,20 @@ void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& src)
 #define DEFAULT_STYLESHEET_LAYER 0
 #define USER_STYLESHEET_LAYER 1
 
-StyleMatchTree createMatchTree(const StyleSheet& stylesheet,
-                               const StyleSheet& defaultStylesheet)
+std::unique_ptr<IStyleMatchTree> createMatchTree(const StyleSheet& stylesheet,
+                                                 const StyleSheet& defaultStylesheet)
 {
-  StyleMatchTree result;
+  auto result = estd::make_unique<StyleMatchTree>();
 
   for (auto ps : defaultStylesheet.propsets) {
-    mergePropSet(result.rootMatches.get(), DEFAULT_STYLESHEET_LAYER, ps);
+    mergePropSet(result->rootMatches.get(), DEFAULT_STYLESHEET_LAYER, ps);
   }
 
   for (auto ps : stylesheet.propsets) {
-    mergePropSet(result.rootMatches.get(), USER_STYLESHEET_LAYER, ps);
+    mergePropSet(result->rootMatches.get(), USER_STYLESHEET_LAYER, ps);
   }
 
-  return result;
+  return std::move(result);
 }
 
 namespace
@@ -436,7 +505,7 @@ void mergePropertiesIntoPropertyMap(PropertyMap& dest,
     auto foundIt = locationMap.find(propdef.first);
     if (foundIt == locationMap.end()
         || isPropLessSpecificPred(foundIt->second, propdef.second.mSourceLoc)) {
-      dest[QString::fromStdString(propdef.first)] = propdef.second.mValues;
+      dest[QString::fromStdString(propdef.first)] = propdef.second;
       locationMap[propdef.first] = propdef.second.mSourceLoc;
     }
   }
@@ -467,12 +536,11 @@ std::ostream& operator<<(std::ostream& os, const SourceLocation& srcloc)
 {
   std::string sourceLayerName =
     srcloc.mSourceLayer == 0 ? "default stylesheet" : "user stylesheet";
-  os << sourceLayerName << " at line " << srcloc.mLocInfo.line << " column "
-     << srcloc.mLocInfo.column;
+  os << sourceLayerName << " at line " << srcloc.mLine << " column " << srcloc.mColumn;
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PropValues& values)
+std::ostream& operator<<(std::ostream& os, const PropertyValues& values)
 {
   class StreamVisitor : public boost::static_visitor<>
   {
@@ -529,8 +597,10 @@ void dumpMatchResults(const MatchResult& result, std::ostream& stream = std::cou
 
 } // anon namespace
 
-std::string describeMatchedPath(const StyleMatchTree& tree, const UiItemPath& path)
+std::string describeMatchedPath(const IStyleMatchTree* itree, const UiItemPath& path)
 {
+  const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
+
   MatchResult result = findMatchingRules(tree, path);
   sortMatchResults(result);
   std::reverse(result.begin(), result.end());
@@ -542,36 +612,14 @@ std::string describeMatchedPath(const StyleMatchTree& tree, const UiItemPath& pa
   return stream.str();
 }
 
-PropertyMap matchPath(const StyleMatchTree& tree, const UiItemPath& path)
+PropertyMap matchPath(const IStyleMatchTree* itree, const UiItemPath& path)
 {
+  const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
+
   MatchResult result = findMatchingRules(tree, path);
   sortMatchResults(result);
   return mergeMatchResults(result);
 }
-
-#if defined(DEBUG)
-
-void MatchNode::dump(const std::string& path) const
-{
-  if (!properties.empty()) {
-    dumpPropertyDefMap(properties);
-  }
-
-  for (auto const& match : matches) {
-    std::cout << "[" << path << "] " << match.first << std::endl;
-    match.second->dump(path + " " + match.first);
-  }
-
-  std::cout << std::endl;
-}
-
-void StyleMatchTree::dump() const
-{
-  std::cout << "-- StyleMatchTree ----------------------" << std::endl;
-  rootMatches->dump("");
-}
-
-#endif // DEBUG
 
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path)
 {

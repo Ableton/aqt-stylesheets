@@ -54,7 +54,7 @@ std::string selectorName(const StyleSheet& ss,
   return ss.propsets[propsetIndex].selectors[0][selIndex0][selIndex1];
 }
 
-std::string getFirstValue(const PropValues& val, const std::string& def = "")
+std::string getFirstValue(const PropertyValues& val, const std::string& def = "")
 {
   if (!val.empty()) {
     if (const std::string* str = boost::get<std::string>(&val[0])) {
@@ -65,7 +65,7 @@ std::string getFirstValue(const PropValues& val, const std::string& def = "")
   return def;
 }
 
-Expression getExpr(const PropValues& val, size_t idx, const Expression& def = {})
+Expression getExpr(const PropertyValues& val, size_t idx, const Expression& def = {})
 {
   if (!val.empty()) {
     if (const Expression* expr = boost::get<Expression>(&val[idx])) {
@@ -77,7 +77,7 @@ Expression getExpr(const PropValues& val, size_t idx, const Expression& def = {}
 }
 
 
-size_t getNumberOfValues(const PropValues& val)
+size_t getNumberOfValues(const PropertyValues& val)
 {
   return val.size();
 }

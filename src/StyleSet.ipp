@@ -56,11 +56,11 @@ AQT_DEFINE_TYPENAME(QColor);
 template <typename T>
 T StyleSet::lookupProperty(const QString& key) const
 {
-  PropValues values;
+  PropertyDef def;
 
-  if (getImpl(values, key)) {
-    if (values.size() == 1) {
-      auto result = convertProperty<T>(values[0]);
+  if (getImpl(def, key)) {
+    if (def.mValues.size() == 1) {
+      auto result = convertProperty<T>(def.mValues[0]);
       if (result) {
         return result.get();
       }

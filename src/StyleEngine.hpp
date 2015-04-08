@@ -36,6 +36,9 @@ SUPPRESS_WARNINGS
 #include <QtQml/QQmlParserStatus>
 RESTORE_WARNINGS
 
+#include <memory>
+
+
 namespace aqt
 {
 namespace stylesheets
@@ -312,7 +315,7 @@ private:
   SourceUrl mStyleSheetSourceUrl;
   SourceUrl mDefaultStyleSheetSourceUrl;
 
-  StyleMatchTree mStyleTree;
+  std::unique_ptr<IStyleMatchTree> mpStyleTree;
   QFileSystemWatcher mFsWatcher;
   int mChangeCount;
   std::map<QString, int> mFontIdCache;

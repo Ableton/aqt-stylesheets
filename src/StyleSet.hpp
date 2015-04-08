@@ -409,7 +409,7 @@ public Q_SLOTS:
 
 private:
   QObject* grandParent();
-  bool getImpl(PropValues& value, const QString& key) const;
+  bool getImpl(Property& def, const QString& key) const;
 
   template <typename T>
   T lookupProperty(const QString& key) const;

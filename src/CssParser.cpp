@@ -59,15 +59,15 @@ std::string loadFileIntoString(const std::string& path)
 // this must be outside of the anon namespace
 // clang-format off
 BOOST_FUSION_ADAPT_STRUCT(
-  aqt::stylesheets::Property,
+  aqt::stylesheets::PropertySpec,
   (std::string, name)
-  (aqt::stylesheets::PropValues, values)
+  (aqt::stylesheets::PropertyValues, values)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
-  aqt::stylesheets::Propset,
+  aqt::stylesheets::PropertySpecSet,
   (std::vector<aqt::stylesheets::Selector>, selectors)
-  (std::vector<aqt::stylesheets::Property>, properties)
+  (std::vector<aqt::stylesheets::PropertySpec>, properties)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -77,7 +77,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   aqt::stylesheets::StyleSheet,
-  (std::vector<aqt::stylesheets::Propset>, propsets)
+  (std::vector<aqt::stylesheets::PropertySpecSet>, propsets)
   (std::vector<aqt::stylesheets::FontFaceDecl>, fontfaces)
   )
 
@@ -115,11 +115,11 @@ public:
   template <typename ThingWithLocation>
   void operator()(ThingWithLocation& thing, It iter) const
   {
-    thing.locInfo.byteofs = static_cast<int>(std::distance(mFirst, iter));
-    thing.locInfo.line = static_cast<int>(get_line(iter));
+    thing.mSourceLoc.mByteOfs = static_cast<int>(std::distance(mFirst, iter));
+    thing.mSourceLoc.mLine = static_cast<int>(get_line(iter));
 
     // The column offset is always off by one. Why? It is a mystery.
-    thing.locInfo.column = static_cast<int>(get_column(mFirst, iter)) - 1;
+    thing.mSourceLoc.mColumn = static_cast<int>(get_column(mFirst, iter)) - 1;
   }
 };
 
@@ -241,12 +241,12 @@ struct StyleSheetGrammar
   qi::rule<Iterator, std::string()> number;
 
   qi::rule<Iterator, std::string(), ascii::space_type> quoted_string;
-  qi::rule<Iterator, aqt::stylesheets::Property(), ascii::space_type> value_pair;
+  qi::rule<Iterator, aqt::stylesheets::PropertySpec(), ascii::space_type> value_pair;
   qi::rule<Iterator, std::string(), ascii::space_type> atom_value;
   qi::rule<Iterator, aqt::stylesheets::PropertyValue(), ascii::space_type> value;
-  qi::rule<Iterator, aqt::stylesheets::PropValues(), ascii::space_type> values;
+  qi::rule<Iterator, aqt::stylesheets::PropertyValues(), ascii::space_type> values;
   qi::rule<Iterator, std::vector<std::string>(), ascii::space_type> args;
-  qi::rule<Iterator, aqt::stylesheets::Propset(), ascii::space_type> propset;
+  qi::rule<Iterator, aqt::stylesheets::PropertySpecSet(), ascii::space_type> propset;
   qi::rule<Iterator, aqt::stylesheets::FontFaceDecl(), ascii::space_type> fontfacedecl;
   qi::rule<Iterator, aqt::stylesheets::StyleSheet(), ascii::space_type> stylesheet;
   qi::rule<Iterator, aqt::stylesheets::Expression(), ascii::space_type> expression;

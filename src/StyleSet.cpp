@@ -230,11 +230,11 @@ bool StyleSet::isSet(const QString& key) const
   return mProperties.find(key) != mProperties.end();
 }
 
-bool StyleSet::getImpl(PropValues& value, const QString& key) const
+bool StyleSet::getImpl(Property& prop, const QString& key) const
 {
   PropertyMap::const_iterator it = mProperties.find(key);
   if (it != mProperties.end()) {
-    value = it->second;
+    prop = it->second;
     return true;
   }
 
@@ -251,17 +251,17 @@ bool StyleSet::getImpl(PropValues& value, const QString& key) const
 
 QVariant StyleSet::get(const QString& key) const
 {
-  PropValues values;
-  getImpl(values, key);
+  Property prop;
+  getImpl(prop, key);
 
-  if (values.size() == 1) {
-    auto conv = convertProperty<QString>(values[0]);
+  if (prop.mValues.size() == 1) {
+    auto conv = convertProperty<QString>(prop.mValues[0]);
     if (conv) {
       return QVariant::fromValue(*conv);
     }
-  } else if (values.size() > 1) {
+  } else if (prop.mValues.size() > 1) {
     QVariantList result;
-    for (const auto& propValue : values) {
+    for (const auto& propValue : prop.mValues) {
       auto conv = convertProperty<QString>(propValue);
       if (conv) {
         result.push_back(conv.get());
@@ -276,14 +276,14 @@ QVariant StyleSet::get(const QString& key) const
 
 QVariant StyleSet::values(const QString& key) const
 {
-  PropValues values;
-  getImpl(values, key);
+  Property prop;
+  getImpl(prop, key);
 
-  if (values.size() == 1) {
-    return convertValueToVariant(values[0]);
+  if (prop.mValues.size() == 1) {
+    return convertValueToVariant(prop.mValues[0]);
   }
 
-  return convertValueToVariantList(values);
+  return convertValueToVariantList(prop.mValues);
 }
 
 QColor StyleSet::color(const QString& key) const
