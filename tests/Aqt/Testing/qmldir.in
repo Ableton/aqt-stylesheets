@@ -1,3 +1,5 @@
 module Aqt.Testing
 
+Utils 1.0 testUtils.js
+
 plugin AqtTestUtilsPlugin @PATH_TO_PLUGIN@
