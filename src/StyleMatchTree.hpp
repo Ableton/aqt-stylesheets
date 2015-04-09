@@ -207,10 +207,6 @@ std::string pathToString(const UiItemPath& path);
 
 using PropertyMap = std::map<QString, PropValues>;
 
-#if defined(DEBUG)
-void dumpPropertyMap(const PropertyMap& properties);
-#endif
-
 void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& b);
 
 StyleMatchTree createMatchTree(const StyleSheet& stylesheet,

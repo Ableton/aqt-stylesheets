@@ -28,8 +28,6 @@ THE SOFTWARE.
 SUPPRESS_WARNINGS
 #include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <QtQml/QQmlEngine>
-#include <QtQuick/QQuickItem>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/lexical_cast.hpp>

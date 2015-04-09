@@ -551,19 +551,6 @@ PropertyMap matchPath(const StyleMatchTree& tree, const UiItemPath& path)
 
 #if defined(DEBUG)
 
-void dumpPropertyMap(const PropertyMap& properties)
-{
-  std::cout << "PropertyMap: {" << std::endl;
-  if (!properties.empty()) {
-    for (PropertyMap::const_iterator it = properties.begin(), end = properties.end();
-         it != end; ++it) {
-      std::cout << "  " << it->first.toStdString() << " -> "
-                << it->second.toString().toStdString() << std::endl;
-    }
-  }
-  std::cout << "}" << std::endl;
-}
-
 void MatchNode::dump(const std::string& path) const
 {
   if (!properties.empty()) {

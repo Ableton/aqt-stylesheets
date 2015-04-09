@@ -18,6 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  add_definitions(-DDEBUG=1)
+else()
+  add_definitions(-DNDEBUG=1)
+endif()
+
 add_library(StyleSheetParser
   Convert.hpp
   Convert.cpp
