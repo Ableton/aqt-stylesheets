@@ -20,7 +20,7 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
@@ -39,7 +39,7 @@ Item {
         when: windowShown
 
         function test_setStyleSheetLoadsFonts() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Load font face .*Aqt.otf.*/);
             compare(spy.count, 0);
             // load the css from a subfolder.  The font referenced from the
@@ -51,7 +51,7 @@ Item {
         }
 
         function test_missingFontsGivesAWarning() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Load font face .*a-missing-font.ttf.*/);
 
             compare(spy.count, 0);

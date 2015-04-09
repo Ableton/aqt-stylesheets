@@ -23,7 +23,7 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
@@ -70,7 +70,7 @@ Item {
         when: windowShown
 
         function test_basePropertyLookup() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Hierarchy changes.*detected.*/);
             compare(spy.count, 0);
             TestUtils.withComponent(minimalCase, scene, {}, function(comp) {

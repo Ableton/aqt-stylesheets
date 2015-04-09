@@ -20,7 +20,7 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
@@ -104,7 +104,7 @@ Item {
         }
 
         function test_lookupASingleString_fails() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*is not convertible.*QString.*/);
             TestUtils.withComponent(badStringLookupScene, scene, {}, function(comp) {
                 // multiple string fails, props.string() returns an empty string.
@@ -201,7 +201,7 @@ Item {
         when: windowShown
 
         function test_lookupNotExistingProperty() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*not-existing.*/);
             TestUtils.withComponent(missingPropertyScene, scene, {}, function(comp) {
                 compare(comp.notExisting, undefined);

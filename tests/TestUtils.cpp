@@ -37,7 +37,7 @@ namespace tests
 
 void TestUtilsPlugin::registerTypes(const char* uri)
 {
-  qmlRegisterType<TestUtils>(uri, 1, 0, "TestUtils");
+  qmlRegisterType<MsgTracker>(uri, 1, 0, "MsgTracker");
 }
 
 } // namespace tests
