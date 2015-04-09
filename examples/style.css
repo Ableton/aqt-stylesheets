@@ -57,3 +57,7 @@ QQuickRectangle.four {
 .three QQuickText {
   font: "60px serif";
 }
+
+QQuickImage {
+  icon: url("assets/bibimpab.png");
+}
