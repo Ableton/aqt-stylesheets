@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleMatchTree.hpp"
+#include "UrlUtils.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
@@ -323,6 +324,11 @@ StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
 StyleEngine* StyleEngineHost::globalStyleEngine()
 {
   return globalStyleEngineImpl();
+}
+
+QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
+{
+  return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
 }
 
 //----------------------------------------------------------------------------------------
