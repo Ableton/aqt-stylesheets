@@ -49,9 +49,8 @@ Item {
         }
 
         function test_missingFontsGivesAWarning() {
-            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
-                                     /^INFO:.*Load font face .*a-missing-font.ttf.*/);
-
+            msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
+                                     /^WARN:.*Could not find font file.*a-missing-font.ttf.*/);
             compare(spy.count, 0);
 
             styleEngine.styleSheetSource = "missing-font.css"
