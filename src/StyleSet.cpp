@@ -320,7 +320,7 @@ QUrl StyleSet::url(const QString& key) const
   if (mpEngine) {
     auto baseUrl = prop.mSourceLoc.mSourceLayer == 0 ? mpEngine->defaultStyleSheetSource()
                                                      : mpEngine->styleSheetSource();
-    return baseUrl.resolved(url);
+    return mpEngine->resolveResourceUrl(baseUrl, url);
   }
 
   return url;
