@@ -33,6 +33,8 @@ add_library(StyleSheetParser
   Property.hpp
   StyleMatchTree.cpp
   StyleMatchTree.hpp
+  UrlUtils.cpp
+  UrlUtils.hpp
   Warnings.hpp
 )
 target_include_directories(StyleSheetParser PUBLIC
