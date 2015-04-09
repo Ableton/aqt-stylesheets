@@ -21,18 +21,31 @@ THE SOFTWARE.
 */
 
 #include "TestUtils.hpp"
-
 #include "../src/Warnings.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtQml/QQmlComponent>
-#include <QtQuickTest/quicktest.h>
 RESTORE_WARNINGS
 
-int main(int argc, char** argv)
-{
-  qmlRegisterType<aqt::stylesheets::tests::TestUtils>(
-    "Aqt.StyleSheets.Tests", 1, 0, "TestUtils");
 
-  return quick_test_main(argc, argv, "tst_Main", ".");
+namespace aqt
+{
+namespace stylesheets
+{
+namespace tests
+{
+
+void TestUtilsPlugin::registerTypes(const char* uri)
+{
+  qmlRegisterType<TestUtils>(uri, 1, 0, "TestUtils");
 }
+
+} // namespace tests
+} // namespace stylesheets
+} // namespace aqt
+
+#if !defined(NOT_INCLUDE_MOC)
+SUPPRESS_WARNINGS
+#include "moc_TestUtils.cpp"
+RESTORE_WARNINGS
+#endif

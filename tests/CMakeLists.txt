@@ -18,18 +18,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-add_executable(QmlTestRunner
-  TestRunner.cpp
-  TestUtils.hpp
-)
-target_compile_options(QmlTestRunner
-  PUBLIC ${cxx11_options} ${warning_options})
+if(WIN32)
+  if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(QMLTESTRUNNER_APP qmltestrunnerd)
+  else()
+    set(QMLTESTRUNNER_APP qmltestrunner)
+  endif()
+else()
+  set(QMLTESTRUNNER_APP qmltestrunner)
+endif()
 
-target_link_libraries(QmlTestRunner
+
+add_library(AqtTestUtilsPlugin MODULE
+  TestUtils.hpp
+  TestUtils.cpp
+)
+target_compile_options(AqtTestUtilsPlugin
+  PUBLIC ${cxx11_options} ${warning_options})
+target_link_libraries(AqtTestUtilsPlugin
   Qt5::Qml Qt5::Test Qt5::QuickTest)
+
+set(plugin_output "${PROJECT_BINARY_DIR}/output")
+set_target_properties(AqtTestUtilsPlugin
+  PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${plugin_output})
+set_target_properties(AqtTestUtilsPlugin
+  PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG ${plugin_output})
+set_target_properties(AqtTestUtilsPlugin
+  PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${plugin_output})
+
+set(PATH_TO_PLUGIN "${plugin_output}")
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/Aqt/Testing/qmldir.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Aqt/Testing/qmldir"
+  @ONLY)
+unset(PATH_TO_PLUGIN)
 
 
 add_test(NAME QMLIntegrationTests
-         COMMAND QmlTestRunner -import "${PROJECT_SOURCE_DIR}/qml"
+         COMMAND "${QMLTESTRUNNER_APP}" -import "${PROJECT_SOURCE_DIR}/qml"
                                -import "${CMAKE_CURRENT_SOURCE_DIR}"
          WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests")

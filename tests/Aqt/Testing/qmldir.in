@@ -1,0 +1,3 @@
+module Aqt.Testing
+
+plugin AqtTestUtilsPlugin @PATH_TO_PLUGIN@
