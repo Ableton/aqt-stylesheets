@@ -197,12 +197,12 @@ QVariantList StyleEngine::availableStyles()
 
 PropertyMap StyleEngine::matchPath(const UiItemPath& path)
 {
-  return aqt::stylesheets::matchPath(mStyleTree, path);
+  return aqt::stylesheets::matchPath(mpStyleTree.get(), path);
 }
 
 std::string StyleEngine::describeMatchedPath(const UiItemPath& path)
 {
-  return aqt::stylesheets::describeMatchedPath(mStyleTree, path);
+  return aqt::stylesheets::describeMatchedPath(mpStyleTree.get(), path);
 }
 
 void StyleEngine::onFileChanged(const QString&)
@@ -293,7 +293,7 @@ void StyleEngine::loadStyle()
     defaultStyleSheet = loadStyleSheet(mDefaultStyleSheetSourceUrl);
   }
 
-  mStyleTree = std::move(createMatchTree(styleSheet, defaultStyleSheet));
+  mpStyleTree = std::move(createMatchTree(styleSheet, defaultStyleSheet));
 
   mChangeCount++;
   Q_EMIT styleChanged(mChangeCount);

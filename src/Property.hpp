@@ -29,6 +29,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 /*! @cond DOXYGEN_IGNORE */
@@ -46,30 +47,55 @@ public:
 };
 
 using PropertyValue = boost::variant<std::string, Expression>;
-using PropValues = std::vector<PropertyValue>;
+using PropertyValues = std::vector<PropertyValue>;
 
-class LocInfo
+class SourceLocation
 {
 public:
-  LocInfo()
-    : byteofs(0)
-    , line(0)
-    , column(0)
+  SourceLocation()
+    : mSourceLayer(0)
+    , mByteOfs(0)
+    , mLine(0)
+    , mColumn(0)
   {
   }
 
-  int byteofs;
-  int line;
-  int column;
+  SourceLocation(int sourceLayer, int byteOfs, int line, int column)
+    : mSourceLayer(sourceLayer)
+    , mByteOfs(byteOfs)
+    , mLine(line)
+    , mColumn(column)
+  {
+  }
+
+  bool operator<(const SourceLocation& other) const
+  {
+    return std::tie(mSourceLayer, mByteOfs)
+           < std::tie(other.mSourceLayer, other.mByteOfs);
+  }
+
+  int mSourceLayer;
+  int mByteOfs;
+  int mLine;
+  int mColumn;
 };
 
 class Property
 {
 public:
-  std::string name;
-  PropValues values;
-  LocInfo locInfo;
+  Property() = default;
+  Property(const SourceLocation& loc, const PropertyValues& values)
+    : mSourceLoc(loc)
+    , mValues(values)
+  {
+  }
+  Property(const Property& other) = default;
+  Property& operator=(const Property& other) = default;
+
+  SourceLocation mSourceLoc;
+  PropertyValues mValues;
 };
+
 
 } // namespace stylesheets
 } // namespace aqt

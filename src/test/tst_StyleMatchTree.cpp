@@ -43,7 +43,8 @@ namespace
 {
 std::string propertyAsString(PropertyMap pm, const char* pPropertyName)
 {
-  if (const std::string* str = boost::get<std::string>(&pm[QString(pPropertyName)][0])) {
+  if (const std::string* str =
+        boost::get<std::string>(&pm[QString(pPropertyName)].mValues[0])) {
     return *str;
   }
   return std::string();
@@ -51,7 +52,7 @@ std::string propertyAsString(PropertyMap pm, const char* pPropertyName)
 
 QColor propertyAsColor(PropertyMap pm, const char* pPropertyName)
 {
-  auto result = convertProperty<QColor>(pm[QString(pPropertyName)][0]);
+  auto result = convertProperty<QColor>(pm[QString(pPropertyName)].mValues[0]);
   if (result) {
     return *result;
   }
@@ -66,10 +67,10 @@ TEST(StyleMatchTreeTest, matchByTypeName)
     "  background: red;\n"
     "}\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("A")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("red", propertyAsString(pm, "background"));
@@ -83,29 +84,29 @@ TEST(StyleMatchTreeTest, matchByTypeAndObjectName)
     "Foo.boo { background: yellow; }\n"
     "Foo > .boo { background: green; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("Foo")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
   EXPECT_EQ(0, pm.size());
 
   p = {PathElement("", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("red", propertyAsString(pm, "background"));
 
   p = {PathElement("", {"boo", "foo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("blue", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("yellow", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Bar", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 }
@@ -117,22 +118,22 @@ TEST(StyleMatchTreeTest, matchDescendants)
     "Foo > Bar { background: yellow; }\n"
     "Foo Bar   { background: green; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   // "Foo > Bar" and "Foo Bar" have same specificity, therefore the later
   // wins.
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar")};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 
   p = {PathElement("Gaz"), PathElement("Bar")};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(0, pm.size());
 }
 
@@ -143,10 +144,10 @@ TEST(StyleMatchTreeTest, laterMatchesWin)
     "Foo Bar   { background: green; }\n"
     "Foo > Bar { background: yellow; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("yellow", propertyAsString(pm, "background"));
 }
@@ -158,30 +159,30 @@ TEST(StyleMatchTreeTest, matchSeparatedQueries)
     "Foo.a, Bar.b { background: blue; }\n"
     "Foo.c, Foo.a > Bar.b { background: black; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("Foo")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("red", propertyAsString(pm, "background"));
 
   p = {PathElement("Bar")};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("red", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"a"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("blue", propertyAsString(pm, "background"));
 
   p = {PathElement("Bar", {"b"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("blue", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"a"}), PathElement("Bar", {"b"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("black", propertyAsString(pm, "background"));
 }
@@ -190,15 +191,15 @@ TEST(StyleMatchTreeTest, matchChildren)
 {
   const std::string src = "Foo > .boo { background: green; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar", {"boo"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(0, pm.size());
 }
 
@@ -209,12 +210,12 @@ TEST(StyleMatchTreeTest, matchDescendantsAlways)
   auto mt = createMatchTree(parseStdString(src));
   auto p =
     UiItemPath{PathElement("Mam"), PathElement("Foo"), PathElement("Bar", {"boo"})};
-  auto pm = matchPath(mt, p);
+  auto pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 
@@ -222,7 +223,7 @@ TEST(StyleMatchTreeTest, matchDescendantsAlways)
        PathElement("mam"),
        PathElement("Gaz"),
        PathElement("Bar", {"boo"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "background"));
 }
@@ -234,9 +235,9 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectors)
     "      Foo.bar { propB: 2; }\n"
     "         .bar { propC: 3; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"bar"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -250,9 +251,9 @@ TEST(StyleMatchTreeTest, inheritedPropertiesAreLessSpecific)
     "          Foo { color: red; }\n"
     "      Foo.bar { color: green; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"bar"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("green", propertyAsString(pm, "color"));
@@ -268,9 +269,9 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithManyParent
     "  Foo.a   Bar.b   { propE: 5; }\n"
     "  Foo.a.x Bar.b.y { propF: 6; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"a", "x"}), PathElement("Bar", {"b", "y"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(6, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -288,9 +289,9 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithParent)
     "      Foo Bar { propB: 2; }\n"
     "    Foo Bar.b { propC: 3; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo"), PathElement("Bar", {"b"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -305,9 +306,9 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithClassedPar
     "      Foo Bar { propB: 2; }\n"
     "    Foo.b Bar { propC: 3; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"b"}), PathElement("Bar")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -324,9 +325,9 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromDuplicateMatchingSelectors)
     " Foo.bar { propD: 4; }\n"
     " Bar, Foo { propE: 5; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"bar"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(pm.size(), 5);
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -344,9 +345,9 @@ TEST(StyleMatchTreeTest, duplicatedPropertiesInIdenticalSelectorsMatchLastOccurr
     " Foo.bar { propB: begin; }\n"
     " Foo.bar { propB: end; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Foo", {"bar"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(pm.size(), 2);
   EXPECT_EQ("last", propertyAsString(pm, "propA"));
@@ -366,9 +367,9 @@ TEST(StyleMatchTreeTest, defaultStyleSheet)
     "          propC: 3 }\n"
     "Foo Bar { propD: 2 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src), parseStdString(defaultSrc));
+  auto mt = createMatchTree(parseStdString(src), parseStdString(defaultSrc));
   UiItemPath p = {PathElement("Bar")};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -376,7 +377,7 @@ TEST(StyleMatchTreeTest, defaultStyleSheet)
   EXPECT_EQ("3", propertyAsString(pm, "propC"));
 
   p = {PathElement("Foo"), PathElement("Bar")};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(5, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -398,9 +399,9 @@ TEST(StyleMatchTreeTest, multipleClassNames)
     "Foo.abc Bar { propE: 5 }\n"
     "Foo.qoo Bar { propF: 6 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"boo", "def"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(4, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -409,7 +410,7 @@ TEST(StyleMatchTreeTest, multipleClassNames)
   EXPECT_EQ("7", propertyAsString(pm, "propE"));
 
   p = {PathElement("Foo", {"abc"}), PathElement("Bar", {"boo", "def"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(5, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -432,9 +433,9 @@ TEST(StyleMatchTreeTest, multipleClassNamesAndDefaultStyleSheet)
     "                  propC: 3 }\n"
     "Foo.gaz Bar.nam { propD: 2 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src), parseStdString(defaultSrc));
+  auto mt = createMatchTree(parseStdString(src), parseStdString(defaultSrc));
   UiItemPath p = {PathElement("Foo", {"boo", "gaz"}), PathElement("Bar", {"aha", "nam"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(5, pm.size());
   EXPECT_EQ("100", propertyAsString(pm, "propA"));
@@ -450,9 +451,9 @@ TEST(StyleMatchTreeTest, multipleClassNamesUndefinedClassNameDontMatter)
     "Bar     { propA: 1 }\n"
     "Bar.boo { propB: 2 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"boo", "abc", "xyz", "def"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(2, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -466,21 +467,21 @@ TEST(StyleMatchTreeTest, multipleClassNames_theLastOfAmbiguousDefinitionsWins)
     ".typeB { color: blue; }\n"
     ".typeC { color: yellow; }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"typeA", "typeB"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("blue", propertyAsString(pm, "color"));
 
   p = {PathElement("Bar", {"typeC", "typeB"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("yellow", propertyAsString(pm, "color"));
 
   p = {PathElement("Bar", {"typeB", "typeC", "typeA"})};
-  pm = matchPath(mt, p);
+  pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ("yellow", propertyAsString(pm, "color"));
@@ -493,9 +494,9 @@ TEST(StyleMatchTreeTest, multipleClassNamesMatchChildren)
     "Abc.ixw                   { propB: 2 }\n"
     "Bar.boo.def > Abc.mno.ixw { propC: 3 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -510,9 +511,9 @@ TEST(StyleMatchTreeTest, multipleClassNames_even_without_whitespace)
     "Abc.ixw                 { propB: 2 }\n"
     "Bar.boo.def>Abc.mno.ixw { propC: 3 }\n";
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(3, pm.size());
   EXPECT_EQ("1", propertyAsString(pm, "propA"));
@@ -530,10 +531,10 @@ TEST(StyleMatchTreeTest, rgbColors_with_percentage_value)
 
   StyleSheet ss = parseStdString(src);
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   {
     UiItemPath p = {PathElement("Bar", {"foo"})};
-    PropertyMap pm = matchPath(mt, p);
+    PropertyMap pm = matchPath(mt.get(), p);
 
     EXPECT_EQ(1, pm.size());
     EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
@@ -544,7 +545,7 @@ TEST(StyleMatchTreeTest, rgbColors_with_percentage_value)
 
   {
     UiItemPath p = {PathElement("Bar", {"bar"})};
-    PropertyMap pm = matchPath(mt, p);
+    PropertyMap pm = matchPath(mt.get(), p);
 
     EXPECT_EQ(1, pm.size());
     EXPECT_EQ(0x1a, propertyAsColor(pm, "color").red());
@@ -561,9 +562,9 @@ TEST(StyleMatchTreeTest, rgbColors)
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 1);
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
@@ -572,7 +573,6 @@ TEST(StyleMatchTreeTest, rgbColors)
   EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
 }
 
-
 TEST(StyleMatchTreeTest, rgbaColors)
 {
   const std::string src = ".foo { color: rgba(0, 16, 32, 0.5); }\n";
@@ -580,9 +580,9 @@ TEST(StyleMatchTreeTest, rgbaColors)
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 1);
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
@@ -591,7 +591,6 @@ TEST(StyleMatchTreeTest, rgbaColors)
   EXPECT_EQ(0x80, propertyAsColor(pm, "color").alpha());
 }
 
-
 TEST(StyleMatchTreeTest, hslColors)
 {
   const std::string src = ".foo { color: hsl(120, 100%, 50%); }\n";
@@ -599,16 +598,15 @@ TEST(StyleMatchTreeTest, hslColors)
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 1);
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(120, propertyAsColor(pm, "color").hslHue());
   EXPECT_NEAR(1.0f, propertyAsColor(pm, "color").hslSaturationF(), 0.00001f);
   EXPECT_NEAR(0.5f, propertyAsColor(pm, "color").lightnessF(), 0.00001f);
 }
-
 
 TEST(StyleMatchTreeTest, hslaColors)
 {
@@ -617,9 +615,9 @@ TEST(StyleMatchTreeTest, hslaColors)
   StyleSheet ss = parseStdString(src);
   EXPECT_EQ(ss.propsets.size(), 1);
 
-  StyleMatchTree mt = createMatchTree(parseStdString(src));
+  auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
-  PropertyMap pm = matchPath(mt, p);
+  PropertyMap pm = matchPath(mt.get(), p);
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(359, propertyAsColor(pm, "color").hslHue());

@@ -49,18 +49,17 @@ AQT_DEFINE_TYPENAME(bool);
 AQT_DEFINE_TYPENAME(QFont);
 AQT_DEFINE_TYPENAME(QString);
 AQT_DEFINE_TYPENAME(QColor);
+AQT_DEFINE_TYPENAME(QUrl);
 
 #undef AQT_DEFINE_TYPENAME
 } // namespace detail
 
 template <typename T>
-T StyleSet::lookupProperty(const QString& key) const
+T StyleSet::lookupProperty(Property& def, const QString& key) const
 {
-  PropValues values;
-
-  if (getImpl(values, key)) {
-    if (values.size() == 1) {
-      auto result = convertProperty<T>(values[0]);
+  if (getImpl(def, key)) {
+    if (def.mValues.size() == 1) {
+      auto result = convertProperty<T>(def.mValues[0]);
       if (result) {
         return result.get();
       }
@@ -72,6 +71,13 @@ T StyleSet::lookupProperty(const QString& key) const
   }
 
   return T();
+}
+
+template <typename T>
+T StyleSet::lookupProperty(const QString& key) const
+{
+  Property def;
+  return lookupProperty<T>(def, key);
 }
 
 } // namespace stylesheets

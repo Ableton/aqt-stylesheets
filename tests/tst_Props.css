@@ -12,3 +12,13 @@
 Bar {
   text: "B";
 }
+
+
+.url-test {
+    icon: url("http://www.eyestep.org/images/icon.srv?nm=loud");
+    icon2: "ableton:assets/images/dots.png";
+}
+
+.dot {
+    dot-icon: url("assets/images/dot.png");
+}

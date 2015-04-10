@@ -22,7 +22,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 
-import Aqt.StyleSheets 1.1
+import Aqt.StyleSheets 1.2
 
 ApplicationWindow {
     width: 500
@@ -74,6 +74,12 @@ ApplicationWindow {
                 Text {
                     text: "Hello"
                     font: StyleSet.props.font("font")
+                }
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: StyleSet.props.url("icon")
                 }
 
                 MouseArea {

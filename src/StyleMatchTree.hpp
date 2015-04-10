@@ -22,8 +22,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#include "CssParser.hpp"
 #include "Property.hpp"
+#include "CssParser.hpp"
 
 #include "estd/memory.hpp"
 #include "Warnings.hpp"
@@ -44,138 +44,6 @@ namespace aqt
 {
 namespace stylesheets
 {
-
-class SourceLocation
-{
-public:
-  SourceLocation()
-    : mSourceLayer(0)
-    , mLocInfo()
-  {
-  }
-
-  SourceLocation(int sourceLayer, const LocInfo& locInfo)
-    : mSourceLayer(sourceLayer)
-    , mLocInfo(locInfo)
-  {
-  }
-
-  bool operator<(const SourceLocation& other) const
-  {
-    return std::tie(mSourceLayer, mLocInfo.byteofs)
-           < std::tie(other.mSourceLayer, other.mLocInfo.byteofs);
-  }
-
-  int mSourceLayer;
-  LocInfo mLocInfo;
-};
-
-class PropertyDef
-{
-public:
-  PropertyDef(const SourceLocation& loc, const PropValues& values)
-    : mSourceLoc(loc)
-    , mValues(values)
-  {
-  }
-
-  SourceLocation mSourceLoc;
-  PropValues mValues;
-};
-
-using PropertyDefMap = std::unordered_map<std::string, PropertyDef>;
-
-/*! The basic building block for a "match tree"
- *
- * A StyleMatchTree is constructed as a tree of @c MatchNode instances.  It
- * is built over the selectors defined in a style sheet.  Each node is a
- * dictionary of type/class name mapping to further match nodes.
- * Ultimately, a match node carries a set of property definitions (in
- * member propmap).
- *
- * The tree is built upside down: A selector "A B C" leads to a tree
- * starting at the root "C".
- *
- * All selectors from all stylesheets are merged in one matchnode tree,
- * i.e. the two selectors "Gaz > Bar" and "Foo > Gaz > Bar" will result in
- * a match node tree like this (where "{}" denote the empty property
- * definition set):
- *
- * @code
- * Bar -> {}
- *   Gaz -> { properties }
- *     Foo -> { properties }
- * @endcode
- *
- * Note the properties both at node "Gaz" and "Bar".
- *
- * Descendants selectors are constructed using the special axis denotator
- * "::desc::".  A selector "Foo > Gaz Bar" will be constructed like this:
- *
- * @code
- * Bar -> {}
- *   ::desc:: -> {}
- *     Gaz -> {}
- *       Foo -> { properties }
- * @endcode
- */
-class MatchNode
-{
-public:
-  MatchNode()
-  {
-  }
-
-  MatchNode(const PropertyDefMap* pProperties)
-  {
-    if (pProperties) {
-      properties = *pProperties;
-    }
-  }
-
-  MatchNode(const MatchNode&) = delete;
-  MatchNode& operator=(const MatchNode&) = delete;
-
-#if defined(DEBUG)
-  void dump(const std::string& path) const;
-#endif
-
-  PropertyDefMap properties;
-
-  using Matches = std::unordered_map<std::string, std::unique_ptr<MatchNode> >;
-  Matches matches;
-};
-
-class StyleMatchTree
-{
-public:
-  StyleMatchTree()
-    : rootMatches(estd::make_unique<MatchNode>())
-  {
-  }
-
-  // For some reason visual studio 2013 wasn't capable of default-creating the
-  // move ctors here, so we provide them explicitly here.
-  StyleMatchTree(StyleMatchTree&& other)
-    : rootMatches(std::move(other.rootMatches))
-  {
-  }
-
-  StyleMatchTree& operator=(StyleMatchTree&& other)
-  {
-    if (this != &other) {
-      rootMatches = std::move(other.rootMatches);
-    }
-    return *this;
-  }
-
-#if defined(DEBUG)
-  void dump() const;
-#endif
-
-  std::unique_ptr<MatchNode> rootMatches;
-};
-
 class PathElement
 {
 public:
@@ -205,15 +73,20 @@ using UiItemPath = std::vector<PathElement>;
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path);
 std::string pathToString(const UiItemPath& path);
 
-using PropertyMap = std::map<QString, PropValues>;
+
+using PropertyMap = std::map<QString, Property>;
 
 void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& b);
 
-StyleMatchTree createMatchTree(const StyleSheet& stylesheet,
-                               const StyleSheet& defaultStylesheet = StyleSheet());
+class IStyleMatchTree
+{
+};
 
-PropertyMap matchPath(const StyleMatchTree& tree, const UiItemPath& path);
-std::string describeMatchedPath(const StyleMatchTree& tree, const UiItemPath& path);
+std::unique_ptr<IStyleMatchTree> createMatchTree(
+  const StyleSheet& stylesheet, const StyleSheet& defaultStylesheet = StyleSheet());
+
+PropertyMap matchPath(const IStyleMatchTree* tree, const UiItemPath& path);
+std::string describeMatchedPath(const IStyleMatchTree* tree, const UiItemPath& path);
 
 } // namespace stylesheets
 } // namespace aqt

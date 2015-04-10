@@ -26,6 +26,7 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
+#include <QtCore/QUrl>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <gtest/gtest.h>
@@ -315,4 +316,34 @@ TEST(Convert, colors_hsba_expression_fails)
     Expression{"hsba", std::vector<std::string>{"255", "50", "100", "75"}}));
   EXPECT_FALSE(convertProperty<QColor>(
     Expression{"hsba", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
+}
+
+//------------------------------------------------------------------------------
+
+TEST(Convert, url_from_strings)
+{
+  EXPECT_EQ(QUrl("http://abc.org"),
+            *convertProperty<QUrl>(PropertyValue(std::string("http://abc.org"))));
+  EXPECT_EQ(QUrl("assets/icon/foo.png"),
+            *convertProperty<QUrl>(PropertyValue(std::string("assets/icon/foo.png"))));
+}
+
+TEST(Convert, url_from_expressions)
+{
+  EXPECT_EQ(
+    QUrl("http://abc.org"), *convertProperty<QUrl>(Expression{
+                              "url", std::vector<std::string>{"http://abc.org"}}));
+  EXPECT_EQ(QUrl("assets/icon/foo.png"),
+            *convertProperty<QUrl>(
+              Expression{"url", std::vector<std::string>{"assets/icon/foo.png"}}));
+}
+
+TEST(Convert, url_conversion_fails)
+{
+  // url() expects 1 argument exactly
+  EXPECT_FALSE(
+    convertProperty<QUrl>(Expression{"url", std::vector<std::string>{"abc.png", "foo/bar"}}));
+
+  EXPECT_FALSE(
+    convertProperty<QUrl>(Expression{"rgb", std::vector<std::string>{"1", "2", "3"}}));
 }

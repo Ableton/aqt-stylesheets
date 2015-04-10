@@ -27,6 +27,7 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
+#include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
@@ -70,6 +71,11 @@ struct PropertyValueConvertTraits<bool> {
   boost::optional<bool> convert(const PropertyValue& value) const;
 };
 
+template <>
+struct PropertyValueConvertTraits<QUrl> {
+  boost::optional<QUrl> convert(const PropertyValue& value) const;
+};
+
 template <typename T, typename Traits = PropertyValueConvertTraits<T>>
 boost::optional<T> convertProperty(const PropertyValue& value, Traits traits = Traits())
 {
@@ -77,7 +83,7 @@ boost::optional<T> convertProperty(const PropertyValue& value, Traits traits = T
 }
 
 QVariant convertValueToVariant(const PropertyValue& value);
-QVariantList convertValueToVariantList(const PropValues& values);
+QVariantList convertValueToVariantList(const PropertyValues& values);
 
 } // namespace stylesheets
 } // namespace aqt

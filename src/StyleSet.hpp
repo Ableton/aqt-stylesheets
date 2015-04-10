@@ -380,6 +380,29 @@ public:
    */
   Q_REVISION(2) Q_INVOKABLE QString string(const QString& key) const;
 
+  /*! Returns the style property @p key as a URL/URI
+   *
+   * Looks up the style property named @p key and interprets its value as a URL.
+   * If the URL is a relative url or path it is resolved with the corresponding
+   * stylesheet source the property was loaded from as base URL.
+   *
+   * This function understands the `url()` CSS notation.
+   *
+   * If there's no such property @p key, the first value can not be converted to
+   * a URL, or the property has multiple values prints a warning and returns an
+   * invalid URL.
+   *
+   * @par Example:
+   * @code
+   * Image {
+   *   source: StyleSet.props.url("icon")
+   * }
+   * @endcode
+   *
+   * @since 1.2
+   */
+  Q_REVISION(2) Q_INVOKABLE QUrl url(const QString& key) const;
+
   /*! @cond DOXYGEN_IGNORE */
   void loadProperties(QObject* pRefObject);
 
@@ -409,10 +432,12 @@ public Q_SLOTS:
 
 private:
   QObject* grandParent();
-  bool getImpl(PropValues& value, const QString& key) const;
+  bool getImpl(Property& def, const QString& key) const;
 
   template <typename T>
   T lookupProperty(const QString& key) const;
+  template <typename T>
+  T lookupProperty(Property& def, const QString& key) const;
 
 private:
   friend class StyleSetAttached;

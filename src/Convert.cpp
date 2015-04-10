@@ -58,6 +58,7 @@ const std::string kHslaColorExpr = "hsla";
 const std::string kHslColorExpr = "hsl";
 const std::string kHsbaColorExpr = "hsba";
 const std::string kHsbColorExpr = "hsb";
+const std::string kUrlExpr = "url";
 const std::string kTrue = "true";
 const std::string kYes = "yes";
 const std::string kFalse = "false";
@@ -180,7 +181,7 @@ QFont fontDeclarationToFont(const QString& fontDecl)
 
 struct Undefined {
 };
-using ExprValue = boost::variant<Undefined, QColor>;
+using ExprValue = boost::variant<Undefined, QColor, QUrl>;
 
 int rgbColorOrPercentage(const std::string& arg)
 {
@@ -318,6 +319,19 @@ ExprValue makeHsbColor(const std::vector<std::string>& args)
 
 //------------------------------------------------------------------------------
 
+ExprValue makeUrl(const std::vector<std::string>& args)
+{
+  if (args.size() == 1u) {
+    return QUrl(QString::fromStdString(args.front()));
+  } else {
+    styleSheetsLogWarning() << kUrlExpr << "() expression expects 1 argument";
+  }
+
+  return Undefined();
+}
+
+//------------------------------------------------------------------------------
+
 ExprValue evaluateExpression(const Expression& expr)
 {
   using ExprEvaluator = std::function<ExprValue(const std::vector<std::string>&)>;
@@ -330,6 +344,7 @@ ExprValue evaluateExpression(const Expression& expr)
     {kHslColorExpr, &makeHslColor},
     {kHsbaColorExpr, &makeHsbaColor},
     {kHsbColorExpr, &makeHsbColor},
+    {kUrlExpr, &makeUrl},
   };
 
   auto iFind = funcMap.find(expr.name);
@@ -428,6 +443,32 @@ boost::optional<bool> PropertyValueConvertTraits<bool>::convert(
   return boost::none;
 }
 
+boost::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
+  const PropertyValue& value) const
+{
+  struct PropValueToUrlVisitor : public boost::static_visitor<boost::optional<QUrl>> {
+    boost::optional<QUrl> operator()(const std::string& str)
+    {
+      return QUrl(QString::fromStdString(str));
+    }
+
+    boost::optional<QUrl> operator()(const Expression& expr)
+    {
+      auto exprValue = evaluateExpression(expr);
+      if (const QUrl* url = boost::get<QUrl>(&exprValue)) {
+        return *url;
+      } else {
+        styleSheetsLogWarning() << "Not an url expression '" << expr.name << "'";
+      }
+
+      return boost::none;
+    }
+  };
+
+  PropValueToUrlVisitor visitor;
+  return boost::apply_visitor(visitor, value);
+}
+
 //----------------------------------------------------------------------------------------
 
 namespace
@@ -450,6 +491,11 @@ struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
       {
         return QVariant(color);
       }
+
+      QVariant operator()(const QUrl& url)
+      {
+        return QVariant(url);
+      }
     };
 
     auto exprValue = evaluateExpression(expr);
@@ -466,7 +512,7 @@ QVariant convertValueToVariant(const PropertyValue& value)
   return boost::apply_visitor(visitor, value);
 }
 
-QVariantList convertValueToVariantList(const PropValues& values)
+QVariantList convertValueToVariantList(const PropertyValues& values)
 {
   QVariantList result;
   for (const auto& propValue : values) {

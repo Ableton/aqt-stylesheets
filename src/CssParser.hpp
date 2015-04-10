@@ -44,12 +44,20 @@ namespace stylesheets
 using SelectorParts = std::vector<std::string>;
 using Selector = std::vector<SelectorParts>;
 
-class Propset
+class PropertySpec
+{
+public:
+  std::string name;
+  PropertyValues values;
+  SourceLocation mSourceLoc;
+};
+
+class PropertySpecSet
 {
 public:
   std::vector<Selector> selectors;
-  std::vector<Property> properties;
-  LocInfo locInfo;
+  std::vector<PropertySpec> properties;
+  SourceLocation mSourceLoc;
 };
 
 class FontFaceDecl
@@ -61,7 +69,7 @@ public:
 class StyleSheet
 {
 public:
-  std::vector<Propset> propsets;
+  std::vector<PropertySpecSet> propsets;
   std::vector<FontFaceDecl> fontfaces;
 };
 
