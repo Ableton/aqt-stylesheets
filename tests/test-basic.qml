@@ -21,7 +21,7 @@ Item {
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Basic.css"
+        styleSheetSource: "basic.css"
     }
 
     Component {

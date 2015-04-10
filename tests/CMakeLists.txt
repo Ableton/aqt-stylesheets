@@ -53,8 +53,14 @@ configure_file(
   @ONLY)
 unset(PATH_TO_PLUGIN)
 
+file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/test-*.qml")
 
-add_test(NAME QMLIntegrationTests
-         COMMAND "${QMLTESTRUNNER_APP}" -import "${PROJECT_SOURCE_DIR}/qml"
-                               -import "${CMAKE_CURRENT_SOURCE_DIR}"
-         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests")
+set(i 0)
+foreach(filename ${files})
+  add_test(NAME "IntegrationTest_${i}"
+           COMMAND "${QMLTESTRUNNER_APP}" -import "${PROJECT_SOURCE_DIR}/qml"
+                                 -import "${CMAKE_CURRENT_SOURCE_DIR}"
+                                 -input "${filename}"
+           WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests")
+  math(EXPR i "${i} + 1")
+endforeach()

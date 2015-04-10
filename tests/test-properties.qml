@@ -26,7 +26,7 @@ Item {
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Props.css"
+        styleSheetSource: "props.css"
     }
 
     Component {

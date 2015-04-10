@@ -30,7 +30,7 @@ Item {
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Paths.css"
+        styleSheetSource: "paths.css"
     }
 
     SignalSpy {

@@ -44,7 +44,7 @@ Item {
             compare(spy.count, 0);
             // load the css from a subfolder.  The font referenced from the
             // css file must be resolved relative to the css file
-            styleEngine.styleSheetSource = "css/tst_AqtFont.css"
+            styleEngine.styleSheetSource = "css/aqt-font.css"
             compare(spy.count, 0);
 
             spy.clear();
@@ -56,7 +56,7 @@ Item {
 
             compare(spy.count, 0);
 
-            styleEngine.styleSheetSource = "tst_MissingFont.css"
+            styleEngine.styleSheetSource = "missing-font.css"
 
             compare(spy.count, 1);
             compare(spy.signalArguments[0][0], "fontWasNotLoaded");
