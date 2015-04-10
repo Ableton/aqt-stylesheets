@@ -24,8 +24,12 @@ add_library(gtest_internal STATIC
 )
 target_include_directories(gtest_internal PUBLIC
   ${GTEST_SOURCE} ${GTEST_SOURCE}/include)
-target_compile_options(gtest_internal PUBLIC
-  ${cxx11_options} -Wno-global-constructors)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
+    OR CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+  target_compile_options(gtest_internal PUBLIC
+    ${cxx11_options} -Wno-global-constructors)
+endif()
 
 add_executable(StyleSheetParserTest
   tst_Convert.cpp
