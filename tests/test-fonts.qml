@@ -5,9 +5,7 @@ import QtTest 1.0
 import QtQuick.Layouts 1.1
 
 import Aqt.StyleSheets 1.1
-import Aqt.StyleSheets.Tests 1.0 as AqtTests
-
-import "testUtils.js" as TestUtils
+import Aqt.Testing 1.0 as AqtTests
 
 Item {
     id: scene
@@ -20,7 +18,7 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
@@ -39,24 +37,24 @@ Item {
         when: windowShown
 
         function test_setStyleSheetLoadsFonts() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Load font face .*Aqt.otf.*/);
             compare(spy.count, 0);
             // load the css from a subfolder.  The font referenced from the
             // css file must be resolved relative to the css file
-            styleEngine.styleSheetSource = "css/tst_AqtFont.css"
+            styleEngine.styleSheetSource = "css/aqt-font.css"
             compare(spy.count, 0);
 
             spy.clear();
         }
 
         function test_missingFontsGivesAWarning() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Load font face .*a-missing-font.ttf.*/);
 
             compare(spy.count, 0);
 
-            styleEngine.styleSheetSource = "tst_MissingFont.css"
+            styleEngine.styleSheetSource = "missing-font.css"
 
             compare(spy.count, 1);
             compare(spy.signalArguments[0][0], "fontWasNotLoaded");

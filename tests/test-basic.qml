@@ -5,8 +5,7 @@ import QtTest 1.0
 import QtQuick.Layouts 1.1
 
 import Aqt.StyleSheets 1.1
-
-import "testUtils.js" as TestUtils
+import Aqt.Testing 1.0 as AqtTests
 
 Item {
     id: scene
@@ -21,7 +20,7 @@ Item {
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Basic.css"
+        styleSheetSource: "basic.css"
     }
 
     Component {
@@ -51,7 +50,7 @@ Item {
         when: windowShown
 
         function test_basePropertyLookup() {
-            TestUtils.withComponent(minimalScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(minimalScene, scene, {}, function(comp) {
                 compare(comp.foo, "B");
             });
         }

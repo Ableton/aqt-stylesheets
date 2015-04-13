@@ -29,6 +29,7 @@ SUPPRESS_WARNINGS
 #include <QtCore/QRegularExpression>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
+#include <QtQml/QQmlExtensionPlugin>
 #include <QtTest/QTest>
 RESTORE_WARNINGS
 
@@ -41,13 +42,13 @@ namespace stylesheets
 namespace tests
 {
 
-class TestUtils : public QObject
+class MsgTracker : public QObject
 {
   Q_OBJECT
   Q_ENUMS(LogLevel)
 
 public:
-  TestUtils(QObject* pParent = nullptr)
+  MsgTracker(QObject* pParent = nullptr)
     : QObject(pParent)
   {
   }
@@ -65,6 +66,15 @@ public:
       QTest::ignoreMessage(QtMsgType(level), pattern.toString().toUtf8().data());
     }
   }
+};
+
+class TestUtilsPlugin : public QQmlExtensionPlugin
+{
+  Q_OBJECT
+  Q_PLUGIN_METADATA(IID "Aqt.Testing")
+
+public:
+  void registerTypes(const char* uri);
 };
 
 } // namespace tests

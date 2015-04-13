@@ -5,9 +5,7 @@ import QtTest 1.0
 import QtQuick.Layouts 1.1
 
 import Aqt.StyleSheets 1.2
-import Aqt.StyleSheets.Tests 1.0 as AqtTests
-
-import "testUtils.js" as TestUtils
+import Aqt.Testing 1.0 as AqtTests
 
 Item {
     id: scene
@@ -20,13 +18,13 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Props.css"
+        styleSheetSource: "props.css"
     }
 
     Component {
@@ -50,7 +48,7 @@ Item {
         when: windowShown
 
         function test_lookupAndConvertASingleColor() {
-            TestUtils.withComponent(singleColorScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(singleColorScene, scene, {}, function(comp) {
                 verify(typeof(comp.foo) != "string");
                 verify(Qt.colorEqual(comp.foo, "#123456"));
             });
@@ -97,16 +95,16 @@ Item {
         when: windowShown
 
         function test_lookupASingleString() {
-            TestUtils.withComponent(stringLookupScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(stringLookupScene, scene, {}, function(comp) {
                 // single string
                 compare(comp.gaz, "hello world!");
             });
         }
 
         function test_lookupASingleString_fails() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*is not convertible.*QString.*/);
-            TestUtils.withComponent(badStringLookupScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(badStringLookupScene, scene, {}, function(comp) {
                 // multiple string fails, props.string() returns an empty string.
                 compare(comp.foo, "");
             });
@@ -142,7 +140,7 @@ Item {
 
         // The get() function on StyleSet returns the lookedup value as is (i.e. a list of strings)
         function test_lookupStringLists() {
-            TestUtils.withComponent(multipleColorsScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(multipleColorsScene, scene, {}, function(comp) {
                 compare(comp.foo.length, 3);
                 verify(Qt.colorEqual(comp.foo[0], "#ff0000"));
                 verify(Qt.colorEqual(comp.foo[1], "#00aa00"));
@@ -163,7 +161,7 @@ Item {
         }
 
         function test_lookupListsOfColors() {
-            TestUtils.withComponent(multipleColorsScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(multipleColorsScene, scene, {}, function(comp) {
                 compare(comp.foo1.length, 3);
 
                 verify(Qt.colorEqual(comp.exprs[0], "#ff0000"));
@@ -201,9 +199,9 @@ Item {
         when: windowShown
 
         function test_lookupNotExistingProperty() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Warning,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*not-existing.*/);
-            TestUtils.withComponent(missingPropertyScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(missingPropertyScene, scene, {}, function(comp) {
                 compare(comp.notExisting, undefined);
             });
         }
@@ -242,7 +240,7 @@ Item {
         when: windowShown
 
         function test_lookupAnUrl() {
-            TestUtils.withComponent(urlLookupScene, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(urlLookupScene, scene, {}, function(comp) {
                 compare(comp.absUrl, "http://www.eyestep.org/images/icon.srv?nm=loud");
                 compare(comp.absUrl2, "ableton:assets/images/dots.png");
                 compare(comp.iconSize.width, 2);

@@ -6,9 +6,7 @@ import QtQuick.Layouts 1.1
 import QtTest 1.0
 
 import Aqt.StyleSheets 1.1
-import Aqt.StyleSheets.Tests 1.0 as AqtTests
-
-import "testUtils.js" as TestUtils
+import Aqt.Testing 1.0 as AqtTests
 
 import Foo 1.0 as Foo
 
@@ -23,14 +21,14 @@ Item {
     implicitHeight: 116
 
 
-    AqtTests.TestUtils {
+    AqtTests.MsgTracker {
         id: msgTracker
     }
 
 
     StyleEngine {
         id: styleEngine
-        styleSheetSource: "tst_Paths.css"
+        styleSheetSource: "paths.css"
     }
 
     SignalSpy {
@@ -70,10 +68,10 @@ Item {
         when: windowShown
 
         function test_basePropertyLookup() {
-            msgTracker.expectMessage(AqtTests.TestUtils.Debug,
+            msgTracker.expectMessage(AqtTests.MsgTracker.Debug,
                                      /^INFO:.*Hierarchy changes.*detected.*/);
             compare(spy.count, 0);
-            TestUtils.withComponent(minimalCase, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(minimalCase, scene, {}, function(comp) {
                 compare(comp.textValue, "B");
             });
             compare(spy.count, 1);
@@ -110,7 +108,7 @@ Item {
 
         function test_basePropertyLookup() {
             compare(spy.count, 0);
-            TestUtils.withComponent(singletonCase, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(singletonCase, scene, {}, function(comp) {
                 compare(comp.textValue, "B");
             });
             compare(spy.count, 0);
@@ -140,7 +138,7 @@ Item {
 
         function test_basePropertyLookup() {
             compare(spy.count, 0);
-            TestUtils.withComponent(windowsCase, scene, {}, function(comp) {
+            AqtTests.Utils.withComponent(windowsCase, scene, {}, function(comp) {
                 compare(comp.textValue, "B");
             });
             compare(spy.count, 0);
