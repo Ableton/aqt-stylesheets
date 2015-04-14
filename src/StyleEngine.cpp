@@ -25,10 +25,14 @@ THE SOFTWARE.
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleMatchTree.hpp"
+#include "UrlUtils.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QPointer>
+#include <QtCore/QFile>
+#include <QtCore/QDir>
+#include <QtCore/QUrl>
 #include <QtGui/QFontDatabase>
 #include <QtQml/QQmlEngine>
 #include <QtQml/QQmlFile>
@@ -213,30 +217,35 @@ void StyleEngine::onFileChanged(const QString&)
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
 {
   for (auto ffd : styleSheet.fontfaces) {
-    QUrl fontFaceUrl =
-      mStyleSheetSourceUrl.url().resolved(QUrl(QString::fromStdString(ffd.url)));
-
+    QUrl fontFaceUrl = resolveResourceUrl(
+      mStyleSheetSourceUrl.url(), QUrl(QString::fromStdString(ffd.url)));
     QString fontFaceFile = QQmlFile::urlToLocalFileOrQrc(fontFaceUrl);
 
-    styleSheetsLogInfo() << "Load font face " << ffd.url << " from "
-                         << fontFaceFile.toStdString();
+    if (!fontFaceFile.isEmpty()) {
+      styleSheetsLogInfo() << "Load font face " << ffd.url << " from "
+                           << fontFaceFile.toStdString();
+      std::map<QString, int>::iterator fontCacheIt = mFontIdCache.find(fontFaceFile);
+      if (fontCacheIt == mFontIdCache.end()) {
+        int fontId = QFontDatabase::addApplicationFont(fontFaceFile);
+        styleSheetsLogDebug() << " [" << fontId << "]";
 
-    std::map<QString, int>::iterator fontCacheIt = mFontIdCache.find(fontFaceFile);
-    if (fontCacheIt == mFontIdCache.end()) {
-      int fontId = QFontDatabase::addApplicationFont(fontFaceFile);
-      styleSheetsLogDebug() << " [" << fontId << "]";
-
-      if (fontId != -1) {
-        QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
-        styleSheetsLogDebug() << " -> family: " << fontFamily.toStdString();
-        mFontIdCache[fontFaceFile] = fontId;
+        if (fontId != -1) {
+          QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
+          styleSheetsLogDebug() << " -> family: " << fontFamily.toStdString();
+          mFontIdCache[fontFaceFile] = fontId;
+        } else {
+          Q_EMIT exception(
+            QString::fromLatin1("fontWasNotLoaded"),
+            QString::fromLatin1("Could not find font in font registry after loading."));
+        }
       } else {
-        Q_EMIT exception(
-          QString::fromLatin1("fontWasNotLoaded"),
-          QString::fromLatin1("Could not find font in font registry after loading."));
+        styleSheetsLogDebug() << " [" << fontCacheIt->second << "]";
       }
     } else {
-      styleSheetsLogDebug() << " [" << fontCacheIt->second << "]";
+      styleSheetsLogWarning() << "Could not find font file "
+                              << fontFaceUrl.toString().toStdString();
+      Q_EMIT exception(QString::fromLatin1("fontWasNotLoaded"),
+                       QString::fromLatin1("Font url could not be resolved."));
     }
   }
 }
@@ -323,6 +332,11 @@ StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
 StyleEngine* StyleEngineHost::globalStyleEngine()
 {
   return globalStyleEngineImpl();
+}
+
+QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
+{
+  return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
 }
 
 //----------------------------------------------------------------------------------------

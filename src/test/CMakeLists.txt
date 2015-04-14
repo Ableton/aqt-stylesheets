@@ -35,6 +35,7 @@ add_executable(StyleSheetParserTest
   tst_Convert.cpp
   tst_CssParser.cpp
   tst_StyleMatchTree.cpp
+  tst_UrlUtils.cpp
 )
 
 target_link_libraries(StyleSheetParserTest

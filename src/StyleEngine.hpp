@@ -38,7 +38,6 @@ RESTORE_WARNINGS
 
 #include <memory>
 
-
 namespace aqt
 {
 namespace stylesheets
@@ -241,6 +240,13 @@ public:
 
   /*! @private */
   std::string describeMatchedPath(const UiItemPath& path);
+
+  /*! Resolve @p url against @p baseUrl or search for it in a search path.
+   *
+   * See aqt::stylesheets::searchForResourceSearchPath() for details.  This
+   * method takes QQmlEngine::importPathList() as searchPath for url resolution.
+   */
+  QUrl resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const;
 
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
