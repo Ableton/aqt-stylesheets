@@ -520,10 +520,14 @@ void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)
 {
   QObject* pParent = parent();
   if (pNewParent != nullptr && pParent != nullptr) {
+    auto prevPath = mPath;
     mPath = traversePathUp(pParent);
     setupStyle();
 
-    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    if (mPath != prevPath) {
+      updateDescendantPaths(pParent);
+      Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    }
   }
 }
 
