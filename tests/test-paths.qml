@@ -144,4 +144,49 @@ Item {
             compare(spy.count, 0);
         }
     }
+
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: setNameCase
+
+        ApplicationWindow {
+            id: root
+
+            property alias itemHeight: bar.height
+
+            property var foo: Item {
+                id: foo
+                StyleSet.name: "setnmFoo"
+
+                property var bar: Item {
+                    id: bar
+                    StyleSet.name: "setnmBar"
+                    height: bar.StyleSet.props.number("height")
+                }
+            }
+        }
+    }
+
+    TestCase {
+        // StyleSet.name is a normal property an is initialized by QML engine
+        // some arbitrary order.  Descendants are probably already setup and got
+        // their properties.  In case of setName all descendants must be
+        // re-evaluated.  This example requires that both styleset names
+        // "setnmFoo" and "setnmBar" are matched.
+        name: "StyleSet.name will reevaluate of descendant paths"
+        when: windowShown
+
+        function test_basePropertyLookup() {
+            compare(spy.count, 0);
+            AqtTests.Utils.withComponent(setNameCase, scene, {}, function(comp) {
+                compare(comp.itemHeight, 100);
+
+                comp.foo.StyleSet.name = "setnmFoo2"
+                compare(comp.itemHeight, 200);
+            });
+            compare(spy.count, 0);
+        }
+    }
 }
