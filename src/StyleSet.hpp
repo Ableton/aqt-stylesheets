@@ -323,7 +323,7 @@ public:
    * `[]` being optional; the order is important though):
    *
    * <pre>
-   * [style] [capMode] [weight] [size] familyName
+   * [style] [capMode] [weight] [hinting] [size] familyName
    * </pre>
    *
    * Where the following values are defined:
@@ -331,6 +331,7 @@ public:
    * - __style__: `italic`, `upright`, `oblique`
    * - __weight__: `light`, `regular`, `demibold`, `bold`
    * - __capMode__: `mixedcase`, `alluppercase`, `alllowercase`, `smallcaps`, `capitalize`
+   * - __hinting__: `defaulthinting`, `nohinting`, `verticalhinting`, `fullhinting`
    *
    * The __size__ can either be given in pixels or points (e.g. @c 12px or @c
    * 11pt).  The __familyName__ is any valid family name currently installed on
@@ -340,7 +341,7 @@ public:
    * @par Example for font specs:
    * @code
    *   italic 14.5pt Calibre
-   *   oblique smallcaps bold 24px Arial
+   *   oblique smallcaps bold nohinting 24px Arial
    * @endcode
    *
    * If there's no such property @p key, its value can not be converted to a
