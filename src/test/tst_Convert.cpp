@@ -75,7 +75,7 @@ TEST(Convert, boolean)
 TEST(Convert, fonts)
 {
   auto f = convertProperty<QFont>(
-    PropertyValue(std::string("italic mixedcase light 12pt Times New Roman")));
+    PropertyValue(std::string("italic mixedcase light nohinting 12pt Times New Roman")));
 
   EXPECT_TRUE(f);
   EXPECT_EQ(QLatin1String("Times New Roman"), f->family());
@@ -84,6 +84,7 @@ TEST(Convert, fonts)
   EXPECT_FALSE(f->bold());
   EXPECT_EQ(QFont::Light, f->weight());
   EXPECT_EQ(QFont::MixedCase, f->capitalization());
+  EXPECT_EQ(QFont::PreferNoHinting, f->hintingPreference());
 }
 
 TEST(Convert, fonts_with_partial_specification)
@@ -98,6 +99,7 @@ TEST(Convert, fonts_with_partial_specification)
   EXPECT_EQ(QFont::StyleNormal, f->style());
   EXPECT_EQ(QFont::Normal, f->weight());
   EXPECT_EQ(QFont::MixedCase, f->capitalization());
+  EXPECT_EQ(QFont::PreferDefaultHinting, f->hintingPreference());
 }
 
 TEST(Convert, fonts_with_float_size)

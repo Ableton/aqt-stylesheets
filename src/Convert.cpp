@@ -117,6 +117,23 @@ QFont::Weight takeFontWeightFromTokenList(QStringList& tokens)
            : QFont::Normal;
 }
 
+/**
+If the first token in the list is a font hinting token,
+convert it to a font hinting and remove it from the list.
+*/
+QFont::HintingPreference takeFontHintingFromTokenList(QStringList& tokens)
+{
+  static const std::map<QString, QFont::HintingPreference> dictionary = {
+    {"defaulthinting", QFont::PreferDefaultHinting},
+    {"nohinting", QFont::PreferNoHinting},
+    {"verticalhinting", QFont::PreferVerticalHinting},
+    {"fullhinting", QFont::PreferFullHinting}};
+
+  return (!tokens.isEmpty() && dictionary.count(tokens.at(0)))
+           ? dictionary.at(tokens.takeFirst())
+           : QFont::PreferDefaultHinting;
+}
+
 struct FontSize {
   int pixelSize = 0;
   qreal pointSize = 0.0f;
@@ -162,6 +179,7 @@ QFont fontDeclarationToFont(const QString& fontDecl)
   const QFont::Style fontStyle = takeFontStyleFromTokenList(tokens);
   const QFont::Capitalization capMode = takeCapitalizationStyleFromTokenList(tokens);
   const QFont::Weight weight = takeFontWeightFromTokenList(tokens);
+  const QFont::HintingPreference hinting = takeFontHintingFromTokenList(tokens);
   const FontSize size = takeFontSizeFromTokenList(tokens);
   const QString familyName = tokens.join(' ');
 
@@ -174,6 +192,7 @@ QFont fontDeclarationToFont(const QString& fontDecl)
   }
   font.setCapitalization(capMode);
   font.setStyle(fontStyle);
+  font.setHintingPreference(hinting);
   return font;
 }
 
