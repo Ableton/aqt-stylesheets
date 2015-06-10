@@ -32,6 +32,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
 endif()
 
 add_executable(StyleSheetParserTest
+  LogUtils.hpp
+  LogUtils.cpp
   tst_Convert.cpp
   tst_CssParser.cpp
   tst_StyleMatchTree.cpp
