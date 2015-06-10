@@ -343,8 +343,8 @@ TEST(Convert, url_from_expressions)
 TEST(Convert, url_conversion_fails)
 {
   // url() expects 1 argument exactly
-  EXPECT_FALSE(
-    convertProperty<QUrl>(Expression{"url", std::vector<std::string>{"abc.png", "foo/bar"}}));
+  EXPECT_FALSE(convertProperty<QUrl>(
+    Expression{"url", std::vector<std::string>{"abc.png", "foo/bar"}}));
 
   EXPECT_FALSE(
     convertProperty<QUrl>(Expression{"rgb", std::vector<std::string>{"1", "2", "3"}}));
