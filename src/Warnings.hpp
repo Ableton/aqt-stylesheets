@@ -26,6 +26,13 @@ THE SOFTWARE.
 
 #if defined(__clang__)
 
+  #if __has_warning("-Wunused-local-typedef")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF \
+    _Pragma("clang diagnostic ignored \"-Wunused-local-typedef\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF
+  #endif
+
   #define SUPPRESS_WARNINGS \
     _Pragma("clang diagnostic push") \
     _Pragma("clang diagnostic ignored \"-Wconversion\"") \
@@ -54,7 +61,8 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wunreachable-code\"") \
     _Pragma("clang diagnostic ignored \"-Wunused-parameter\"") \
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \
-    _Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
+    _Pragma("clang diagnostic ignored \"-Wweak-vtables\"") \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF
 
   #define RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
