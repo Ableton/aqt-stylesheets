@@ -102,7 +102,7 @@ class LocationAnnotator
 
 public:
   // to make phoenix::function happy
-  template <typename, typename>
+  template <typename>
   struct result {
     using type = void;
   };
