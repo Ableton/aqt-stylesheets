@@ -24,6 +24,8 @@ else()
   add_definitions(-DNDEBUG=1)
 endif()
 
+add_definitions(-DBOOST_SPIRIT_USE_PHOENIX_V3=1)
+
 add_library(StyleSheetParser
   Convert.hpp
   Convert.cpp
