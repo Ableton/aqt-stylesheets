@@ -1,0 +1,22 @@
+
+include(/Users/ske/dev/prefix/doc/global/fileextensions.qdocconf)
+
+include(/Users/ske/dev/prefix/doc/global/html-header-offline.qdocconf)
+
+# Should this contain licence information as the Qt documentation does?
+HTML.footer = \
+    "        </div>\n" \
+    "       </div>\n" \
+    "   </div>\n" \
+    "   </div>\n" \
+    "</div>\n" \
+    "<div class=\"footer\">\n" \
+    "</div>\n"
+
+buildversion = "Aqt.Stylesheets 1.0 Reference Documentation"
+
+project = Aqt Stylesheets
+description = Aqt Stylesheets
+outputdir   = html
+outputformats = HTML
+sourcedirs  = .

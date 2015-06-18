@@ -1,0 +1,51 @@
+
+/*!
+    \qmlmodule Aqt.Stylesheets 1.0
+
+*/
+
+/*!
+    \page index.html
+    \indexpage
+    \startpage Aqt Stylesheets
+
+    \title Aqt Stylesheets
+
+    This is Aqt Stylesheets.
+
+    \list
+        \li \l {StyleEngine}
+        \li \l {StyleSet}
+    \endlist
+*/
+
+/*!
+    \qmltype StyleEngine
+    \inqmlmodule Aqt.Stylesheets
+    \brief This is the StyleEngine
+    \since Aqt Stylesheets 1.0
+
+    This is the StyleEngine. Use it in your QML code.
+*/
+
+/*!
+    \qmltype StyleSet
+    \inqmlmodule Aqt.Stylesheets
+    \brief This is the StyleSet
+    \since Aqt Stylesheets 1.0
+
+    This is the StyleSet. Use it in your QML code.
+
+*/
+
+/*!
+    \qmlattachedproperty string StyleSet::name
+
+    This is the styleset name.
+*/
+
+/*!
+    \qmlproperty url StyleEngine::styleSheetSource
+
+    This is the source for the style sheet.
+*/
