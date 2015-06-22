@@ -1,0 +1,447 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>StyleSet &mdash; AqtStylesheets 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="AqtStylesheets 1.1 documentation" href="index.html" />
+    <link rel="prev" title="StyleEngine" href="StyleEngine.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="StyleEngine.html" title="StyleEngine"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">AqtStylesheets 1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="StyleEngine.html"
+                        title="previous chapter">StyleEngine</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/StyleSet.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="styleset">
+<h1>StyleSet<a class="headerlink" href="#styleset" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="_CPPv2N3aqt11stylesheets8StyleSetE">
+<span id="aqt::stylesheets::StyleSet"></span><span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"></span><em class="property">class </em><code class="descclassname">aqt::stylesheets::</code><code class="descname">StyleSet</code><a class="headerlink" href="#_CPPv2N3aqt11stylesheets8StyleSetE" title="Permalink to this definition">¶</a></dt>
+<dd><p>An attached type used for accessing CSS like style settings. </p>
+<p><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> is the type to access the style properties and information for a QML item. When a <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> is instantiated and attached to a QML item it</p>
+<p><ul class="simple">
+<li>determines the path of the attached-to-item up to its very root (the root of the QQuickItem object hierarchy).</li>
+<li>connects itself to the singleton styleEngine or its styleChanged signal resp.</li>
+<li>determines its style properties by matching the attached-to item&#8217;s element path against the selector rules loaded from the style sheet.</li>
+</ul>
+</p>
+<p>A style set can be queried for properties using the props property&#8217;s various functions, like <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1abd6d3ffd0191f746fac03ff6ae0def16"><span>color()</span></a>, <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a5a848a535988bfce3711a92e7eda9940"><span>font()</span></a>, etc.</p>
+<p>
+The element path is constructed from the typenames and attached &#8220;style
+  class&#8221; names of the QML and QQuickItem object tree. In the following example the path for each item is added as a comment:<dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">StyleSet.name:</span> <span class="s2">&quot;gridline&quot;</span>
+  <span class="k">color:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">color</span><span class="p">(</span><span class="s2">&quot;background-color&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Note</strong></dt>
+<dd>Style properties should always be accessed through the props property only. Only by doing this it is possible to get notifications about style changes. (The reason is that QML does not create bindings for attached types directly).</dd>
+<dt><strong>The Element Path (UiItemPath)</strong></dt>
+<dd></dd>
+</dl>
+</p>
+<p><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>               <span class="c1">// QQuickRectangle</span>
+  <span class="nx">Text</span> <span class="p">{</span>                  <span class="c1">// QQuickRectangle QQuickText</span>
+  <span class="p">}</span>
+  <span class="nx">Item</span> <span class="p">{</span>                  <span class="c1">// QQuickRectangle QQuickItem</span>
+    <span class="nx">ListView</span> <span class="p">{</span>            <span class="c1">// QQuickRectangle QQuickItem QQuickListView</span>
+      <span class="k">delegate:</span> <span class="nx">MyView</span> <span class="p">{</span>  <span class="c1">// QQuickRectangle QQuickItem QQuickListView MyView</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+<p>MyView is a user type defined in the module&#8217;s qmldir file as MyView. Built-in types like Rectangle or Text begin with <code class="docutils literal"><span class="pre">QQuick</span></code>. For debugging purposes the path of an item can be printed to stdout with the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1ad548b2118d02711fe1d3c314e4399dd7"><span>StyleSet::path</span></a> property.</p>
+<p><dl class="docutils">
+<dt><strong>Note</strong></dt>
+<dd>Matching, determining element path and properties may be delayed in case the global style engine has not been initialized yet (e.g. because it is created lazily from a loader). In this case using style property lookup functions like <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a80b80cba4c5551a7134d598efe0119d3"><span>get(const QString&amp;) const </span></a>or color(const QString&amp;, const QColor&amp;) const may not return expected values until the <a class="reference internal" href="StyleEngine.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a> is actually initialized.</dd>
+<dt><strong>Import in QML:</strong></dt>
+<dd><code class="docutils literal"><span class="pre">import</span> <span class="pre">Aqt.StyleSheets</span> <span class="pre">1.0</span></code> </dd>
+<dt><strong>Since</strong></dt>
+<dd>1.0 </dd>
+</dl>
+</p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a8e311a1876adbef673e0aade6248198c"></span><code class="descname">Q_INVOKABLE bool aqt::stylesheets::StyleSet::isValid()</code> const</dt>
+<dd><p>Indicates whether this style set has any properties set. </p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a05f86c62e6b0fc68cce9a699a4d7688c"></span><code class="descname">Q_INVOKABLE bool aqt::stylesheets::StyleSet::isSet(const QString &amp; key)</code> const</dt>
+<dd><p>Indicates whether a style property <code class="docutils literal"><span class="pre">key</span></code> is defined. </p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a80b80cba4c5551a7134d598efe0119d3"></span><code class="descname">Q_INVOKABLE QVariant aqt::stylesheets::StyleSet::get(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property named <code class="docutils literal"><span class="pre">key</span></code>. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and returns it as is. The output is either a <code class="docutils literal"><span class="pre">string</span></code> (<code class="docutils literal"><span class="pre">QString</span></code>) or a list of strings (<code class="docutils literal"><span class="pre">QVariantList</span></code>).</p>
+<p><dl class="docutils">
+<dt><strong>Note</strong></dt>
+<dd>If there&#8217;s no such property returns an invalid <code class="docutils literal"><span class="pre">QVariant</span></code> which maps to <code class="docutils literal"><span class="pre">undefined</span></code> into Javascript/QML.</dd>
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">color:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;clip-colors&quot;</span><span class="p">)[</span><span class="nx">clipColorId</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a5b941b4992e34f6ce0d5999b2a8fd97b"></span><code class="descname">Q_INVOKABLE QVariant aqt::stylesheets::StyleSet::values(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property named <code class="docutils literal"><span class="pre">key</span></code>. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code>, evaluates expressions and returns the result. The output is either a <code class="docutils literal"><span class="pre">string</span></code> (<code class="docutils literal"><span class="pre">QString</span></code>), the resulting type of a CSS value expression (e.g. <code class="docutils literal"><span class="pre">rgb()</span></code>, <code class="docutils literal"><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a122eec81954b267012e452537c5af3fc"><span><span class="pre">url()</span></span></a></code>, etc.) or a list of these types (<code class="docutils literal"><span class="pre">QVariantList</span></code>).</p>
+<p><dl class="docutils">
+<dt><strong>Note</strong></dt>
+<dd>If there&#8217;s no such property this method will return an default constructed <code class="docutils literal"><span class="pre">QVariant</span></code> which maps to <code class="docutils literal"><span class="pre">undefined</span></code> in Javascript/QML.</dd>
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">color:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">values</span><span class="p">(</span><span class="s2">&quot;clip-colors&quot;</span><span class="p">)[</span><span class="nx">clipColorId</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Since</strong></dt>
+<dd>1.2 </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1abd6d3ffd0191f746fac03ff6ae0def16"></span><code class="descname">Q_INVOKABLE QColor aqt::stylesheets::StyleSet::color(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a <code class="docutils literal"><span class="pre">QColor</span></code>. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a color specification. All common color specs QML supports can be used here:</p>
+<p><ul class="simple">
+<li>by name, e.g. <code class="docutils literal"><span class="pre">red</span></code>, <code class="docutils literal"><span class="pre">black</span></code>, <code class="docutils literal"><span class="pre">yellow</span></code> </li>
+<li>by RGB string, e.g. <code class="docutils literal"><span class="pre">#3f4f5f</span></code> </li>
+<li>by ARGB string, e.g. <code class="docutils literal"><span class="pre">#a0ff0022</span></code>.</li>
+<li>then special <code class="docutils literal"><span class="pre">transparent</span></code> color</li>
+<li>CSS color expressions like <code class="docutils literal"><span class="pre">rgb(120,</span> <span class="pre">64,</span> <span class="pre">230)</span></code> or <code class="docutils literal"><span class="pre">hsla(340,</span> <span class="pre">20%,</span> <span class="pre">34%,</span> <span class="pre">0.5)</span></code>.</li>
+</ul>
+</p>
+<p>Style property names can be any string, but typically end with <code class="docutils literal"><span class="pre">&quot;-color&quot;</span></code>.</p>
+<p>If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, the property has multiple values, or the property&#8217;s value can not be converted to a <code class="docutils literal"><span class="pre">QColor</span></code> prints a warning and returns a default <code class="docutils literal"><span class="pre">QColor</span></code>.</p>
+<p>
+The following CSS color expressions are supported:<dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">color:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">color</span><span class="p">(</span><span class="s2">&quot;background-color&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</p>
+<p><ul class="simple">
+<li><code class="docutils literal"><span class="pre">rgb(r,</span> <span class="pre">g,</span> <span class="pre">b)</span></code> where <code class="docutils literal"><span class="pre">r</span></code> (red), <code class="docutils literal"><span class="pre">g</span></code> (green), and <code class="docutils literal"><span class="pre">b</span></code> (blue) can be integers from <code class="docutils literal"><span class="pre">0</span></code> to <code class="docutils literal"><span class="pre">255</span></code> or percentage values (e.g. <code class="docutils literal"><span class="pre">97%</span></code>).</li>
+<li><code class="docutils literal"><span class="pre">rgba(r,</span> <span class="pre">g,</span> <span class="pre">b,</span> <span class="pre">a)</span></code>, like <code class="docutils literal"><span class="pre">rgb()</span></code>, <code class="docutils literal"><span class="pre">a</span></code> (alpha) is a float from <code class="docutils literal"><span class="pre">0.0</span></code> to <code class="docutils literal"><span class="pre">1.0</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">hsl(h,</span> <span class="pre">s,</span> <span class="pre">l)</span></code> where <code class="docutils literal"><span class="pre">h</span></code> (hue) is an integer value from <code class="docutils literal"><span class="pre">0</span></code> to <code class="docutils literal"><span class="pre">359</span></code> and <code class="docutils literal"><span class="pre">s</span></code> (saturation) and <code class="docutils literal"><span class="pre">l</span></code> (lightness) are percentage values (e.g. <code class="docutils literal"><span class="pre">45%</span></code>).</li>
+<li><code class="docutils literal"><span class="pre">hsla(h,</span> <span class="pre">s,</span> <span class="pre">l,</span> <span class="pre">a)</span></code> like <code class="docutils literal"><span class="pre">hsl()</span></code>, <code class="docutils literal"><span class="pre">a</span></code> (alpha) is a float from <code class="docutils literal"><span class="pre">0.0</span></code> to <code class="docutils literal"><span class="pre">1.0</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">hsb(h,</span> <span class="pre">s,</span> <span class="pre">b)</span></code>, like <code class="docutils literal"><span class="pre">hsl()</span></code>, but instead of lightness takes <code class="docutils literal"><span class="pre">b</span></code> (brightness) as percentage.</li>
+<li><code class="docutils literal"><span class="pre">hsba(h,</span> <span class="pre">s,</span> <span class="pre">b,</span> <span class="pre">a)</span></code>, like <code class="docutils literal"><span class="pre">hsla()</span></code>, but instead of lightness takes <code class="docutils literal"><span class="pre">b</span></code> (brightness) as percentage. </li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a38843d6aa6f8fcd350e429ee5dfb6344"></span><code class="descname">Q_INVOKABLE bool aqt::stylesheets::StyleSet::boolean(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a boolean value. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a boolean. If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, its value can not be converted to a boolean, or the property has multiple values prints a warning and returns false.</p>
+<p>Only the following conversions are supported:</p>
+<p><ul class="simple">
+<li>&#8220;true&#8221;, &#8220;yes&#8221; -&gt; true</li>
+<li>&#8220;false&#8221;, &#8220;no&#8221; -&gt; false</li>
+</ul>
+</p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">visible:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="kr">boolean</span><span class="p">(</span><span class="s2">&quot;visible&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a4b8abe1c0c7eaaccaea32baaad033690"></span><code class="descname">Q_INVOKABLE double aqt::stylesheets::StyleSet::number(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a number. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a number (a double). If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, its value can not be converted to a double, or the property has multiple values prints a warning and return 0.0.</p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Rectangle</span> <span class="p">{</span>
+  <span class="k">width:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">number</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a5a848a535988bfce3711a92e7eda9940"></span><code class="descname">Q_INVOKABLE QFont aqt::stylesheets::StyleSet::font(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a <code class="docutils literal"><span class="pre">QFont</span></code>. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a CSS like font specification. The font string has the format (with the terms in <code class="docutils literal"><span class="pre">[]</span></code> being optional; the order is important though):</p>
+<p></p>
+<p>Where the following values are defined:</p>
+<p><ul class="simple">
+<li><strong>style</strong>: <code class="docutils literal"><span class="pre">italic</span></code>, <code class="docutils literal"><span class="pre">upright</span></code>, <code class="docutils literal"><span class="pre">oblique</span></code></li>
+<li><strong>weight</strong>: <code class="docutils literal"><span class="pre">light</span></code>, <code class="docutils literal"><span class="pre">regular</span></code>, <code class="docutils literal"><span class="pre">demibold</span></code>, <code class="docutils literal"><span class="pre">bold</span></code></li>
+<li><strong>capMode</strong>: <code class="docutils literal"><span class="pre">mixedcase</span></code>, <code class="docutils literal"><span class="pre">alluppercase</span></code>, <code class="docutils literal"><span class="pre">alllowercase</span></code>, <code class="docutils literal"><span class="pre">smallcaps</span></code>, <code class="docutils literal"><span class="pre">capitalize</span></code></li>
+<li><strong>hinting</strong>: <code class="docutils literal"><span class="pre">defaulthinting</span></code>, <code class="docutils literal"><span class="pre">nohinting</span></code>, <code class="docutils literal"><span class="pre">verticalhinting</span></code>, <code class="docutils literal"><span class="pre">fullhinting</span></code></li>
+</ul>
+</p>
+<p>The <strong>size</strong> can either be given in pixels or points (e.g. <code class="docutils literal"><span class="pre">12px</span></code> or <code class="docutils literal"><span class="pre">11pt</span></code>). The <strong>familyName</strong> is any valid family name currently installed on the system, loaded via a <code class="docutils literal"><span class="pre">FontLoader</span></code> or via the <code class="docutils literal"><span class="pre">font-face</span></code> declaration from a style sheet.</p>
+<p>
+If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, its value can not be converted to a font spec, or the property has multiple values prints a warning and returns a default constructed QFont.<dl class="docutils">
+<dt><strong>Example for font specs:</strong></dt>
+<dd><pre class="literal-block">
+italic 14.5pt Calibre
+oblique smallcaps bold nohinting 24px Arial
+</pre>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Text</span> <span class="p">{</span>
+  <span class="k">font:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">font</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a2d8eaf4ecff2b4238a21df1734e807a1"></span><code class="descname">Q_INVOKABLE QString aqt::stylesheets::StyleSet::string(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a string. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a string. If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, first value can not be converted to a string (esp. a CSS expression like <code class="docutils literal"><span class="pre">rgb()</span></code> can not be converted), or the property has multiple values prints a warning and returns an empty string.</p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Text</span> <span class="p">{</span>
+  <span class="k">text:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">string</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Note</strong></dt>
+<dd>The main difference to the generic <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a80b80cba4c5551a7134d598efe0119d3"><span>get()</span></a> function is that it will always return a single value only, where <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a80b80cba4c5551a7134d598efe0119d3"><span>get()</span></a> might return a list of strings. This accessor should be used therefore when a single string is expected.</dd>
+<dt><strong>Since</strong></dt>
+<dd>1.2 </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a122eec81954b267012e452537c5af3fc"></span><code class="descname">Q_INVOKABLE QUrl aqt::stylesheets::StyleSet::url(const QString &amp; key)</code> const</dt>
+<dd><p>Returns the style property <code class="docutils literal"><span class="pre">key</span></code> as a URL/URI. </p>
+<p>Looks up the style property named <code class="docutils literal"><span class="pre">key</span></code> and interprets its value as a URL. If the URL is a relative url or path it is resolved with the corresponding stylesheet source the property was loaded from as base URL.</p>
+<p>This function understands the <code class="docutils literal"><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a122eec81954b267012e452537c5af3fc"><span><span class="pre">url()</span></span></a></code> CSS notation.</p>
+<p>If there&#8217;s no such property <code class="docutils literal"><span class="pre">key</span></code>, the first value can not be converted to a URL, or the property has multiple values prints a warning and returns an invalid URL.</p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Image</span> <span class="p">{</span>
+  <span class="k">source:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s2">&quot;icon&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Since</strong></dt>
+<dd>1.2 </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Signal</p>
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a717518f42e8ea5e7e3de3550d3be5fb3"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleSet::propsChanged</code></dt>
+<dd><p>Fires when properties change. </p>
+<p>When ever the <a class="reference internal" href="StyleEngine.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a> reloads its style sheet and property values are changed or new properties appear this signal will be fired. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1ab1d26e12a6467d837b9efb2c4fb745dd"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleSet::pathChanged</code></dt>
+<dd><p>Fires when the path of the item changes. </p>
+<p>Whenever the location of the object his <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> is attached to changes the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> will fire this signal. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Property</p>
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1ad548b2118d02711fe1d3c314e4399dd7"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleSet::path</code></dt>
+<dd><p>Contains the path for the element this <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> is attached to. </p>
+<p>The path will look similar to this:</p>
+<p><code class="docutils literal"><span class="pre">QQuickRectangle.root/QQuickRowLayout/QQuickItem.box/QQuickText</span></code></p>
+<p>and reads from root to leaf, i.e. the left most token is the element at the root of the QML object hierarchy. The path is mostly useful for debugging purposes. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a8bf741bd02d399aaaca06ba1779b10fd"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleSet::props</code></dt>
+<dd><p>Contains the style properties for the element this <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> is attached to. </p>
+<p><dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Text</span> <span class="p">{</span>
+    <span class="k">color:</span> <span class="nx">StyleSet</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">color</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Note</strong></dt>
+<dd>Due to the nature of attached properties in QML only if you access the style properties by going through the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a8bf741bd02d399aaaca06ba1779b10fd"><span>props()</span></a> method you get a property binding, which will notify in case of style sheet changes. If you access the property settings with <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1abd6d3ffd0191f746fac03ff6ae0def16"><span>color()</span></a> or <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a5a848a535988bfce3711a92e7eda9940"><span>font()</span></a> directly, the QML code won&#8217;t listen to style changes. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a37dca3093e71850798781f2780c63024"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleSet::name</code></dt>
+<dd><p>Contains the style class name. </p>
+<p>The style class name is part of the element path used for matching selector rules. This name forms the &#8220;dot&#8221; part of an elements selector name.</p>
+<p>
+It is possible to define multiple class names for the same item by separating them with whitespace.<dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Item</span> <span class="p">{</span>
+  <span class="k">StyleSet.name:</span> <span class="s2">&quot;root&quot;</span>
+  <span class="k">Component.onCompleted:</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">StyleSet</span><span class="p">.</span><span class="nx">path</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>=&gt; QQuickItem.root</p>
+</dd>
+</dl>
+</p>
+<p>
+The properties for all matching selectors are merged. <dl class="docutils">
+<dt><strong>Example:</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">Item</span> <span class="p">{</span>
+  <span class="k">StyleSet.name:</span> <span class="s2">&quot;example colors&quot;</span>
+  <span class="k">Component.onCompleted:</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">StyleSet</span><span class="p">.</span><span class="nx">path</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>=&gt; QQuickItem.{example,colors}</p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="StyleEngine.html" title="StyleEngine"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">AqtStylesheets 1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Ableton.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

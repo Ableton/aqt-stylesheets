@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>StyleEngine &mdash; AqtStylesheets 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="AqtStylesheets 1.1 documentation" href="index.html" />
+    <link rel="next" title="StyleSet" href="StyleSet.html" />
+    <link rel="prev" title="Welcome to AqtStylesheets’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="StyleSet.html" title="StyleSet"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to AqtStylesheets’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">AqtStylesheets 1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to AqtStylesheets&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="StyleSet.html"
+                        title="next chapter">StyleSet</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/StyleEngine.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="styleengine">
+<h1>StyleEngine<a class="headerlink" href="#styleengine" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="_CPPv2N3aqt11stylesheets11StyleEngineE">
+<span id="aqt::stylesheets::StyleEngine"></span><span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"></span><em class="property">class </em><code class="descclassname">aqt::stylesheets::</code><code class="descname">StyleEngine</code><a class="headerlink" href="#_CPPv2N3aqt11stylesheets11StyleEngineE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface to the singleton <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a>. </p>
+<p>Create and setup the style engine for the application. There must be a single instance of this class for a complete application only. Trying to create more than one instance will print a warning leaving the first instance untouched.</p>
+<p>The style engine supports up to two stylesheets specified by the styleSheetSource and defaultStyleSheetSource properties. Rules from the former take precedence of the those from the later.</p>
+<p><dl class="docutils">
+<dt><strong>Example</strong></dt>
+<dd><div class="highlight-qml"><div class="highlight"><pre><span class="nx">ApplicationWindow</span> <span class="p">{</span>
+  <span class="nx">StyleEngine</span> <span class="p">{</span>
+    <span class="k">styleSheetSource:</span> <span class="s2">&quot;../Assets/bright.css&quot;</span>
+    <span class="k">defaultStyleSheetSource:</span> <span class="s2">&quot;Resources/default.css&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Import in QML:</strong></dt>
+<dd> </dd>
+<dt><strong>Since</strong></dt>
+<dd>1.0 </dd>
+</dl>
+</p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Signal</p>
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a095864a3ab5f241194ee2a2f0c310e91"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::styleChanged</code></dt>
+<dd><p>Fires when the style sheet is replaced or changed on the disk. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a6ba10dab8b3f2879a23a581f96fe7ec6"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::styleNameChanged</code></dt>
+<dd><p>Fires when a new style sheet file name is set to the styleName property. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a959302f3b70919a42b186de86b49fb8c"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::defaultStyleNameChanged</code></dt>
+<dd><p>Fires when a new default style sheet file name is set to the styleName property. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a4b134d400082dee9fefa05c9ba9b7970"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::fileExtensionsChanged</code></dt>
+<dd><p>Fires when a new set of file extensions are set to the fileExtensions property. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1afac6174081acbf60afa9283a2638fcbc"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::availableStylesChanged</code></dt>
+<dd><p>Fires when the list of style sheets in the stylePath folder changes. </p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1aeecfc44b9477338048dec3910eda609a"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::styleSheetSourceChanged</code></dt>
+<dd><p>Emitted when the style sheet source URL changes. </p>
+<p><dl class="docutils">
+<dt><strong>Since</strong></dt>
+<dd>1.1 </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a270c846548631e8d973cf137d3feb781"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::defaultStyleSheetSourceChanged</code></dt>
+<dd><p>Emitted when the default style sheet source URL changes. </p>
+<p><dl class="docutils">
+<dt><strong>Since</strong></dt>
+<dd>1.1 </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a7077fa0fb37095ae291220e104ee77c5"></span><em class="property">signal </em><code class="descname">aqt::stylesheets::StyleEngine::exception</code></dt>
+<dd><p>Emitted when any part of the style sheet subsystem has to report some exceptional situation. </p>
+<p><dl class="docutils">
+<dt><strong>Since</strong></dt>
+<dd>1.1 </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">type</span></code> - <p>Indicates a type of exception, like &#8220;font-not-found&#8221;, etc. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">message</span></code> - <p>Some descriptive message</p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Property</p>
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a2fed2cb4658ebbf8456fd8abdf8f940a"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::stylePath</code></dt>
+<dd><p>Contains the URL of folder containing style sheets. </p>
+<p>The URL is resolved relative to the location of the QML file in which the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a> is instantiated. It must resolve to a local file path. The <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a> is actively watching this folder. Appearing or disappearing style sheet file will fire <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1afac6174081acbf60afa9283a2638fcbc"><span>availableStylesChanged()</span></a> signals.</p>
+<p></p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a196bc5fbdd0780666fbc0e3e58202a07"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::styleName</code></dt>
+<dd><p>Contains the file name of the current style sheet. </p>
+<p>The style sheet file is actively watched and, if changing, reloaded. New or changing properties will fire <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a095864a3ab5f241194ee2a2f0c310e91"><span>styleChanged(int)</span></a> signals. There&#8217;s no need though to actively monitor this signal since properties requested via the <a class="reference internal" href="StyleSet.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> attached type will automatically connect to the style engine.</p>
+<p>The style sheet file name can be set during app runtime. This will load the new style sheet and update all <a class="reference internal" href="StyleSet.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a8bf741bd02d399aaaca06ba1779b10fd"><span>StyleSet.props</span></a> in the app accordingly.</p>
+<p><dl class="docutils">
+<dt><strong>See</strong></dt>
+<dd><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a196bc5fbdd0780666fbc0e3e58202a07"><span>styleName</span></a> property</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a82bbef5e222f4b260d1529789950c423"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::defaultStyleName</code></dt>
+<dd><p>Contains the file name of the default style sheet. </p>
+<p><dl class="docutils">
+<dt><strong>See</strong></dt>
+<dd><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a196bc5fbdd0780666fbc0e3e58202a07"><span>styleName</span></a> property</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a375522dc350ce9a22bb98fa83981a17a"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::fileExtensions</code></dt>
+<dd><p>Defines the list of support file extensions. </p>
+<p>Only files with these extensions will be found as style sheets. Default is *.css only.</p>
+<p></p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a71b78b00a66e4e236be83608f2a15b16"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::availableStyles</code></dt>
+<dd><p>Contains the list of all style sheet files found in the stylePath folder. </p>
+<p>Contains all files in the folder given by the stylePath property. Only files ending in the <code class="docutils literal"><span class="pre">*</span></code>.css extension are listed.</p>
+<p>Whenever the list of style sheet files in the watch folder (given by the stylePath property) is changed the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1afac6174081acbf60afa9283a2638fcbc"><span>availableStylesChanged()</span></a> signal will be fired.</p>
+<p>The most like usage of this property is to build a style sheet chooser (Implementing a style sheet menu).</p>
+<p></p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1aae910fc45716d0e9c7fe627c7b501de5"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::styleSheetSource</code></dt>
+<dd><p>Contains the source url of the current style sheet. </p>
+<p>The style sheet file is actively watched and, if changing, reloaded. New or changing properties will fire <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1a095864a3ab5f241194ee2a2f0c310e91"><span>styleChanged(int)</span></a> signals. There&#8217;s no need though to actively monitor this signal since properties requested via the <a class="reference internal" href="StyleSet.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set"><span>StyleSet</span></a> attached type will automatically connect to the style engine.</p>
+<p>The style sheet url can be set during app runtime. This will load the new style sheet and update all <a class="reference internal" href="StyleSet.html#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_set_1a8bf741bd02d399aaaca06ba1779b10fd"><span>StyleSet.props</span></a> in the app accordingly.</p>
+<p>The URL is resolved relative to the location of the QML file in which the <a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine"><span>StyleEngine</span></a> is instantiated.</p>
+<p><dl class="docutils">
+<dt><strong>Since</strong></dt>
+<dd>1.1 </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="member">
+<dt>
+<span class="target" id="AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1ae4217ff5dde1d511a430877426efc9b2"></span><em class="property">property </em><code class="descname">aqt::stylesheets::StyleEngine::defaultStyleSheetSource</code></dt>
+<dd><p>Contains the source url of the default style sheet. </p>
+<p><dl class="docutils">
+<dt><strong>See</strong></dt>
+<dd><a class="reference internal" href="#AqtStylesheetsclassaqt_1_1stylesheets_1_1_style_engine_1aae910fc45716d0e9c7fe627c7b501de5"><span>styleSheetSource</span></a> property</dd>
+<dt><strong>Since</strong></dt>
+<dd>1.1 </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="StyleSet.html" title="StyleSet"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to AqtStylesheets’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">AqtStylesheets 1.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Ableton.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
