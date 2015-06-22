@@ -73,14 +73,16 @@ Q_SIGNALS:
  * former take precedence of the those from the later.
  *
  * @par Example
- * @code
- * ApplicationWindow {
- *   StyleEngine {
- *     styleSheetSource: "../Assets/bright.css"
- *     defaultStyleSheetSource: "Resources/default.css"
+ * @rst
+ * .. code-block:: qml
+ *
+ *   ApplicationWindow {
+ *     StyleEngine {
+ *       styleSheetSource: "../Assets/bright.css"
+ *       defaultStyleSheetSource: "Resources/default.css"
+ *     }
  *   }
- * }
- * @endcode
+ * @endrst
  *
  * @par Import in QML:
  * <pre>
@@ -235,6 +237,8 @@ public:
    * The element path @p path is matched against the rules loaded from the
    * current style sheet.  The resulting set of properties is returned.  If
    * the path is not matching any rule the result is an empty property map.
+   *
+   * @private
    */
   PropertyMap matchPath(const UiItemPath& path);
 
@@ -245,6 +249,8 @@ public:
    *
    * See aqt::stylesheets::searchForResourceSearchPath() for details.  This
    * method takes QQmlEngine::importPathList() as searchPath for url resolution.
+   *
+   * @private
    */
   QUrl resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const;
 

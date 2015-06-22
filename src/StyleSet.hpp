@@ -63,12 +63,14 @@ class StyleSetAttached;
  * various functions, like color(), font(), etc.
  *
  * @par Example:
- * @code
- * Rectangle {
- *   StyleSet.name: "gridline"
- *   color: StyleSet.props.color("background-color")
- * }
- * @endcode
+ * @rst
+ * .. code-block:: qml
+ *
+ *   Rectangle {
+ *     StyleSet.name: "gridline"
+ *     color: StyleSet.props.color("background-color")
+ *   }
+ * @endrst
  *
  * @note Style properties should always be accessed through the props
  * property only.  Only by doing this it is possible to get notifications
@@ -81,18 +83,20 @@ class StyleSetAttached;
  * class" names of the QML and QQuickItem object tree.  In the following
  * example the path for each item is added as a comment:
  *
- * @code
- * Rectangle {               // QQuickRectangle
- *   Text {                  // QQuickRectangle QQuickText
- *   }
- *   Item {                  // QQuickRectangle QQuickItem
- *     ListView {            // QQuickRectangle QQuickItem QQuickListView
- *       delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
+ * @rst
+ * .. code-block:: qml
+ *
+ *   Rectangle {               // QQuickRectangle
+ *     Text {                  // QQuickRectangle QQuickText
+ *     }
+ *     Item {                  // QQuickRectangle QQuickItem
+ *       ListView {            // QQuickRectangle QQuickItem QQuickListView
+ *         delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
+ *         }
  *       }
  *     }
  *   }
- * }
- * @endcode
+ * @endrst
  *
  * MyView is a user type defined in the module's qmldir file as MyView.
  * Built-in types like Rectangle or Text begin with @c QQuick.  For
@@ -130,11 +134,13 @@ class StyleSet : public QObject
    * attached to
    *
    * @par Example:
-   * @code
-   * Text {
-   *     color: StyleSet.props.color("color")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Text {
+   *       color: StyleSet.props.color("color")
+   *   }
+   * @endrst
    *
    * @note Due to the nature of attached properties in QML only if you
    * access the style properties by going through the props() method you
@@ -155,27 +161,31 @@ class StyleSet : public QObject
    * rules.  This name forms the "dot" part of an elements selector name.
    *
    * @par Example:
-   * @code
-   * Item {
-   *   StyleSet.name: "root"
-   *   Component.onCompleted: console.log(StyleSet.path);
-   * }
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Item {
+   *     StyleSet.name: "root"
+   *     Component.onCompleted: console.log(StyleSet.path);
+   *   }
    *
    * => QQuickItem.root
-   * @endcode
+   * @endrst
    *
    * It is possible to define multiple class names for the same item by
    * separating them with whitespace.
    *
    * @par Example:
-   * @code
-   * Item {
-   *   StyleSet.name: "example colors"
-   *   Component.onCompleted: console.log(StyleSet.path);
-   * }
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Item {
+   *     StyleSet.name: "example colors"
+   *     Component.onCompleted: console.log(StyleSet.path);
+   *   }
    *
    * => QQuickItem.{example,colors}
-   * @endcode
+   * @endrst
    *
    * The properties for all matching selectors are merged.
    */
@@ -207,11 +217,13 @@ public:
    * maps to @c undefined into Javascript/QML.
    *
    * @par Example:
-   * @code
-   * Rectangle {
-   *   color: StyleSet.props.get("clip-colors")[clipColorId]
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Rectangle {
+   *     color: StyleSet.props.get("clip-colors")[clipColorId]
+   *   }
+   * @endrst
    */
   Q_INVOKABLE QVariant get(const QString& key) const;
 
@@ -226,11 +238,13 @@ public:
    *       constructed @c QVariant which maps to `undefined` in Javascript/QML.
    *
    * @par Example:
-   * @code
-   * Rectangle {
-   *   color: StyleSet.props.values("clip-colors")[clipColorId]
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Rectangle {
+   *     color: StyleSet.props.values("clip-colors")[clipColorId]
+   *   }
+   * @endrst
    *
    * @since 1.2
    */
@@ -256,11 +270,13 @@ public:
    * and returns a default `QColor`.
    *
    * @par Example:
-   * @code
-   * Rectangle {
-   *   color: StyleSet.props.color("background-color")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Rectangle {
+   *     color: StyleSet.props.color("background-color")
+   *   }
+   * @endrst
    *
    * The following CSS color expressions are supported:
    *
@@ -292,11 +308,13 @@ public:
    * - "false", "no" -> false
    *
    * @par Example:
-   * @code
-   * Rectangle {
-   *   visible: StyleSet.props.boolean("visible")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Rectangle {
+   *     visible: StyleSet.props.boolean("visible")
+   *   }
+   * @endrst
    */
   Q_INVOKABLE bool boolean(const QString& key) const;
 
@@ -308,11 +326,13 @@ public:
    * warning and return 0.0.
    *
    * @par Example:
-   * @code
-   * Rectangle {
-   *   width: StyleSet.props.number("width")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Rectangle {
+   *     width: StyleSet.props.number("width")
+   *   }
+   * @endrst
    */
   Q_INVOKABLE double number(const QString& key) const;
 
@@ -349,11 +369,13 @@ public:
    * a default constructed QFont.
    *
    * @par Example:
-   * @code
-   * Text {
-   *   font: StyleSet.props.font("font")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Text {
+   *     font: StyleSet.props.font("font")
+   *   }
+   * @endrst
    */
   Q_INVOKABLE QFont font(const QString& key) const;
 
@@ -366,11 +388,13 @@ public:
    * returns an empty string.
    *
    * @par Example:
-   * @code
-   * Text {
-   *   text: StyleSet.props.string("title")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Text {
+   *     text: StyleSet.props.string("title")
+   *   }
+   * @endrst
    *
    * @note The main difference to the generic get() function is that it will
    *       always return a single value only, where get() might return a list of
@@ -394,11 +418,13 @@ public:
    * invalid URL.
    *
    * @par Example:
-   * @code
-   * Image {
-   *   source: StyleSet.props.url("icon")
-   * }
-   * @endcode
+   * @rst
+   * .. code-block:: qml
+   *
+   *   Image {
+   *     source: StyleSet.props.url("icon")
+   *   }
+   * @endrst
    *
    * @since 1.2
    */
