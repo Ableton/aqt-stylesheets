@@ -69,6 +69,7 @@ void setGlobalStyleEngine(StyleEngine* pEngine)
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
   , mChangeCount(0)
+  , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
   connect(&mFsWatcher, SIGNAL(fileChanged(const QString&)), this,
@@ -332,6 +333,11 @@ StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
 StyleEngine* StyleEngineHost::globalStyleEngine()
 {
   return globalStyleEngineImpl();
+}
+
+StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
+{
+  return mFontIdCache;
 }
 
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const

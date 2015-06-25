@@ -51,12 +51,19 @@ class StyleEngineHost : public QObject
 {
   Q_OBJECT
 public:
+  using FontIdCache = std::map<QString, int>;
+
   static StyleEngineHost* globalStyleEngineHost();
 
   static StyleEngine* globalStyleEngine();
 
+  FontIdCache& fontIdCache();
+
 Q_SIGNALS:
   void styleEngineLoaded(aqt::stylesheets::StyleEngine* pEngine);
+
+private:
+  std::map<QString, int> mFontIdCache;
 };
 
 /*! @endcond */
@@ -324,7 +331,7 @@ private:
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
   QFileSystemWatcher mFsWatcher;
   int mChangeCount;
-  std::map<QString, int> mFontIdCache;
+  StyleEngineHost::FontIdCache& mFontIdCache;
 
   StylesDirWatcher mStylesDir;
 };
