@@ -76,6 +76,7 @@ THE SOFTWARE.
   * C4251: 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
   * C4365: 'action' : conversion from 'type_1' to 'type_2', signed/unsigned mismatch
   * C4388: signed/unsigned mismatch
+  * C4459: declaration of 'identifier' hides global declaration
   * C4555: expression has no effect; expected expression with side-effect
   * C4619: #pragma warning : there is no warning number 'number'
   * C4628: digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
@@ -92,6 +93,7 @@ THE SOFTWARE.
     __pragma(warning(disable: 4251)) \
     __pragma(warning(disable: 4365)) \
     __pragma(warning(disable: 4388)) \
+    __pragma(warning(disable: 4459)) \
     __pragma(warning(disable: 4555)) \
     __pragma(warning(disable: 4619)) \
     __pragma(warning(disable: 4628)) \
