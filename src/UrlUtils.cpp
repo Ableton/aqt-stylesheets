@@ -56,7 +56,7 @@ QUrl searchForResourceSearchPath(const QUrl& baseUrl,
       }
     } else if (!path.contains("/../")) {
       auto pathRelPart = path.split(QRegularExpression("^/+"))[1];
-      for (const auto str : searchPath) {
+      for (const auto& str : searchPath) {
         auto dir = QDir(str);
         auto absPath = QDir::cleanPath(dir.absoluteFilePath(pathRelPart));
 

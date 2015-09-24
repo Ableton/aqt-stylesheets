@@ -303,7 +303,7 @@ void StyleEngine::loadStyle()
     defaultStyleSheet = loadStyleSheet(mDefaultStyleSheetSourceUrl);
   }
 
-  mpStyleTree = std::move(createMatchTree(styleSheet, defaultStyleSheet));
+  mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
   mChangeCount++;
   Q_EMIT styleChanged(mChangeCount);
