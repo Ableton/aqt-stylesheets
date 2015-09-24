@@ -196,6 +196,10 @@ public:
       return LogTracker::kError;
     case QtFatalMsg:
       return LogTracker::kFatal;
+#if QT_VERSION >= 0x050500
+    case QtInfoMsg:
+      return LogTracker::kInfo;
+#endif
     }
 
     BOOST_ASSERT(false);
