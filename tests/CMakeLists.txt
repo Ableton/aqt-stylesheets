@@ -19,11 +19,7 @@
 # THE SOFTWARE.
 
 if(WIN32)
-  if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(QMLTESTRUNNER_APP qmltestrunnerd)
-  else()
-    set(QMLTESTRUNNER_APP qmltestrunner)
-  endif()
+  set(QMLTESTRUNNER_APP qmltestrunner.exe)
 else()
   set(QMLTESTRUNNER_APP qmltestrunner)
 endif()
