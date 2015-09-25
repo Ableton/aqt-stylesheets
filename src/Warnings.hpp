@@ -82,6 +82,7 @@ THE SOFTWARE.
   * C4628: digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
   * C4640: 'instance' : construction of local static object is not thread-safe
   * C4668: 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+  * C4714: function 'function' marked as __forceinline not inlined
   * C4800: 'type' : forcing value to bool 'true' or 'false' (performance warning)
   * C4826: Conversion from 'type1 ' to 'type_2' is sign-extended. This may cause unexpected runtime behavior.
   */
@@ -99,6 +100,7 @@ THE SOFTWARE.
     __pragma(warning(disable: 4628)) \
     __pragma(warning(disable: 4640)) \
     __pragma(warning(disable: 4668)) \
+    __pragma(warning(disable: 4714)) \
     __pragma(warning(disable: 4800)) \
     __pragma(warning(disable: 4826))
 
