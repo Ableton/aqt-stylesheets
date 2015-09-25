@@ -1,0 +1,20 @@
+clone_depth: 5
+
+environment:
+  matrix:
+    - CONFIGURATION: Release
+  BOOST_ROOT: c:\Libraries\boost_1_59_0
+
+install:
+  - set PATH=%PATH%;C:\Qt\5.3\msvc2013_opengl\bin
+  - git clone https://chromium.googlesource.com/external/googletest.git C:\projects\googletest
+
+
+build_script:
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_PREFIX_PATH=C:\Qt\5.3\msvc2013_opengl -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DGTEST_SOURCE=C:\projects\googletest -DBoost_INCLUDE_DIR=%BOOST_ROOT%
+  - cmake --build . --config %CONFIGURATION%
+
+test_script:
+  - ctest -C %CONFIGURATION% -V
+  - qmlscene --quit -I ../qml ../examples/TestApp.qml
