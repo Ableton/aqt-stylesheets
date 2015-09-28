@@ -69,6 +69,13 @@ THE SOFTWARE.
 
 #elif defined(_MSC_VER)
 
+  #if _MSC_VER < 1900
+    #define ABL_PRAGMA_MSVC_DISABLE_4459
+  #else
+    #define ABL_PRAGMA_MSVC_DISABLE_4459 \
+    __pragma(warning(disable: 4459))
+  #endif
+
   /**
   * C4100: 'identifier' : unreferenced formal parameter
   * C4127: conditional expression is constant
@@ -94,7 +101,6 @@ THE SOFTWARE.
     __pragma(warning(disable: 4251)) \
     __pragma(warning(disable: 4365)) \
     __pragma(warning(disable: 4388)) \
-    __pragma(warning(disable: 4459)) \
     __pragma(warning(disable: 4555)) \
     __pragma(warning(disable: 4619)) \
     __pragma(warning(disable: 4628)) \
@@ -102,7 +108,8 @@ THE SOFTWARE.
     __pragma(warning(disable: 4668)) \
     __pragma(warning(disable: 4714)) \
     __pragma(warning(disable: 4800)) \
-    __pragma(warning(disable: 4826))
+    __pragma(warning(disable: 4826)) \
+    ABL_PRAGMA_MSVC_DISABLE_4459
 
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))
