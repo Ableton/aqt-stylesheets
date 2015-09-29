@@ -2,17 +2,21 @@ clone_depth: 5
 
 environment:
   matrix:
-    - CONFIGURATION: Release
+    - CMAKE_GENERATOR: "Visual Studio 12 2013"
+      CMAKE_PREFIX_PATH: C:/Qt/5.3/msvc2013_opengl
+      CONFIGURATION: Release
+    - CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      CMAKE_PREFIX_PATH: C:/Qt/5.3/msvc2013_64_opengl
+      CONFIGURATION: Release
   BOOST_ROOT: c:\Libraries\boost_1_59_0
 
 install:
-  - set PATH=%PATH%;C:\Qt\5.3\msvc2013_opengl\bin
+  - set PATH=%PATH%;%CMAKE_PREFIX_PATH%\bin
   - git clone https://chromium.googlesource.com/external/googletest.git C:\projects\googletest
-
 
 build_script:
   - mkdir build && cd build
-  - cmake .. -DCMAKE_PREFIX_PATH=C:\Qt\5.3\msvc2013_opengl -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DGTEST_SOURCE=C:\projects\googletest -DBoost_INCLUDE_DIR=%BOOST_ROOT%
+  - cmake .. -G"%CMAKE_GENERATOR%" -DGTEST_SOURCE=C:\projects\googletest -DBoost_INCLUDE_DIR=%BOOST_ROOT%
   - cmake --build . --config %CONFIGURATION%
 
 test_script:
