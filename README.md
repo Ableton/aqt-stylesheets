@@ -1,7 +1,5 @@
 # Aqt StyleSheets
 
-[![Build Status](https://travis-ci.org/Ableton/aqt-stylesheets.svg?branch=master)](https://travis-ci.org/Ableton/aqt-stylesheets)
-
 StylesSheets is a library for Qt/QML that allows you to apply CSS stylesheets to
 QML applications.
 
@@ -86,3 +84,9 @@ application update.
 ## License
 
 Aqt StyleSheets is distributed under the MIT license (see LICENSE).
+
+
+## CI Status
+
+Master: [![Build status](https://ci.appveyor.com/api/projects/status/vvgdowxuay94x7e3/branch/master?svg=true)](https://ci.appveyor.com/project/gck-ableton/aqt-stylesheets/branch/master)
+[![Build Status](https://travis-ci.org/Ableton/aqt-stylesheets.svg?branch=master)](https://travis-ci.org/Ableton/aqt-stylesheets)
