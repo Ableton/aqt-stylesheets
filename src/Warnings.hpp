@@ -79,6 +79,8 @@ THE SOFTWARE.
   /**
   * C4100: 'identifier' : unreferenced formal parameter
   * C4127: conditional expression is constant
+  * C4191: 'type cast' : unsafe conversion from 'function pointer type' to 'function pointer type'
+  *        Calling this function through the result pointer may cause your program to fail
   * C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
   * C4251: 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
   * C4365: 'action' : conversion from 'type_1' to 'type_2', signed/unsigned mismatch
@@ -97,6 +99,7 @@ THE SOFTWARE.
     __pragma(warning(push)) \
     __pragma(warning(disable: 4100)) \
     __pragma(warning(disable: 4127)) \
+    __pragma(warning(disable: 4191)) \
     __pragma(warning(disable: 4244)) \
     __pragma(warning(disable: 4251)) \
     __pragma(warning(disable: 4365)) \
