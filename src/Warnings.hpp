@@ -35,8 +35,8 @@ THE SOFTWARE.
 
   #define SUPPRESS_WARNINGS \
     _Pragma("clang diagnostic push") \
-    _Pragma("clang diagnostic ignored \"-Wconversion\"") \
     _Pragma("clang diagnostic ignored \"-Wconditional-uninitialized\"") \
+    _Pragma("clang diagnostic ignored \"-Wconversion\"") \
     _Pragma("clang diagnostic ignored \"-Wcovered-switch-default\"") \
     _Pragma("clang diagnostic ignored \"-Wdeprecated\"") \
     _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
@@ -58,6 +58,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wsign-conversion\"") \
     _Pragma("clang diagnostic ignored \"-Wswitch-enum\"") \
     _Pragma("clang diagnostic ignored \"-Wundef\"") \
+    _Pragma("clang diagnostic ignored \"-Wundefined-reinterpret-cast\"") \
     _Pragma("clang diagnostic ignored \"-Wunreachable-code\"") \
     _Pragma("clang diagnostic ignored \"-Wunused-parameter\"") \
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \

@@ -44,8 +44,8 @@ StylesDirWatcher::StylesDirWatcher(QObject* pParent)
 {
   mStyleFilters.push_back(QLatin1String("*.css"));
 
-  connect(&mFsWatcher, SIGNAL(directoryChanged(const QString&)), this,
-          SLOT(onDirectoryChanged(const QString&)));
+  connect(&mFsWatcher, &QFileSystemWatcher::directoryChanged, this,
+          &StylesDirWatcher::onDirectoryChanged);
 }
 
 QUrl StylesDirWatcher::stylePath() const

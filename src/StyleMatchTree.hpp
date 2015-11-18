@@ -25,7 +25,6 @@ THE SOFTWARE.
 #include "Property.hpp"
 #include "CssParser.hpp"
 
-#include "estd/memory.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS

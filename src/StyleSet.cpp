@@ -191,7 +191,7 @@ void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
 
   if (isDiffEngine || mPath != path) {
     if (mpEngine && isDiffEngine) {
-      disconnect(mpEngine, SIGNAL(styleChanged(int)), this, SLOT(onStyleChanged(int)));
+      disconnect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
       mChangeCount = 0;
     }
 
@@ -199,7 +199,7 @@ void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
     mPath = path;
 
     if (mpEngine && isDiffEngine) {
-      connect(mpEngine, SIGNAL(styleChanged(int)), this, SLOT(onStyleChanged(int)));
+      connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
     }
 
     loadProperties(parent());
@@ -393,8 +393,8 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
   if (p) {
     QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
     if (pItem != nullptr) {
-      connect(pItem, SIGNAL(parentChanged(QQuickItem*)), this,
-              SLOT(onParentChanged(QQuickItem*)));
+      connect(
+        pItem, &QQuickItem::parentChanged, this, &StyleSetAttached::onParentChanged);
     } else if (p->parent() != nullptr) {
       styleSheetsLogInfo() << "Parent to StyleSetAttached is not a QQuickItem but '"
                            << p->metaObject()->className() << "'. "
@@ -409,9 +409,8 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
 
     mPath = traversePathUp(p);
 
-    connect(StyleEngineHost::globalStyleEngineHost(),
-            SIGNAL(styleEngineLoaded(aqt::stylesheets::StyleEngine*)), this,
-            SLOT(onStyleEngineChanged(aqt::stylesheets::StyleEngine*)));
+    connect(StyleEngineHost::globalStyleEngineHost(), &StyleEngineHost::styleEngineLoaded,
+            this, &StyleSetAttached::onStyleEngineChanged);
 
     setupStyle();
   }
