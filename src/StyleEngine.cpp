@@ -72,13 +72,13 @@ StyleEngine::StyleEngine(QObject* pParent)
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
-  connect(&mFsWatcher, SIGNAL(fileChanged(const QString&)), this,
-          SLOT(onFileChanged(const QString&)));
-
-  connect(&mStylesDir, SIGNAL(availableStylesChanged()), this,
-          SIGNAL(availableStylesChanged()));
   connect(
-    &mStylesDir, SIGNAL(fileExtensionsChanged()), this, SIGNAL(fileExtensionsChanged()));
+    &mFsWatcher, &QFileSystemWatcher::fileChanged, this, &StyleEngine::onFileChanged);
+
+  connect(&mStylesDir, &StylesDirWatcher::availableStylesChanged, this,
+          &StyleEngine::availableStylesChanged);
+  connect(&mStylesDir, &StylesDirWatcher::fileExtensionsChanged, this,
+          &StyleEngine::fileExtensionsChanged);
 }
 
 int StyleEngine::changeCount() const

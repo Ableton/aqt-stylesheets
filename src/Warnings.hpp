@@ -58,6 +58,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wsign-conversion\"") \
     _Pragma("clang diagnostic ignored \"-Wswitch-enum\"") \
     _Pragma("clang diagnostic ignored \"-Wundef\"") \
+    _Pragma("clang diagnostic ignored \"-Wundefined-reinterpret-cast\"") \
     _Pragma("clang diagnostic ignored \"-Wunreachable-code\"") \
     _Pragma("clang diagnostic ignored \"-Wunused-parameter\"") \
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \
