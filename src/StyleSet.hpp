@@ -189,7 +189,7 @@ public:
   void initStyleSet(const UiItemPath& path, StyleEngine* pEngine);
 
   QString path() const;
-  aqt::stylesheets::StyleSet* props();
+  StyleSet* props();
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */
@@ -468,7 +468,7 @@ public:
   void setName(const QString& val);
 
   QString path() const;
-  aqt::stylesheets::StyleSet* props();
+  StyleSet* props();
 
   QString styleInfo() const;
 
@@ -480,7 +480,7 @@ Q_SIGNALS:
   void pathChanged(const QString& path);
 
 private Q_SLOTS:
-  void onStyleEngineChanged(aqt::stylesheets::StyleEngine* pEngine);
+  void onStyleEngineChanged(StyleEngine* pEngine);
   void onParentChanged(QQuickItem* pNewParent);
 
 private:
