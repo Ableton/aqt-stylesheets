@@ -114,44 +114,6 @@ class StyleSet : public QObject
 {
   Q_OBJECT
 
-// Fake this additional property definition.  The property is actually
-// defined in StyleSetAttached, which should not appear in the documentation
-// at all.  doxygen's @property tag somehow ends up in the function section,
-// which is not very helpful.
-#ifdef DOXYGEN_GENERATED
-  /*! @public Contains the style class name
-   *
-   * The style class name is part of the element path used for matching selector
-   * rules.  This name forms the "dot" part of an elements selector name.
-   *
-   * @par Example:
-   * @code
-   * Item {
-   *   StyleSet.name: "root"
-   *   Component.onCompleted: console.log(StyleSet.path);
-   * }
-   *
-   * => QQuickItem.root
-   * @endcode
-   *
-   * It is possible to define multiple class names for the same item by
-   * separating them with whitespace.
-   *
-   * @par Example:
-   * @code
-   * Item {
-   *   StyleSet.name: "example colors"
-   *   Component.onCompleted: console.log(StyleSet.path);
-   * }
-   *
-   * => QQuickItem.{example,colors}
-   * @endcode
-   *
-   * The properties for all matching selectors are merged.
-   */
-  Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-#endif
-
 public:
   /*! @cond DOXYGEN_IGNORE */
   StyleSet(QObject* pParent = nullptr);
@@ -403,6 +365,36 @@ class StyleSetAttached : public QObject
 {
   Q_OBJECT
 
+  /*! @public Contains the style class name
+   *
+   * The style class name is part of the element path used for matching selector
+   * rules.  This name forms the "dot" part of an elements selector name.
+   *
+   * @par Example:
+   * @code
+   * Item {
+   *   StyleSet.name: "root"
+   *   Component.onCompleted: console.log(StyleSet.path);
+   * }
+   *
+   * => QQuickItem.root
+   * @endcode
+   *
+   * It is possible to define multiple class names for the same item by
+   * separating them with whitespace.
+   *
+   * @par Example:
+   * @code
+   * Item {
+   *   StyleSet.name: "example colors"
+   *   Component.onCompleted: console.log(StyleSet.path);
+   * }
+   *
+   * => QQuickItem.{example,colors}
+   * @endcode
+   *
+   * The properties for all matching selectors are merged.
+   */
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
 
   /*! @public Contains the path for the element this StyleSet is attached to.
