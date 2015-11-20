@@ -126,24 +126,6 @@ class StyleSet : public QObject
    */
   Q_PROPERTY(QString path READ path NOTIFY pathChanged)
 
-  /*! @public Contains the style properties for the element this StyleSet is
-   * attached to
-   *
-   * @par Example:
-   * @code
-   * Text {
-   *     color: StyleSet.props.color("color")
-   * }
-   * @endcode
-   *
-   * @note Due to the nature of attached properties in QML only if you
-   * access the style properties by going through the props() method you
-   * get a property binding, which will notify in case of style sheet
-   * changes.  If you access the property settings with color() or font()
-   * directly, the QML code won't listen to style changes.
-   */
-  Q_PROPERTY(aqt::stylesheets::StyleSet* props READ props NOTIFY propsChanged)
-
 // Fake this additional property definition.  The property is actually
 // defined in StyleSetAttached, which should not appear in the documentation
 // at all.  doxygen's @property tag somehow ends up in the function section,
@@ -189,7 +171,6 @@ public:
   void initStyleSet(const UiItemPath& path, StyleEngine* pEngine);
 
   QString path() const;
-  StyleSet* props();
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */
@@ -411,13 +392,6 @@ public:
 /*! @endcond */
 
 Q_SIGNALS:
-  /*! Fires when properties change
-   *
-   * When ever the StyleEngine reloads its style sheet and property values are
-   * changed or new properties appear this signal will be fired.
-   */
-  void propsChanged();
-
   /*! Fires when the path of the item changes
    *
    * Whenever the location of the object his StyleSet is attached to changes
@@ -452,7 +426,25 @@ class StyleSetAttached : public QObject
 
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
   Q_PROPERTY(QString path READ path NOTIFY pathChanged)
+
+  /*! @public Contains the style properties for the element this StyleSet is
+   * attached to
+   *
+   * @par Example:
+   * @code
+   * Text {
+   *     color: StyleSet.props.color("color")
+   * }
+   * @endcode
+   *
+   * @note Due to the nature of attached properties in QML only if you
+   * access the style properties by going through the props() method you
+   * get a property binding, which will notify in case of style sheet
+   * changes.  If you access the property settings with color() or font()
+   * directly, the QML code won't listen to style changes.
+   */
   Q_PROPERTY(aqt::stylesheets::StyleSet* props READ props NOTIFY propsChanged)
+
   Q_PROPERTY(QString styleInfo READ styleInfo NOTIFY propsChanged)
 
 public:
@@ -467,7 +459,13 @@ public:
   QString styleInfo() const;
 
 Q_SIGNALS:
+  /*! Fires when properties change
+   *
+   * When ever the StyleEngine reloads its style sheet and property values are
+   * changed or new properties appear this signal will be fired.
+   */
   void propsChanged();
+
   void nameChanged(const QString& name);
   void pathChanged(const QString& path);
 
