@@ -114,18 +114,6 @@ class StyleSet : public QObject
 {
   Q_OBJECT
 
-  /*! @public Contains the path for the element this StyleSet is attached to.
-   *
-   * The path will look similar to this:
-   *
-   * ```QQuickRectangle.root/QQuickRowLayout/QQuickItem.box/QQuickText```
-   *
-   * and reads from root to leaf, i.e. the left most token is the element at
-   * the root of the QML object hierarchy.  The path is mostly useful for
-   * debugging purposes.
-   */
-  Q_PROPERTY(QString path READ path NOTIFY pathChanged)
-
 // Fake this additional property definition.  The property is actually
 // defined in StyleSetAttached, which should not appear in the documentation
 // at all.  doxygen's @property tag somehow ends up in the function section,
@@ -170,7 +158,6 @@ public:
 
   void initStyleSet(const UiItemPath& path, StyleEngine* pEngine);
 
-  QString path() const;
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */
@@ -389,15 +376,7 @@ public:
   void loadProperties();
 
   static StyleSetAttached* qmlAttachedProperties(QObject* pObject);
-/*! @endcond */
-
-Q_SIGNALS:
-  /*! Fires when the path of the item changes
-   *
-   * Whenever the location of the object his StyleSet is attached to changes
-   * the StyleSet will fire this signal.
-   */
-  void pathChanged(const QString& path);
+  /*! @endcond */
 
 public Q_SLOTS:
   /*! @cond DOXYGEN_IGNORE */
@@ -425,6 +404,17 @@ class StyleSetAttached : public QObject
   Q_OBJECT
 
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+
+  /*! @public Contains the path for the element this StyleSet is attached to.
+   *
+   * The path will look similar to this:
+   *
+   * ```QQuickRectangle.root/QQuickRowLayout/QQuickItem.box/QQuickText```
+   *
+   * and reads from root to leaf, i.e. the left most token is the element at
+   * the root of the QML object hierarchy.  The path is mostly useful for
+   * debugging purposes.
+   */
   Q_PROPERTY(QString path READ path NOTIFY pathChanged)
 
   /*! @public Contains the style properties for the element this StyleSet is
@@ -467,6 +457,12 @@ Q_SIGNALS:
   void propsChanged();
 
   void nameChanged(const QString& name);
+
+  /*! Fires when the path of the item changes
+   *
+   * Whenever the location of the object his StyleSet is attached to changes
+   * the StyleSet will fire this signal.
+   */
   void pathChanged(const QString& path);
 
 private Q_SLOTS:

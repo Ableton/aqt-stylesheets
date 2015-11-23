@@ -182,11 +182,6 @@ StyleSetAttached* StyleSet::qmlAttachedProperties(QObject* pObject)
   return new StyleSetAttached(pObject);
 }
 
-QString StyleSet::path() const
-{
-  return QString::fromStdString(pathToString(mPath));
-}
-
 bool StyleSet::isValid() const
 {
   return !mProperties.empty();
