@@ -321,11 +321,6 @@ private:
  * }
  * @endcode
  *
- * @note Style properties should always be accessed through the props
- * property only.  Only by doing this it is possible to get notifications
- * about style changes.  (The reason is that QML does not create bindings
- * for attached types directly).
- *
  * @par The Element Path (UiItemPath)
  *
  * The element path is constructed from the typenames and attached "style
@@ -419,11 +414,6 @@ class StyleSetAttached : public QObject
    * }
    * @endcode
    *
-   * @note Due to the nature of attached properties in QML only if you
-   * access the style properties by going through the props() method you
-   * get a property binding, which will notify in case of style sheet
-   * changes.  If you access the property settings with color() or font()
-   * directly, the QML code won't listen to style changes.
    */
   Q_PROPERTY(aqt::stylesheets::StyleSet* props READ props NOTIFY propsChanged)
 
