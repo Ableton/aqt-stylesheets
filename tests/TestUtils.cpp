@@ -27,7 +27,6 @@ SUPPRESS_WARNINGS
 #include <QtQml/QQmlComponent>
 RESTORE_WARNINGS
 
-
 namespace aqt
 {
 namespace stylesheets

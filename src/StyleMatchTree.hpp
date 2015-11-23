@@ -72,7 +72,6 @@ using UiItemPath = std::vector<PathElement>;
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path);
 std::string pathToString(const UiItemPath& path);
 
-
 using PropertyMap = std::map<QString, Property>;
 
 void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& b);

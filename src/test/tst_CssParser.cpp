@@ -76,7 +76,6 @@ Expression getExpr(const PropertyValues& val, size_t idx, const Expression& def 
   return def;
 }
 
-
 size_t getNumberOfValues(const PropertyValues& val)
 {
   return val.size();

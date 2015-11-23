@@ -36,7 +36,6 @@ RESTORE_WARNINGS
 
 #include <string>
 
-
 namespace aqt
 {
 namespace stylesheets

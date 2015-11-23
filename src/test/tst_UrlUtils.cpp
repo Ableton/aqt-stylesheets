@@ -34,9 +34,7 @@ SUPPRESS_WARNINGS
 #include <gtest/gtest.h>
 RESTORE_WARNINGS
 
-
 using namespace aqt::stylesheets;
-
 
 namespace
 {
@@ -183,7 +181,7 @@ TEST(UrlUtils, resolveResourceUrl_relative_local_with_search_path)
 TEST(UrlUtils, resolveResourceUrl_relative_dotdot_local_with_search_path)
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
-      auto temppath = sandbox.path() + "/";
+    auto temppath = sandbox.path() + "/";
 
     QDir tempDir(temppath);
     tempDir.mkpath(QLatin1String("assets"));
@@ -195,10 +193,8 @@ TEST(UrlUtils, resolveResourceUrl_relative_dotdot_local_with_search_path)
     auto fooAbsPath = fooTempDir.absoluteFilePath("foo/assets/a.css");
     createFile(fooAbsPath);
 
-    auto searchPath = QStringList{
-      tempDir.absoluteFilePath("foo/xyz/"),
-      tempDir.absoluteFilePath("bar/")
-    };
+    auto searchPath =
+      QStringList{tempDir.absoluteFilePath("foo/xyz/"), tempDir.absoluteFilePath("bar/")};
 
     // up-paths (../) are never resolved against search path
     EXPECT_EQ(QUrl("../assets/a.css"),
@@ -211,21 +207,19 @@ TEST(UrlUtils, resolveResourceUrl_relative_dotdot_local_with_search_path)
                 QUrl::fromLocalFile(localFilePath), QUrl("../assets/a.css"), searchPath));
 
     // relative paths starting with '/' must not contain '/../'.  They are returned as-is.
-    EXPECT_EQ(QUrl(),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("/../assets/a.css"), searchPath));
+    EXPECT_EQ(QUrl(), searchForResourceSearchPath(QUrl::fromLocalFile(localFilePath),
+                                                  QUrl("/../assets/a.css"), searchPath));
 
     // path "/" fails
-    EXPECT_EQ(QUrl(),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("/"), searchPath));
+    EXPECT_EQ(QUrl(), searchForResourceSearchPath(
+                        QUrl::fromLocalFile(localFilePath), QUrl("/"), searchPath));
   });
 }
 
 TEST(UrlUtils, resolveResourceUrl_non_resolvable_url_is_returned_as_is)
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
-      auto temppath = sandbox.path() + "/";
+    auto temppath = sandbox.path() + "/";
 
     QDir tempDir(temppath);
     auto searchPath = QStringList{tempDir.absoluteFilePath("foo/"),
