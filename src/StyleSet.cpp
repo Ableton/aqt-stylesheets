@@ -154,7 +154,6 @@ PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mChangeCount(0)
 {
 }
 
@@ -165,7 +164,6 @@ void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
   if (isDiffEngine || mPath != path) {
     if (mpEngine && isDiffEngine) {
       disconnect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
-      mChangeCount = 0;
     }
 
     mpEngine = pEngine;
@@ -212,7 +210,7 @@ bool StyleSet::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
-  if (!mpEngine.isNull() && mChangeCount == mpEngine->changeCount()) {
+  if (!mpEngine.isNull()) {
     styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
                             << pathToString(mPath) << ")";
     Q_EMIT mpEngine->exception(QString::fromLatin1("propertyNotFound"),
@@ -299,11 +297,9 @@ QUrl StyleSet::url(const QString& key) const
   return url;
 }
 
-void StyleSet::onStyleChanged(int changeCount)
+void StyleSet::onStyleChanged(int)
 {
-  if (mChangeCount != changeCount) {
-    loadProperties();
-  }
+  loadProperties();
 }
 
 void StyleSet::loadProperties()
@@ -314,7 +310,6 @@ void StyleSet::loadProperties()
 
   if (mpEngine) {
     mProperties = mpEngine->matchPath(mPath);
-    mChangeCount = mpEngine->changeCount();
 
     if (!mPath.empty()) {
       PropertyMap inheritedProps(
