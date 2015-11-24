@@ -427,7 +427,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
   /*! @cond DOXYGEN_IGNORE */
-  void onStyleChanged(int changeCount);
+  void onStyleChanged();
 
 private:
   bool getImpl(Property& def, const QString& key) const;

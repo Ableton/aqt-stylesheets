@@ -297,7 +297,7 @@ QUrl StyleSet::url(const QString& key) const
   return url;
 }
 
-void StyleSet::onStyleChanged(int)
+void StyleSet::onStyleChanged()
 {
   loadProperties();
 }

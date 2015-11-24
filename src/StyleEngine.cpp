@@ -68,7 +68,6 @@ void setGlobalStyleEngine(StyleEngine* pEngine)
 
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
-  , mChangeCount(0)
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
@@ -79,11 +78,6 @@ StyleEngine::StyleEngine(QObject* pParent)
           &StyleEngine::availableStylesChanged);
   connect(&mStylesDir, &StylesDirWatcher::fileExtensionsChanged, this,
           &StyleEngine::fileExtensionsChanged);
-}
-
-int StyleEngine::changeCount() const
-{
-  return mChangeCount;
 }
 
 QUrl StyleEngine::styleSheetSource() const
@@ -305,8 +299,7 @@ void StyleEngine::loadStyle()
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
-  mChangeCount++;
-  Q_EMIT styleChanged(mChangeCount);
+  Q_EMIT styleChanged();
 }
 
 void StyleEngine::classBegin()
