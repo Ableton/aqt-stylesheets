@@ -331,34 +331,6 @@ void StyleSet::loadProperties()
   }
 }
 
-const PropertyMap& StyleSet::properties(int changeCount)
-{
-  if (changeCount != mChangeCount) {
-    loadProperties();
-  }
-
-  return mProperties;
-}
-
-QObject* StyleSet::grandParent()
-{
-  QObject* pParent = parent();
-  if (pParent) {
-    if (qobject_cast<StyleSetAttached*>(pParent) != nullptr) {
-      pParent = pParent->parent();
-
-      // asking for the attached style of pParent would return the same
-      // attached style again.  So when traversing the tree up, skip the
-      // current object.
-      if (pParent != nullptr) {
-        pParent = pParent->parent();
-      }
-    }
-  }
-
-  return pParent;
-}
-
 StyleSetAttached::StyleSetAttached(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())

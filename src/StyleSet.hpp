@@ -408,8 +408,6 @@ public:
   void loadProperties();
 
   static StyleSetAttached* qmlAttachedProperties(QObject* pObject);
-
-  const PropertyMap& properties(int changeCount);
 /*! @endcond */
 
 Q_SIGNALS:
@@ -432,7 +430,6 @@ public Q_SLOTS:
   void onStyleChanged(int changeCount);
 
 private:
-  QObject* grandParent();
   bool getImpl(Property& def, const QString& key) const;
 
   template <typename T>
