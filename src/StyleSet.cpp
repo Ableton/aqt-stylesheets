@@ -23,22 +23,15 @@ THE SOFTWARE.
 #include "StyleSet.hpp"
 
 #include "Convert.hpp"
-#include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleEngine.hpp"
-#include "StyleMatchTree.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtCore/QUrl>
-#include <QtGui/QColor>
-#include <QtGui/QFont>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
-#include <boost/optional.hpp>
 RESTORE_WARNINGS
 
-#include <iostream>
 #include <string>
 
 namespace aqt

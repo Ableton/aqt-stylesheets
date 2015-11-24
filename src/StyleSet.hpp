@@ -27,15 +27,15 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <QtCore/QObject>
 #include <QtCore/QPointer>
 #include <QtCore/QString>
+#include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <QtQml/qqml.h>
 RESTORE_WARNINGS
-
-#include <string>
 
 class QQuickItem;
 
