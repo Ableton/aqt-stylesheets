@@ -66,6 +66,23 @@ void setGlobalStyleEngine(StyleEngine* pEngine)
 
 } // anon namespace
 
+StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
+{
+  static StyleEngineHost gGlobalStyleEngineHost;
+
+  return &gGlobalStyleEngineHost;
+}
+
+StyleEngine* StyleEngineHost::globalStyleEngine()
+{
+  return globalStyleEngineImpl();
+}
+
+StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
+{
+  return mFontIdCache;
+}
+
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
@@ -316,29 +333,10 @@ void StyleEngine::componentComplete()
   setGlobalStyleEngine(this);
 }
 
-StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
-{
-  static StyleEngineHost gGlobalStyleEngineHost;
-
-  return &gGlobalStyleEngineHost;
-}
-
-StyleEngine* StyleEngineHost::globalStyleEngine()
-{
-  return globalStyleEngineImpl();
-}
-
-StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
-{
-  return mFontIdCache;
-}
-
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
 {
   return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
 }
-
-//----------------------------------------------------------------------------------------
 
 void StyleEngine::SourceUrl::set(const QUrl& url,
                                  StyleEngine* pParent,
