@@ -244,7 +244,7 @@ public:
   PropertyMap matchPath(const UiItemPath& path);
 
   /*! @private */
-  std::string describeMatchedPath(const UiItemPath& path);
+  std::string describeMatchedPath(const UiItemPath& path) const;
 
   /*! Resolve @p url against @p baseUrl or search for it in a search path.
    *

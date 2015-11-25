@@ -216,7 +216,7 @@ PropertyMap StyleEngine::matchPath(const UiItemPath& path)
   return aqt::stylesheets::matchPath(mpStyleTree.get(), path);
 }
 
-std::string StyleEngine::describeMatchedPath(const UiItemPath& path)
+std::string StyleEngine::describeMatchedPath(const UiItemPath& path) const
 {
   return aqt::stylesheets::describeMatchedPath(mpStyleTree.get(), path);
 }
