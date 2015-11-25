@@ -376,18 +376,6 @@ void StyleSetAttached::setEngine(StyleEngine* pEngine)
   setupStyle();
 }
 
-void StyleSetAttached::updateStyle()
-{
-  QObject* p = parent();
-
-  StyleEngine* pEngine = StyleEngineHost::globalStyleEngine();
-
-  if (p != nullptr && pEngine != nullptr
-      && mStyle.mChangeCount < pEngine->changeCount()) {
-    setEngine(pEngine);
-  }
-}
-
 void StyleSetAttached::setupStyle()
 {
   mStyle.initStyleSet(mPath, mpEngine);

@@ -438,8 +438,6 @@ private:
   T lookupProperty(Property& def, const QString& key) const;
 
 private:
-  friend class StyleSetAttached;
-
   QPointer<StyleEngine> mpEngine;
   UiItemPath mPath;
   PropertyMap mProperties;
@@ -468,8 +466,6 @@ public:
   StyleSet* props();
 
   QString styleInfo() const;
-
-  void updateStyle();
 
 Q_SIGNALS:
   void propsChanged();
