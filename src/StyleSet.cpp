@@ -173,7 +173,7 @@ void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
       connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
     }
 
-    loadProperties();
+    onStyleChanged();
   }
 }
 
