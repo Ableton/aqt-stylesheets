@@ -96,7 +96,7 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
-  if (!mpEngine.isNull()) {
+  if (mpEngine) {
     styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
                             << pathToString(mPath) << ")";
     Q_EMIT mpEngine->exception(QString::fromLatin1("propertyNotFound"),

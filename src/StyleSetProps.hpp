@@ -27,7 +27,6 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
@@ -286,7 +285,7 @@ private:
   T lookupProperty(Property& def, const QString& key) const;
 
 private:
-  QPointer<StyleEngine> mpEngine;
+  StyleEngine* const mpEngine;
   UiItemPath mPath;
   PropertyMap mProperties;
   /*! @endcond */
