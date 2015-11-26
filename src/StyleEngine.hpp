@@ -238,14 +238,6 @@ public:
   virtual void componentComplete();
   /*! @endcond */
 
-  /*! Matches an element path
-   *
-   * The element path @p path is matched against the rules loaded from the
-   * current style sheet.  The resulting set of properties is returned.  If
-   * the path is not matching any rule the result is an empty property map.
-   */
-  PropertyMap matchPath(const UiItemPath& path);
-
   /*! @private */
   std::string describeMatchedPath(const UiItemPath& path) const;
 

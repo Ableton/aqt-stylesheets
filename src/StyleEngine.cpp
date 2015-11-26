@@ -221,11 +221,6 @@ QVariantList StyleEngine::availableStyles()
   return mStylesDir.availableStyleSheetNames();
 }
 
-PropertyMap StyleEngine::matchPath(const UiItemPath& path)
-{
-  return aqt::stylesheets::matchPath(mpStyleTree.get(), path);
-}
-
 std::string StyleEngine::describeMatchedPath(const UiItemPath& path) const
 {
   return aqt::stylesheets::describeMatchedPath(mpStyleTree.get(), path);
@@ -371,7 +366,7 @@ PropertyMap StyleEngine::effectivePropertyMap(const UiItemPath& path)
   using std::end;
   using std::prev;
 
-  auto props = matchPath(path);
+  auto props = matchPath(mpStyleTree.get(), path);
 
   if (path.size() > 1) {
     const auto ancestorProps = effectivePropertyMap({begin(path), prev(end(path))});
