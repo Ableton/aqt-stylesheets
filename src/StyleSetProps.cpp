@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 #include "StyleSetProps.hpp"
 
+#include "estd/memory.hpp"
 #include "Convert.hpp"
 #include "Log.hpp"
 #include "Property.hpp"
@@ -80,18 +81,18 @@ StyleSetProps* StyleSetProps::nullStyleSetProps()
 
 bool StyleSetProps::isValid() const
 {
-  return !mProperties.empty();
+  return !mpProperties->empty();
 }
 
 bool StyleSetProps::isSet(const QString& key) const
 {
-  return mProperties.find(key) != mProperties.end();
+  return mpProperties->find(key) != mpProperties->end();
 }
 
 bool StyleSetProps::getImpl(Property& prop, const QString& key) const
 {
-  PropertyMap::const_iterator it = mProperties.find(key);
-  if (it != mProperties.end()) {
+  PropertyMap::const_iterator it = mpProperties->find(key);
+  if (it != mpProperties->end()) {
     prop = it->second;
     return true;
   }
@@ -191,8 +192,10 @@ void StyleSetProps::onStyleChanged()
 void StyleSetProps::loadProperties()
 {
   if (mpEngine) {
-    mProperties = effectivePropertyMap(mPath, *mpEngine);
+    mpProperties = estd::make_unique<PropertyMap>(effectivePropertyMap(mPath, *mpEngine));
     Q_EMIT propsChanged();
+  } else {
+    mpProperties = estd::make_unique<PropertyMap>();
   }
 }
 
