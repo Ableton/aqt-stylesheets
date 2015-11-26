@@ -129,9 +129,10 @@ UiItemPath traversePathUp(QObject* pObj)
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mpEngine(StyleEngineHost::globalStyleEngine())
   , mpStyleSetProps(StyleSetProps::nullStyleSetProps())
 {
+  auto* pEngine = StyleEngineHost::globalStyleEngine();
+
   QObject* p = parent();
   if (p) {
     QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
@@ -142,8 +143,8 @@ StyleSet::StyleSet(QObject* pParent)
                            << p->metaObject()->className() << "'. "
                            << "Hierarchy changes for this component won't be detected.";
 
-      if (!mpEngine.isNull()) {
-        Q_EMIT mpEngine->exception(
+      if (pEngine) {
+        Q_EMIT pEngine->exception(
           QString::fromLatin1("noParentChangeReports"),
           QString::fromLatin1("Hierarchy changes for this component won't be detected"));
       }
@@ -151,7 +152,7 @@ StyleSet::StyleSet(QObject* pParent)
 
     mPath = traversePathUp(p);
 
-    if (!mpEngine) {
+    if (!pEngine) {
       connect(StyleEngineHost::globalStyleEngineHost(),
               &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
     }
@@ -168,24 +169,19 @@ StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 void StyleSet::onStyleEngineLoaded(StyleEngine* pEngine)
 {
   Q_ASSERT(pEngine);
+  Q_UNUSED(pEngine);
 
   disconnect(StyleEngineHost::globalStyleEngineHost(),
              &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
 
-  setEngine(pEngine);
-  Q_ASSERT(mpStyleSetProps != StyleSetProps::nullStyleSetProps());
-}
-
-void StyleSet::setEngine(StyleEngine* pEngine)
-{
-  mpEngine = pEngine;
   setupStyle();
+  Q_ASSERT(mpStyleSetProps != StyleSetProps::nullStyleSetProps());
 }
 
 void StyleSet::setupStyle()
 {
-  if (mpEngine) {
-    mpStyleSetProps = mpEngine->styleSetProps(mPath);
+  if (auto* pEngine = StyleEngineHost::globalStyleEngine()) {
+    mpStyleSetProps = pEngine->styleSetProps(mPath);
 
     connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
     connect(
@@ -223,8 +219,9 @@ QString StyleSet::path() const
 
 QString StyleSet::styleInfo() const
 {
-  std::string styleInfoStr(mpEngine ? mpEngine->describeMatchedPath(mPath)
-                                    : "No style engine installed");
+  auto* pEngine = StyleEngineHost::globalStyleEngine();
+  std::string styleInfoStr(pEngine ? pEngine->describeMatchedPath(mPath)
+                                   : "No style engine installed");
   return QString::fromStdString(styleInfoStr);
 }
 

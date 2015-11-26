@@ -28,7 +28,6 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QObject>
-#include <QtCore/QPointer>
 #include <QtCore/QString>
 #include <QtQml/qqml.h>
 RESTORE_WARNINGS
@@ -207,11 +206,9 @@ private Q_SLOTS:
   void onPropsInvalidated();
 
 private:
-  void setEngine(StyleEngine* pEngine);
   void setupStyle();
 
 private:
-  QPointer<StyleEngine> mpEngine;
   StyleSetProps* mpStyleSetProps;
   QString mName;
   UiItemPath mPath;
