@@ -128,51 +128,26 @@ UiItemPath traversePathUp(QObject* pObj)
   return traverseParentChain<UiItemPath>(pObj, collectPathVisitor);
 }
 
-class PropertyMapMergeVisitor
+PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 {
-public:
-  PropertyMap mPropertyMap;
-  int mCurrentChangeCount;
+  using std::begin;
+  using std::end;
+  using std::prev;
 
-  PropertyMapMergeVisitor(int currentChangeCount)
-    : mCurrentChangeCount(currentChangeCount)
-  {
-  }
+  auto props = engine.matchPath(path);
 
-  bool operator()(QObject* pObj)
-  {
-    using std::begin;
-    using std::end;
+  if (path.size() > 1) {
+    const auto ancestorProps =
+      effectivePropertyMap({begin(path), prev(end(path))}, engine);
 
-    StyleSetAttached* pStyleSetAttached =
-      qobject_cast<StyleSetAttached*>(qmlAttachedPropertiesObject<StyleSet>(pObj, false));
-
-    if (pStyleSetAttached) {
-      pStyleSetAttached->updateStyle();
-
-      if (StyleSet* pStyle = pStyleSetAttached->props()) {
-        auto props = pStyle->properties(mCurrentChangeCount);
-        mPropertyMap.insert(begin(props), end(props));
-
-        // since our ancestors style should have been compiled already, stop
-        // at it
-        // return false;
-      }
+    if (props.empty()) {
+      props = ancestorProps;
+    } else {
+      props.insert(begin(ancestorProps), end(ancestorProps));
     }
-
-    return true;
   }
 
-  PropertyMap result() const
-  {
-    return mPropertyMap;
-  }
-};
-
-PropertyMap effectivePropertyMap(QObject* pObj, int currentChangeCount)
-{
-  PropertyMapMergeVisitor visitor(currentChangeCount);
-  return traverseParentChain<PropertyMap>(pObj, visitor);
+  return props;
 }
 
 } // anon namespace
@@ -200,7 +175,7 @@ void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
       connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
     }
 
-    loadProperties(parent());
+    loadProperties();
   }
 }
 
@@ -327,22 +302,23 @@ QUrl StyleSet::url(const QString& key) const
 void StyleSet::onStyleChanged(int changeCount)
 {
   if (mChangeCount != changeCount) {
-    loadProperties(parent());
+    loadProperties();
   }
 }
 
-void StyleSet::loadProperties(QObject* pRefObject)
+void StyleSet::loadProperties()
 {
   using std::begin;
   using std::end;
+  using std::prev;
 
   if (mpEngine) {
     mProperties = mpEngine->matchPath(mPath);
     mChangeCount = mpEngine->changeCount();
 
-    if (pRefObject) {
+    if (!mPath.empty()) {
       PropertyMap inheritedProps(
-        effectivePropertyMap(pRefObject, mpEngine->changeCount()));
+        effectivePropertyMap({begin(mPath), prev(end(mPath))}, *mpEngine));
       mProperties.insert(begin(inheritedProps), end(inheritedProps));
     }
 
@@ -358,7 +334,7 @@ void StyleSet::loadProperties(QObject* pRefObject)
 const PropertyMap& StyleSet::properties(int changeCount)
 {
   if (changeCount != mChangeCount) {
-    loadProperties(grandParent());
+    loadProperties();
   }
 
   return mProperties;

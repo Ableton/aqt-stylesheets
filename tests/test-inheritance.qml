@@ -90,8 +90,7 @@ Item {
                    objectPath: "a.b.a.c", prop: "onlyBdirectC", expectedValue: "" },
                 {  tag: "A/B/A/C, forEveryone",
                    objectPath: "a.b.a.c", prop: "forEveryone", expectedValue: "bc" },
-                {  tag: "FAIL: A/B.custom, onlyA",
-                   expectFail: "Bug: A/B.custom does currently not inherit properties from A",
+                {  tag: "A/B.custom, onlyA",
                    objectPath: "a.b_custom", prop: "onlyA", expectedValue: "A" },
                 {  tag: "A/B.custom, onlyB",
                    objectPath: "a.b_custom", prop: "onlyB", expectedValue: "B" },
@@ -122,20 +121,7 @@ Item {
 
         function test_propertyInheritance(data) {
             AqtTests.Utils.withComponent(styledSceneComponent, scene, {}, function(a) {
-
-                // The following two lines are a work-around to force
-                // initialization of StyleSet objects that are not accessed
-                // otherwise in some test rows. This is a bug in the style
-                // engine which will be fixed later in this branch.
-                a.StyleSet.name;
-                a.b.StyleSet.name;
-
                 var obj = eval(data.objectPath);
-
-                if (data.expectFail) {
-                    expectFail("", data.expectFail);
-                }
-
                 compare(obj.StyleSet.props.string(data.prop), data.expectedValue);
             });
         }

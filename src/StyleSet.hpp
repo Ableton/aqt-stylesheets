@@ -405,7 +405,7 @@ public:
   Q_REVISION(2) Q_INVOKABLE QUrl url(const QString& key) const;
 
   /*! @cond DOXYGEN_IGNORE */
-  void loadProperties(QObject* pRefObject);
+  void loadProperties();
 
   static StyleSetAttached* qmlAttachedProperties(QObject* pObject);
 

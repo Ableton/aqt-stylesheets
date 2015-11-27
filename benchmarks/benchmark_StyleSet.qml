@@ -64,12 +64,6 @@ Item {
                 property string mode
                 property int level: 0
 
-                // The following line is a work-around to force
-                // initialization of StyleSet objects that are not accessed
-                // otherwise in in the tree. This is a bug in the style
-                // engine which will be fixed later in this branch.
-                property string workaround: StyleSet.name
-
                 Loader {
                     property string parentMode: parent.mode
                     property int parentLevel: parent.level
