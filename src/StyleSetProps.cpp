@@ -72,6 +72,12 @@ StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
   onStyleChanged();
 }
 
+StyleSetProps* StyleSetProps::nullStyleSetProps()
+{
+  static StyleSetProps sNullStyleSetProps{{}, nullptr};
+  return &sNullStyleSetProps;
+}
+
 bool StyleSetProps::isValid() const
 {
   return !mProperties.empty();

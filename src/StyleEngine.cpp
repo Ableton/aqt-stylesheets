@@ -22,9 +22,11 @@ THE SOFTWARE.
 
 #include "StyleEngine.hpp"
 
+#include "estd/memory.hpp"
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleMatchTree.hpp"
+#include "StyleSetProps.hpp"
 #include "UrlUtils.hpp"
 #include "Warnings.hpp"
 
@@ -95,6 +97,13 @@ StyleEngine::StyleEngine(QObject* pParent)
           &StyleEngine::availableStylesChanged);
   connect(&mStylesDir, &StylesDirWatcher::fileExtensionsChanged, this,
           &StyleEngine::fileExtensionsChanged);
+}
+
+StyleEngine::~StyleEngine()
+{
+  for (auto& pStyleSetProps : mStyleSetPropsInstances) {
+    Q_EMIT pStyleSetProps->invalidated();
+  }
 }
 
 QUrl StyleEngine::styleSheetSource() const
@@ -336,6 +345,12 @@ void StyleEngine::componentComplete()
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
 {
   return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
+}
+
+StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
+{
+  mStyleSetPropsInstances.emplace_back(estd::make_unique<StyleSetProps>(path, this));
+  return mStyleSetPropsInstances.back().get();
 }
 
 void StyleEngine::SourceUrl::set(const QUrl& url,

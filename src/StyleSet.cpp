@@ -22,7 +22,6 @@ THE SOFTWARE.
 
 #include "StyleSet.hpp"
 
-#include "estd/memory.hpp"
 #include "Log.hpp"
 #include "StyleEngine.hpp"
 #include "Warnings.hpp"
@@ -131,6 +130,7 @@ UiItemPath traversePathUp(QObject* pObj)
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
+  , mpStyleSetProps(StyleSetProps::nullStyleSetProps())
 {
   QObject* p = parent();
   if (p) {
@@ -176,10 +176,15 @@ void StyleSet::setEngine(StyleEngine* pEngine)
 
 void StyleSet::setupStyle()
 {
-  mpStyleSetProps = estd::make_unique<StyleSetProps>(mPath, mpEngine);
-  connect(
-    mpStyleSetProps.get(), &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
-  Q_EMIT propsChanged();
+  if (mpEngine) {
+    mpStyleSetProps = mpEngine->styleSetProps(mPath);
+
+    connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+    connect(
+      mpStyleSetProps, &StyleSetProps::invalidated, this, &StyleSet::onPropsInvalidated);
+
+    Q_EMIT propsChanged();
+  }
 }
 
 QString StyleSet::name() const
@@ -217,7 +222,7 @@ QString StyleSet::styleInfo() const
 
 StyleSetProps* StyleSet::props()
 {
-  return mpStyleSetProps.get();
+  return mpStyleSetProps;
 }
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
@@ -229,6 +234,13 @@ void StyleSet::onParentChanged(QQuickItem* pNewParent)
 
     Q_EMIT pathChanged();
   }
+}
+
+void StyleSet::onPropsInvalidated()
+{
+  mpStyleSetProps->disconnect(this);
+  mpStyleSetProps = StyleSetProps::nullStyleSetProps();
+  Q_EMIT propsChanged();
 }
 
 } // namespace stylesheets
