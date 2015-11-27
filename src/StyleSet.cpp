@@ -374,7 +374,7 @@ void StyleSetAttached::setName(const QString& val)
     }
 
     Q_EMIT nameChanged(mName);
-    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    Q_EMIT pathChanged();
   }
 }
 
@@ -402,7 +402,7 @@ void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)
     mPath = traversePathUp(pParent);
     setupStyle();
 
-    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    Q_EMIT pathChanged();
   }
 }
 

@@ -463,7 +463,7 @@ Q_SIGNALS:
    * Whenever the location of the object his StyleSet is attached to changes
    * the StyleSet will fire this signal.
    */
-  void pathChanged(const QString& path);
+  void pathChanged();
 
 private Q_SLOTS:
   void onStyleEngineChanged(StyleEngine* pEngine);
