@@ -22,12 +22,12 @@ THE SOFTWARE.
 
 #include "StyleSet.hpp"
 
+#include "estd/memory.hpp"
 #include "Log.hpp"
 #include "StyleEngine.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
 RESTORE_WARNINGS
 
@@ -131,11 +131,10 @@ UiItemPath traversePathUp(QObject* pObj)
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
-  , mStyleSetProps(this)
+  , mpStyleSetProps(estd::make_unique<StyleSetProps>())
 {
-  connect(&mStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
-
-  QQmlEngine::setObjectOwnership(&mStyleSetProps, QQmlEngine::CppOwnership);
+  connect(
+    mpStyleSetProps.get(), &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
 
   QObject* p = parent();
   if (p) {
@@ -181,7 +180,7 @@ void StyleSet::setEngine(StyleEngine* pEngine)
 
 void StyleSet::setupStyle()
 {
-  mStyleSetProps.initStyleSet(mPath, mpEngine);
+  mpStyleSetProps->initStyleSet(mPath, mpEngine);
   Q_EMIT propsChanged();
 }
 
@@ -220,7 +219,7 @@ QString StyleSet::styleInfo() const
 
 StyleSetProps* StyleSet::props()
 {
-  return &mStyleSetProps;
+  return mpStyleSetProps.get();
 }
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
