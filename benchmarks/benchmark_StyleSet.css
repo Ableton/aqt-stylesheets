@@ -1,0 +1,40 @@
+/* Copyright (c) 2015 Ableton AG, Berlin */
+
+A {
+  something: "a";
+  background: blue;
+}
+
+B {
+  something: "b";
+  background: blue;
+}
+
+C {
+  something: "c";
+  background: blue;
+}
+
+D {
+  something: "d";
+  background: blue;
+}
+
+A B {
+  something: "ab";
+  background: blue;
+}
+
+A B C {
+  something: "abc";
+  background: blue;
+}
+
+A B C D {
+  something: "abcd";
+  background: blue;
+}
+
+A B C D QQuickRectangle {
+  background: red;
+}
