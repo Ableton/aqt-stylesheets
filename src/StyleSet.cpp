@@ -131,11 +131,7 @@ UiItemPath traversePathUp(QObject* pObj)
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
-  , mpStyleSetProps(estd::make_unique<StyleSetProps>())
 {
-  connect(
-    mpStyleSetProps.get(), &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
-
   QObject* p = parent();
   if (p) {
     QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
@@ -180,7 +176,9 @@ void StyleSet::setEngine(StyleEngine* pEngine)
 
 void StyleSet::setupStyle()
 {
-  mpStyleSetProps->initStyleSet(mPath, mpEngine);
+  mpStyleSetProps = estd::make_unique<StyleSetProps>(mPath, mpEngine);
+  connect(
+    mpStyleSetProps.get(), &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
   Q_EMIT propsChanged();
 }
 

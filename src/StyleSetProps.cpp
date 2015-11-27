@@ -61,12 +61,7 @@ PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 
 } // anon namespace
 
-StyleSetProps::StyleSetProps(QObject* pParent)
-  : QObject(pParent)
-{
-}
-
-void StyleSetProps::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
+StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
 {
   const bool isDiffEngine = mpEngine != pEngine;
 
