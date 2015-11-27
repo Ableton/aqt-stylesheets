@@ -62,24 +62,14 @@ PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 } // anon namespace
 
 StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
+  : mpEngine(pEngine)
+  , mPath(path)
 {
-  const bool isDiffEngine = mpEngine != pEngine;
-
-  if (isDiffEngine || mPath != path) {
-    if (mpEngine && isDiffEngine) {
-      disconnect(
-        mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
-    }
-
-    mpEngine = pEngine;
-    mPath = path;
-
-    if (mpEngine && isDiffEngine) {
-      connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
-    }
-
-    onStyleChanged();
+  if (mpEngine) {
+    connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
   }
+
+  onStyleChanged();
 }
 
 bool StyleSetProps::isValid() const
