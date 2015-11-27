@@ -109,13 +109,13 @@ public:
 
   bool operator()(QObject* pObj)
   {
-    mResult.insert(mResult.begin(), PathElement(typeName(pObj), styleClassName(pObj)));
+    mResult.emplace_back(typeName(pObj), styleClassName(pObj));
     return true;
   }
 
   UiItemPath result() const
   {
-    return mResult;
+    return {mResult.rbegin(), mResult.rend()};
   }
 };
 
