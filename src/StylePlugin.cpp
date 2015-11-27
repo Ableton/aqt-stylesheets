@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "StyleEngine.hpp"
 #include "StylesDirWatcher.hpp"
 #include "StyleSet.hpp"
+#include "StyleSetProps.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
