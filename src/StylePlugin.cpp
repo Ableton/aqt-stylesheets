@@ -34,7 +34,7 @@ RESTORE_WARNINGS
 
 void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
 {
-  qmlRegisterUncreatableType<aqt::stylesheets::StyleSetAttached>(
+  qmlRegisterUncreatableType<aqt::stylesheets::StyleSet>(
     pUri, 1, 0, "StyleSet", "StyleSet is exposed as an attached property");
   qmlRegisterUncreatableType<aqt::stylesheets::StyleSetProps>(
     pUri, 1, 0, "StyleSetProps", "Exposed as StyleSet.props");

@@ -68,13 +68,13 @@ std::string typeName(QObject* obj)
 
 std::vector<std::string> styleClassName(QObject* pObj)
 {
-  StyleSetAttached* pStyleSetAttached = qobject_cast<StyleSetAttached*>(
-    qmlAttachedPropertiesObject<StyleSetAttached>(pObj, false));
+  StyleSet* pStyleSet =
+    qobject_cast<StyleSet*>(qmlAttachedPropertiesObject<StyleSet>(pObj, false));
 
   std::vector<std::string> classNames;
 
-  if (pStyleSetAttached) {
-    for (auto className : pStyleSetAttached->name().split(" ")) {
+  if (pStyleSet) {
+    for (auto className : pStyleSet->name().split(" ")) {
       classNames.emplace_back(className.toStdString());
     }
   }
@@ -294,15 +294,15 @@ void StyleSetProps::loadProperties()
     mProperties = effectivePropertyMap(mPath, *mpEngine);
 
     QObject* pParent = parent();
-    if (qobject_cast<StyleSetAttached*>(pParent) != nullptr) {
+    if (qobject_cast<StyleSet*>(pParent) != nullptr) {
       // emit the change notification from the attached property, otherwise
       // the QML world won't see it.
-      Q_EMIT qobject_cast<StyleSetAttached*>(parent())->propsChanged();
+      Q_EMIT qobject_cast<StyleSet*>(parent())->propsChanged();
     }
   }
 }
 
-StyleSetAttached::StyleSetAttached(QObject* pParent)
+StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
   , mStyleSetProps(this)
@@ -313,10 +313,9 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
   if (p) {
     QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
     if (pItem != nullptr) {
-      connect(
-        pItem, &QQuickItem::parentChanged, this, &StyleSetAttached::onParentChanged);
+      connect(pItem, &QQuickItem::parentChanged, this, &StyleSet::onParentChanged);
     } else if (p->parent() != nullptr) {
-      styleSheetsLogInfo() << "Parent to StyleSetAttached is not a QQuickItem but '"
+      styleSheetsLogInfo() << "Parent to StyleSet is not a QQuickItem but '"
                            << p->metaObject()->className() << "'. "
                            << "Hierarchy changes for this component won't be detected.";
 
@@ -330,40 +329,40 @@ StyleSetAttached::StyleSetAttached(QObject* pParent)
     mPath = traversePathUp(p);
 
     connect(StyleEngineHost::globalStyleEngineHost(), &StyleEngineHost::styleEngineLoaded,
-            this, &StyleSetAttached::onStyleEngineChanged);
+            this, &StyleSet::onStyleEngineChanged);
 
     setupStyle();
   }
 }
 
-StyleSetAttached* StyleSetAttached::qmlAttachedProperties(QObject* pObject)
+StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 {
-  return new StyleSetAttached(pObject);
+  return new StyleSet(pObject);
 }
 
-void StyleSetAttached::onStyleEngineChanged(StyleEngine* pEngine)
+void StyleSet::onStyleEngineChanged(StyleEngine* pEngine)
 {
   setEngine(pEngine);
 }
 
-void StyleSetAttached::setEngine(StyleEngine* pEngine)
+void StyleSet::setEngine(StyleEngine* pEngine)
 {
   mpEngine = pEngine;
   setupStyle();
 }
 
-void StyleSetAttached::setupStyle()
+void StyleSet::setupStyle()
 {
   mStyleSetProps.initStyleSet(mPath, mpEngine);
   Q_EMIT propsChanged();
 }
 
-QString StyleSetAttached::name() const
+QString StyleSet::name() const
 {
   return mName;
 }
 
-void StyleSetAttached::setName(const QString& val)
+void StyleSet::setName(const QString& val)
 {
   if (mName != val) {
     mName = val;
@@ -379,24 +378,24 @@ void StyleSetAttached::setName(const QString& val)
   }
 }
 
-QString StyleSetAttached::path() const
+QString StyleSet::path() const
 {
   return QString::fromStdString(pathToString(mPath));
 }
 
-QString StyleSetAttached::styleInfo() const
+QString StyleSet::styleInfo() const
 {
   std::string styleInfoStr(mpEngine ? mpEngine->describeMatchedPath(mPath)
                                     : "No style engine installed");
   return QString::fromStdString(styleInfoStr);
 }
 
-StyleSetProps* StyleSetAttached::props()
+StyleSetProps* StyleSet::props()
 {
   return &mStyleSetProps;
 }
 
-void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)
+void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
   QObject* pParent = parent();
   if (pNewParent != nullptr && pParent != nullptr) {
