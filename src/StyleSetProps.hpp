@@ -271,6 +271,9 @@ public:
   /*! @cond DOXYGEN_IGNORE */
   void loadProperties();
 
+Q_SIGNALS:
+  void propsChanged();
+
 public Q_SLOTS:
   void onStyleChanged();
 

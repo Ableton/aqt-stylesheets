@@ -26,7 +26,6 @@ THE SOFTWARE.
 #include "Log.hpp"
 #include "Property.hpp"
 #include "StyleEngine.hpp"
-#include "StyleSet.hpp"
 
 #include <iterator>
 
@@ -202,13 +201,7 @@ void StyleSetProps::loadProperties()
 {
   if (mpEngine) {
     mProperties = effectivePropertyMap(mPath, *mpEngine);
-
-    QObject* pParent = parent();
-    if (qobject_cast<StyleSet*>(pParent) != nullptr) {
-      // emit the change notification from the attached property, otherwise
-      // the QML world won't see it.
-      Q_EMIT qobject_cast<StyleSet*>(parent())->propsChanged();
-    }
+    Q_EMIT propsChanged();
   }
 }
 

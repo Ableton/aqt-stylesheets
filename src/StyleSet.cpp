@@ -133,6 +133,8 @@ StyleSet::StyleSet(QObject* pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
   , mStyleSetProps(this)
 {
+  connect(&mStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+
   QQmlEngine::setObjectOwnership(&mStyleSetProps, QQmlEngine::CppOwnership);
 
   QObject* p = parent();
