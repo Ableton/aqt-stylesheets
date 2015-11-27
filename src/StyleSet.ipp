@@ -55,7 +55,7 @@ AQT_DEFINE_TYPENAME(QUrl);
 } // namespace detail
 
 template <typename T>
-T StyleSet::lookupProperty(Property& def, const QString& key) const
+T StyleSetProps::lookupProperty(Property& def, const QString& key) const
 {
   if (getImpl(def, key)) {
     if (def.mValues.size() == 1) {
@@ -74,7 +74,7 @@ T StyleSet::lookupProperty(Property& def, const QString& key) const
 }
 
 template <typename T>
-T StyleSet::lookupProperty(const QString& key) const
+T StyleSetProps::lookupProperty(const QString& key) const
 {
   Property def;
   return lookupProperty<T>(def, key);

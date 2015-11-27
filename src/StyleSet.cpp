@@ -152,42 +152,43 @@ PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 
 } // anon namespace
 
-StyleSet::StyleSet(QObject* pParent)
+StyleSetProps::StyleSetProps(QObject* pParent)
   : QObject(pParent)
 {
 }
 
-void StyleSet::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
+void StyleSetProps::initStyleSet(const UiItemPath& path, StyleEngine* pEngine)
 {
   const bool isDiffEngine = mpEngine != pEngine;
 
   if (isDiffEngine || mPath != path) {
     if (mpEngine && isDiffEngine) {
-      disconnect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
+      disconnect(
+        mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
     }
 
     mpEngine = pEngine;
     mPath = path;
 
     if (mpEngine && isDiffEngine) {
-      connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSet::onStyleChanged);
+      connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
     }
 
     onStyleChanged();
   }
 }
 
-bool StyleSet::isValid() const
+bool StyleSetProps::isValid() const
 {
   return !mProperties.empty();
 }
 
-bool StyleSet::isSet(const QString& key) const
+bool StyleSetProps::isSet(const QString& key) const
 {
   return mProperties.find(key) != mProperties.end();
 }
 
-bool StyleSet::getImpl(Property& prop, const QString& key) const
+bool StyleSetProps::getImpl(Property& prop, const QString& key) const
 {
   PropertyMap::const_iterator it = mProperties.find(key);
   if (it != mProperties.end()) {
@@ -206,7 +207,7 @@ bool StyleSet::getImpl(Property& prop, const QString& key) const
   return false;
 }
 
-QVariant StyleSet::get(const QString& key) const
+QVariant StyleSetProps::get(const QString& key) const
 {
   Property prop;
   getImpl(prop, key);
@@ -231,7 +232,7 @@ QVariant StyleSet::get(const QString& key) const
   return QVariant();
 }
 
-QVariant StyleSet::values(const QString& key) const
+QVariant StyleSetProps::values(const QString& key) const
 {
   Property prop;
   getImpl(prop, key);
@@ -243,32 +244,32 @@ QVariant StyleSet::values(const QString& key) const
   return convertValueToVariantList(prop.mValues);
 }
 
-QColor StyleSet::color(const QString& key) const
+QColor StyleSetProps::color(const QString& key) const
 {
   return lookupProperty<QColor>(key);
 }
 
-QFont StyleSet::font(const QString& key) const
+QFont StyleSetProps::font(const QString& key) const
 {
   return lookupProperty<QFont>(key);
 }
 
-double StyleSet::number(const QString& key) const
+double StyleSetProps::number(const QString& key) const
 {
   return lookupProperty<double>(key);
 }
 
-bool StyleSet::boolean(const QString& key) const
+bool StyleSetProps::boolean(const QString& key) const
 {
   return lookupProperty<bool>(key);
 }
 
-QString StyleSet::string(const QString& key) const
+QString StyleSetProps::string(const QString& key) const
 {
   return lookupProperty<QString>(key);
 }
 
-QUrl StyleSet::url(const QString& key) const
+QUrl StyleSetProps::url(const QString& key) const
 {
   Property prop;
   auto url = lookupProperty<QUrl>(prop, key);
@@ -282,12 +283,12 @@ QUrl StyleSet::url(const QString& key) const
   return url;
 }
 
-void StyleSet::onStyleChanged()
+void StyleSetProps::onStyleChanged()
 {
   loadProperties();
 }
 
-void StyleSet::loadProperties()
+void StyleSetProps::loadProperties()
 {
   if (mpEngine) {
     mProperties = effectivePropertyMap(mPath, *mpEngine);
@@ -304,9 +305,9 @@ void StyleSet::loadProperties()
 StyleSetAttached::StyleSetAttached(QObject* pParent)
   : QObject(pParent)
   , mpEngine(StyleEngineHost::globalStyleEngine())
-  , mStyle(this)
+  , mStyleSetProps(this)
 {
-  QQmlEngine::setObjectOwnership(&mStyle, QQmlEngine::CppOwnership);
+  QQmlEngine::setObjectOwnership(&mStyleSetProps, QQmlEngine::CppOwnership);
 
   QObject* p = parent();
   if (p) {
@@ -353,7 +354,7 @@ void StyleSetAttached::setEngine(StyleEngine* pEngine)
 
 void StyleSetAttached::setupStyle()
 {
-  mStyle.initStyleSet(mPath, mpEngine);
+  mStyleSetProps.initStyleSet(mPath, mpEngine);
   Q_EMIT propsChanged();
 }
 
@@ -390,9 +391,9 @@ QString StyleSetAttached::styleInfo() const
   return QString::fromStdString(styleInfoStr);
 }
 
-StyleSet* StyleSetAttached::props()
+StyleSetProps* StyleSetAttached::props()
 {
-  return &mStyle;
+  return &mStyleSetProps;
 }
 
 void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)

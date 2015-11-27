@@ -48,13 +48,13 @@ class StyleEngine;
 class StyleSetAttached;
 
 /*! Provides style properties to QML via StyleSetAttached */
-class StyleSet : public QObject
+class StyleSetProps : public QObject
 {
   Q_OBJECT
 
 public:
   /*! @cond DOXYGEN_IGNORE */
-  StyleSet(QObject* pParent = nullptr);
+  StyleSetProps(QObject* pParent = nullptr);
 
   void initStyleSet(const UiItemPath& path, StyleEngine* pEngine);
 
@@ -412,7 +412,7 @@ class StyleSetAttached : public QObject
    * @endcode
    *
    */
-  Q_PROPERTY(aqt::stylesheets::StyleSet* props READ props NOTIFY propsChanged)
+  Q_PROPERTY(aqt::stylesheets::StyleSetProps* props READ props NOTIFY propsChanged)
 
   Q_PROPERTY(QString styleInfo READ styleInfo NOTIFY propsChanged)
 
@@ -427,7 +427,7 @@ public:
   void setName(const QString& val);
 
   QString path() const;
-  StyleSet* props();
+  StyleSetProps* props();
 
   QString styleInfo() const;
 
@@ -462,7 +462,7 @@ private:
 
 private:
   QPointer<StyleEngine> mpEngine;
-  StyleSet mStyle;
+  StyleSetProps mStyleSetProps;
   QString mName;
   UiItemPath mPath;
 
