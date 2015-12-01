@@ -32,5 +32,12 @@ Item {
                 compare(item.StyleSet.path, "QQuickItem.{foo,bar,baz}");
             });
         }
+
+        function test_redundantWhitespaceIsIgnored() {
+            AqtTests.Utils.withComponent(itemComponent, null, {}, function(item) {
+                item.StyleSet.name = "bar  foo ";
+                compare(item.StyleSet.path, "QQuickItem.{bar,foo}");
+            });
+        }
     }
 }
