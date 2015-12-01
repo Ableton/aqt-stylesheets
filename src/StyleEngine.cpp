@@ -155,7 +155,6 @@ void StyleEngine::setStylePath(const QUrl& url)
     mStylePath = qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile();
 
     updateSourceUrls();
-    loadStyle();
   }
 }
 
