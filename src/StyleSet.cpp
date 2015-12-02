@@ -32,6 +32,7 @@ SUPPRESS_WARNINGS
 #include <QtQuick/QQuickItem>
 RESTORE_WARNINGS
 
+#include <iterator>
 #include <string>
 
 namespace aqt
@@ -140,6 +141,9 @@ public:
 
   bool operator()(QObject* pObj)
   {
+    using std::begin;
+    using std::end;
+
     StyleSetAttached* pStyleSetAttached =
       qobject_cast<StyleSetAttached*>(qmlAttachedPropertiesObject<StyleSet>(pObj, false));
 
@@ -147,7 +151,8 @@ public:
       pStyleSetAttached->updateStyle();
 
       if (StyleSet* pStyle = pStyleSetAttached->props()) {
-        mergeInheritableProperties(mPropertyMap, pStyle->properties(mCurrentChangeCount));
+        auto props = pStyle->properties(mCurrentChangeCount);
+        mPropertyMap.insert(begin(props), end(props));
 
         // since our ancestors style should have been compiled already, stop
         // at it
@@ -328,6 +333,9 @@ void StyleSet::onStyleChanged(int changeCount)
 
 void StyleSet::loadProperties(QObject* pRefObject)
 {
+  using std::begin;
+  using std::end;
+
   if (mpEngine) {
     mProperties = mpEngine->matchPath(mPath);
     mChangeCount = mpEngine->changeCount();
@@ -335,7 +343,7 @@ void StyleSet::loadProperties(QObject* pRefObject)
     if (pRefObject) {
       PropertyMap inheritedProps(
         effectivePropertyMap(pRefObject, mpEngine->changeCount()));
-      mergeInheritableProperties(mProperties, inheritedProps);
+      mProperties.insert(begin(inheritedProps), end(inheritedProps));
     }
 
     QObject* pParent = parent();
