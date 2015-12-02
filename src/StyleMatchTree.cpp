@@ -229,15 +229,6 @@ void mergePropSet(MatchNode* parent, int sourceLayer, const PropertySpecSet& ps)
 
 } // anon namespace
 
-void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& src)
-{
-  for (auto const& prop : src) {
-    if (dest.find(prop.first) == dest.end()) {
-      dest.insert(prop);
-    }
-  }
-}
-
 #define DEFAULT_STYLESHEET_LAYER 0
 #define USER_STYLESHEET_LAYER 1
 

@@ -74,8 +74,6 @@ std::string pathToString(const UiItemPath& path);
 
 using PropertyMap = std::map<QString, Property>;
 
-void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& b);
-
 class IStyleMatchTree
 {
 };
