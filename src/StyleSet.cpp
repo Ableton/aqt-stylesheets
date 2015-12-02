@@ -177,6 +177,22 @@ PropertyMap effectivePropertyMap(QObject* pObj, int currentChangeCount)
   return traverseParentChain<PropertyMap>(pObj, visitor);
 }
 
+void updateDescendantPaths(const QObject* pObj)
+{
+  if (pObj) {
+    for (const auto* pChild : pObj->children()) {
+      StyleSetAttached* pStyleSetAttached = qobject_cast<StyleSetAttached*>(
+        qmlAttachedPropertiesObject<StyleSet>(pChild, false));
+
+      if (pStyleSetAttached) {
+        pStyleSetAttached->reevaluatePath();
+      }
+
+      updateDescendantPaths(pChild);
+    }
+  }
+}
+
 } // anon namespace
 
 StyleSet::StyleSet(QObject* pParent)
@@ -450,6 +466,21 @@ QString StyleSetAttached::name() const
   return mName;
 }
 
+void StyleSetAttached::reevaluatePath()
+{
+  QObject* p = parent();
+  if (p) {
+    auto prevPath = mPath;
+    mPath = traversePathUp(p);
+    setupStyle();
+
+    if (mPath != prevPath) {
+      Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    }
+  }
+}
+
+
 void StyleSetAttached::setName(const QString& val)
 {
   if (mName != val) {
@@ -459,6 +490,7 @@ void StyleSetAttached::setName(const QString& val)
     if (p) {
       mPath = traversePathUp(p);
       setupStyle();
+      updateDescendantPaths(p);
     }
 
     Q_EMIT nameChanged(mName);
@@ -487,10 +519,14 @@ void StyleSetAttached::onParentChanged(QQuickItem* pNewParent)
 {
   QObject* pParent = parent();
   if (pNewParent != nullptr && pParent != nullptr) {
+    auto prevPath = mPath;
     mPath = traversePathUp(pParent);
     setupStyle();
 
-    Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    if (mPath != prevPath) {
+      updateDescendantPaths(pParent);
+      Q_EMIT pathChanged(QString::fromStdString(pathToString(mPath)));
+    }
   }
 }
 

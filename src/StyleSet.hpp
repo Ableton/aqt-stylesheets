@@ -473,6 +473,7 @@ public:
   QString styleInfo() const;
 
   void updateStyle();
+  void reevaluatePath();
 
 Q_SIGNALS:
   void propsChanged();

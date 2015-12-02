@@ -190,6 +190,8 @@ public:
     switch (type) {
     case QtDebugMsg:
       return LogTracker::kDebug;
+    case QtInfoMsg:
+      return LogTracker::kDebug;
     case QtWarningMsg:
       return LogTracker::kWarn;
     case QtCriticalMsg:

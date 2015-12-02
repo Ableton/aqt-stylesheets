@@ -3,3 +3,11 @@
 Bar, QObject.foo, .root {
   text: "B";
 }
+
+.setnmFoo .setnmBar {
+    height: 100;
+}
+
+.setnmFoo2 .setnmBar {
+    height: 200;
+}
