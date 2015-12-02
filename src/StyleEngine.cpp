@@ -43,6 +43,7 @@ RESTORE_WARNINGS
 
 #include <iostream>
 #include <iterator>
+#include <tuple>
 
 namespace aqt
 {
@@ -102,7 +103,8 @@ StyleEngine::StyleEngine(QObject* pParent)
 
 StyleEngine::~StyleEngine()
 {
-  for (auto& pStyleSetProps : mStyleSetPropsInstances) {
+  for (auto& element : mStyleSetPropsByPath) {
+    auto& pStyleSetProps = element.second;
     Q_EMIT pStyleSetProps->invalidated();
   }
 }
@@ -350,8 +352,14 @@ QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
 
 StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
 {
-  mStyleSetPropsInstances.emplace_back(estd::make_unique<StyleSetProps>(path, this));
-  return mStyleSetPropsInstances.back().get();
+  auto iElement = mStyleSetPropsByPath.find(path);
+
+  if (iElement == mStyleSetPropsByPath.end()) {
+    std::tie(iElement, std::ignore) =
+      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path, this));
+  }
+
+  return iElement->second.get();
 }
 
 PropertyMap* StyleEngine::properties(const UiItemPath& path)

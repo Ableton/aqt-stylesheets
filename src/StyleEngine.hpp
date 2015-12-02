@@ -251,6 +251,9 @@ public:
 
   /*! Returns a pointer to StyleSetProps corresponding to @p path
    *
+   * Subsequent calls with identical @p path will return pointers to
+   * the same StyleSetProps instance.
+   *
    * Will never return nullptr, but pointers will be invalidated if
    * and only if this StyleEngine instance is destroyed. Clients should
    * listen to StyleSetProps::invalidated.
@@ -338,6 +341,9 @@ private:
   PropertyMap* effectivePropertyMap(const UiItemPath& path);
 
 private:
+  using StyleSetPropsByPath =
+    std::unordered_map<UiItemPath, std::unique_ptr<StyleSetProps>, UiItemPathHasher>;
+
   using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
   using PropertyMaps = std::unordered_map<UiItemPath, PropertyMap*, UiItemPathHasher>;
 
@@ -355,7 +361,7 @@ private:
 
   StylesDirWatcher mStylesDir;
 
-  std::vector<std::unique_ptr<StyleSetProps>> mStyleSetPropsInstances;
+  StyleSetPropsByPath mStyleSetPropsByPath;
 
   PropertyMapInstances mPropertyMapInstances;
   PropertyMaps mPropertyMaps;
