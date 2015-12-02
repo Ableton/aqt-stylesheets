@@ -81,6 +81,15 @@ While qmlscene is running you can change `examples/style.css` and watch the
 application update.
 
 
+## Benchmarks
+
+In the `benchmarks` folder there are benchmarks that can be run manually with:
+
+```
+qmltestrunner -input benchmarks/benchmark_*.qml -import qml
+```
+
+
 ## License
 
 Aqt StyleSheets is distributed under the MIT license (see LICENSE).
