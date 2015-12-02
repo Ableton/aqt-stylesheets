@@ -48,11 +48,7 @@ StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
   , mPath(path)
   , mpProperties(nullProperties())
 {
-  if (mpEngine) {
-    connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
-  }
-
-  onStyleChanged();
+  loadProperties();
 }
 
 StyleSetProps* StyleSetProps::nullStyleSetProps()
@@ -165,12 +161,6 @@ QUrl StyleSetProps::url(const QString& key) const
 
   return url;
 }
-
-void StyleSetProps::onStyleChanged()
-{
-  loadProperties();
-}
-
 void StyleSetProps::loadProperties()
 {
   if (mpEngine) {

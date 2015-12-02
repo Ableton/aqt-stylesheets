@@ -273,9 +273,6 @@ Q_SIGNALS:
   void propsChanged();
   void invalidated();
 
-public Q_SLOTS:
-  void onStyleChanged();
-
 private:
   bool getImpl(Property& def, const QString& key) const;
 

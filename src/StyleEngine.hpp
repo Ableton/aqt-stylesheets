@@ -335,6 +335,7 @@ private:
   void loadStyle();
   StyleSheet loadStyleSheet(const SourceUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
+  void reloadAllProperties();
 
   void updateSourceUrls();
 

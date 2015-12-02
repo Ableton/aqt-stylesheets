@@ -323,12 +323,22 @@ void StyleEngine::loadStyle()
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
+  reloadAllProperties();
+
+  Q_EMIT styleChanged();
+}
+
+void StyleEngine::reloadAllProperties()
+{
   mPropertyMaps.clear();
 
   auto oldPropertyMapInstances = PropertyMapInstances{};
   oldPropertyMapInstances.swap(mPropertyMapInstances);
 
-  Q_EMIT styleChanged();
+  for (auto& element : mStyleSetPropsByPath) {
+    auto& pStyleSetProps = element.second;
+    pStyleSetProps->loadProperties();
+  }
 }
 
 void StyleEngine::classBegin()
