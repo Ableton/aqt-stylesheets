@@ -47,69 +47,6 @@ namespace stylesheets
 class StyleEngine;
 class StyleSetAttached;
 
-/*! An attached type used for accessing CSS like style settings
- *
- * StyleSet is the type to access the style properties and information for a
- * QML item.  When a StyleSet is instantiated and attached to
- * a QML item it
- *
- *   - determines the path of the attached-to-item up to its very root (the root
- *     of the QQuickItem object hierarchy).
- *   - connects itself to the singleton styleEngine or its styleChanged signal resp.
- *   - determines its style properties by matching the attached-to item's element
- *     path against the selector rules loaded from the style sheet.
- *
- * A style set can be queried for properties using the props property's
- * various functions, like color(), font(), etc.
- *
- * @par Example:
- * @code
- * Rectangle {
- *   StyleSet.name: "gridline"
- *   color: StyleSet.props.color("background-color")
- * }
- * @endcode
- *
- * @note Style properties should always be accessed through the props
- * property only.  Only by doing this it is possible to get notifications
- * about style changes.  (The reason is that QML does not create bindings
- * for attached types directly).
- *
- * @par The Element Path (UiItemPath)
- *
- * The element path is constructed from the typenames and attached "style
- * class" names of the QML and QQuickItem object tree.  In the following
- * example the path for each item is added as a comment:
- *
- * @code
- * Rectangle {               // QQuickRectangle
- *   Text {                  // QQuickRectangle QQuickText
- *   }
- *   Item {                  // QQuickRectangle QQuickItem
- *     ListView {            // QQuickRectangle QQuickItem QQuickListView
- *       delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
- *       }
- *     }
- *   }
- * }
- * @endcode
- *
- * MyView is a user type defined in the module's qmldir file as MyView.
- * Built-in types like Rectangle or Text begin with @c QQuick.  For
- * debugging purposes the path of an item can be printed to stdout with the
- * StyleSet::path property.
- *
- * @note Matching, determining element path and properties may be delayed in case
- * the global style engine has not been initialized yet (e.g. because it is
- * created lazily from a loader).  In this case using style property lookup
- * functions like get(const QString&) const or
- * color(const QString&, const QColor&) const may not
- * return expected values until the StyleEngine is actually initialized.
- *
- * @par Import in QML:
- * ```import Aqt.StyleSheets 1.0```
- * @since 1.0
- */
 class StyleSet : public QObject
 {
   Q_OBJECT
@@ -359,8 +296,71 @@ private:
   /*! @endcond */
 };
 
-/*! @cond DOXYGEN_IGNORE */
-
+/*! An attached type used for accessing CSS like style settings
+ *
+ * This type is exposed to QML as "StyleSet".
+ *
+ * StyleSet is the type to access the style properties and information for a
+ * QML item.  When a StyleSet is instantiated and attached to
+ * a QML item it
+ *
+ *   - determines the path of the attached-to-item up to its very root (the root
+ *     of the QQuickItem object hierarchy).
+ *   - connects itself to the singleton styleEngine or its styleChanged signal resp.
+ *   - determines its style properties by matching the attached-to item's element
+ *     path against the selector rules loaded from the style sheet.
+ *
+ * A style set can be queried for properties using the props property's
+ * various functions, like color(), font(), etc.
+ *
+ * @par Example:
+ * @code
+ * Rectangle {
+ *   StyleSet.name: "gridline"
+ *   color: StyleSet.props.color("background-color")
+ * }
+ * @endcode
+ *
+ * @note Style properties should always be accessed through the props
+ * property only.  Only by doing this it is possible to get notifications
+ * about style changes.  (The reason is that QML does not create bindings
+ * for attached types directly).
+ *
+ * @par The Element Path (UiItemPath)
+ *
+ * The element path is constructed from the typenames and attached "style
+ * class" names of the QML and QQuickItem object tree.  In the following
+ * example the path for each item is added as a comment:
+ *
+ * @code
+ * Rectangle {               // QQuickRectangle
+ *   Text {                  // QQuickRectangle QQuickText
+ *   }
+ *   Item {                  // QQuickRectangle QQuickItem
+ *     ListView {            // QQuickRectangle QQuickItem QQuickListView
+ *       delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
+ *       }
+ *     }
+ *   }
+ * }
+ * @endcode
+ *
+ * MyView is a user type defined in the module's qmldir file as MyView.
+ * Built-in types like Rectangle or Text begin with @c QQuick.  For
+ * debugging purposes the path of an item can be printed to stdout with the
+ * StyleSet::path property.
+ *
+ * @note Matching, determining element path and properties may be delayed in case
+ * the global style engine has not been initialized yet (e.g. because it is
+ * created lazily from a loader).  In this case using style property lookup
+ * functions like get(const QString&) const or
+ * color(const QString&, const QColor&) const may not
+ * return expected values until the StyleEngine is actually initialized.
+ *
+ * @par Import in QML:
+ * ```import Aqt.StyleSheets 1.0```
+ * @since 1.0
+ */
 class StyleSetAttached : public QObject
 {
   Q_OBJECT
@@ -429,6 +429,8 @@ class StyleSetAttached : public QObject
 
   Q_PROPERTY(QString styleInfo READ styleInfo NOTIFY propsChanged)
 
+  /*! @cond DOXYGEN_IGNORE */
+
 public:
   explicit StyleSetAttached(QObject* pParent = nullptr);
 
@@ -439,6 +441,8 @@ public:
   StyleSet* props();
 
   QString styleInfo() const;
+
+/*! @endcond */
 
 Q_SIGNALS:
   /*! Fires when properties change
@@ -457,6 +461,8 @@ Q_SIGNALS:
    */
   void pathChanged();
 
+  /*! @cond DOXYGEN_IGNORE */
+
 private Q_SLOTS:
   void onStyleEngineChanged(StyleEngine* pEngine);
   void onParentChanged(QQuickItem* pNewParent);
@@ -470,9 +476,9 @@ private:
   StyleSet mStyle;
   QString mName;
   UiItemPath mPath;
-};
 
-/*! @endcond */
+  /*! @endcond */
+};
 
 } // namespace stylesheets
 } // namespace aqt
