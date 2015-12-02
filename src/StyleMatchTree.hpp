@@ -67,7 +67,13 @@ public:
   std::vector<std::string> mClassNames;
 };
 
+std::size_t hash_value(const PathElement& pathElement);
+
 using UiItemPath = std::vector<PathElement>;
+
+struct UiItemPathHasher {
+  std::size_t operator()(const UiItemPath& path) const;
+};
 
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path);
 std::string pathToString(const UiItemPath& path);

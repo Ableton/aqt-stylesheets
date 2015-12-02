@@ -321,6 +321,8 @@ void StyleEngine::loadStyle()
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
+  mPropertyMaps.clear();
+
   auto oldPropertyMapInstances = PropertyMapInstances{};
   oldPropertyMapInstances.swap(mPropertyMapInstances);
 
@@ -354,31 +356,41 @@ StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
 
 PropertyMap* StyleEngine::properties(const UiItemPath& path)
 {
-  mPropertyMapInstances.emplace_back(
-    estd::make_unique<PropertyMap>(effectivePropertyMap(path)));
-
-  return mPropertyMapInstances.back().get();
+  return effectivePropertyMap(path);
 }
 
-PropertyMap StyleEngine::effectivePropertyMap(const UiItemPath& path)
+PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
 {
   using std::begin;
   using std::end;
   using std::prev;
 
+  const auto iElement = mPropertyMaps.find(path);
+  if (iElement != mPropertyMaps.end()) {
+    return iElement->second;
+  }
+
   auto props = matchPath(mpStyleTree.get(), path);
 
   if (path.size() > 1) {
-    const auto ancestorProps = effectivePropertyMap({begin(path), prev(end(path))});
+    auto* pAncestorProps = effectivePropertyMap({begin(path), prev(end(path))});
 
     if (props.empty()) {
-      props = ancestorProps;
+      // point to our ancestor props and return them immediately
+      // without storing our own props instance
+      mPropertyMaps.emplace(path, pAncestorProps);
+      return pAncestorProps;
     } else {
-      props.insert(begin(ancestorProps), end(ancestorProps));
+      props.insert(begin(*pAncestorProps), end(*pAncestorProps));
     }
   }
 
-  return props;
+  mPropertyMapInstances.emplace_back(estd::make_unique<PropertyMap>(std::move(props)));
+
+  auto* pProps = mPropertyMapInstances.back().get();
+  mPropertyMaps.emplace(path, pProps);
+
+  return pProps;
 }
 
 void StyleEngine::SourceUrl::set(const QUrl& url,

@@ -37,6 +37,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace aqt
@@ -262,6 +263,9 @@ public:
    * current style sheet.  The resulting set of properties is returned.  If
    * the path is not matching any rule the result is an empty property map.
    *
+   * Subsequent calls with identical @p path will return pointers to the same
+   * PropertyMap instance.
+   *
    * Will never return nullptr, but pointers will be invalidated if and only
    * if the style changes or this StyleEngine instance is destroyed.
    */
@@ -331,10 +335,11 @@ private:
 
   void updateSourceUrls();
 
-  PropertyMap effectivePropertyMap(const UiItemPath& path);
+  PropertyMap* effectivePropertyMap(const UiItemPath& path);
 
 private:
   using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
+  using PropertyMaps = std::unordered_map<UiItemPath, PropertyMap*, UiItemPathHasher>;
 
   QUrl mStylePathUrl;        //!< @deprecated
   QString mStylePath;        //!< @deprecated
@@ -351,7 +356,9 @@ private:
   StylesDirWatcher mStylesDir;
 
   std::vector<std::unique_ptr<StyleSetProps>> mStyleSetPropsInstances;
+
   PropertyMapInstances mPropertyMapInstances;
+  PropertyMaps mPropertyMaps;
 };
 
 } // namespace stylesheets
