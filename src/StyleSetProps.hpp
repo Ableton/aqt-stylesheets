@@ -34,8 +34,6 @@ SUPPRESS_WARNINGS
 #include <QtGui/QFont>
 RESTORE_WARNINGS
 
-#include <memory>
-
 namespace aqt
 {
 namespace stylesheets
@@ -289,7 +287,7 @@ private:
 private:
   StyleEngine* const mpEngine;
   UiItemPath mPath;
-  std::unique_ptr<PropertyMap> mpProperties;
+  PropertyMap* mpProperties;
   /*! @endcond */
 };
 

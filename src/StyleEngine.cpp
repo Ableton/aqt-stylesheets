@@ -42,6 +42,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <iostream>
+#include <iterator>
 
 namespace aqt
 {
@@ -325,6 +326,9 @@ void StyleEngine::loadStyle()
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
+  auto oldPropertyMapInstances = PropertyMapInstances{};
+  oldPropertyMapInstances.swap(mPropertyMapInstances);
+
   Q_EMIT styleChanged();
 }
 
@@ -351,6 +355,35 @@ StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
 {
   mStyleSetPropsInstances.emplace_back(estd::make_unique<StyleSetProps>(path, this));
   return mStyleSetPropsInstances.back().get();
+}
+
+PropertyMap* StyleEngine::properties(const UiItemPath& path)
+{
+  mPropertyMapInstances.emplace_back(
+    estd::make_unique<PropertyMap>(effectivePropertyMap(path)));
+
+  return mPropertyMapInstances.back().get();
+}
+
+PropertyMap StyleEngine::effectivePropertyMap(const UiItemPath& path)
+{
+  using std::begin;
+  using std::end;
+  using std::prev;
+
+  auto props = matchPath(path);
+
+  if (path.size() > 1) {
+    const auto ancestorProps = effectivePropertyMap({begin(path), prev(end(path))});
+
+    if (props.empty()) {
+      props = ancestorProps;
+    } else {
+      props.insert(begin(ancestorProps), end(ancestorProps));
+    }
+  }
+
+  return props;
 }
 
 void StyleEngine::SourceUrl::set(const QUrl& url,

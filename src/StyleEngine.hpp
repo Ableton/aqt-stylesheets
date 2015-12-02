@@ -264,6 +264,17 @@ public:
    */
   StyleSetProps* styleSetProps(const UiItemPath& path);
 
+  /*! Returns a pointer to the PropertyMap corresponding to @p path
+   *
+   * The element path @p path is matched against the rules loaded from the
+   * current style sheet.  The resulting set of properties is returned.  If
+   * the path is not matching any rule the result is an empty property map.
+   *
+   * Will never return nullptr, but pointers will be invalidated if and only
+   * if the style changes or this StyleEngine instance is destroyed.
+   */
+  PropertyMap* properties(const UiItemPath& path);
+
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
   void styleChanged();
@@ -328,7 +339,11 @@ private:
 
   void updateSourceUrls();
 
+  PropertyMap effectivePropertyMap(const UiItemPath& path);
+
 private:
+  using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
+
   QUrl mStylePathUrl;        //!< @deprecated
   QString mStylePath;        //!< @deprecated
   QString mStyleName;        //!< @deprecated
@@ -344,6 +359,7 @@ private:
   StylesDirWatcher mStylesDir;
 
   std::vector<std::unique_ptr<StyleSetProps>> mStyleSetPropsInstances;
+  PropertyMapInstances mPropertyMapInstances;
 };
 
 } // namespace stylesheets

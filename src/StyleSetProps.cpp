@@ -22,13 +22,10 @@ THE SOFTWARE.
 
 #include "StyleSetProps.hpp"
 
-#include "estd/memory.hpp"
 #include "Convert.hpp"
 #include "Log.hpp"
 #include "Property.hpp"
 #include "StyleEngine.hpp"
-
-#include <iterator>
 
 namespace aqt
 {
@@ -38,26 +35,10 @@ namespace stylesheets
 namespace
 {
 
-PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
+PropertyMap* nullProperties()
 {
-  using std::begin;
-  using std::end;
-  using std::prev;
-
-  auto props = engine.matchPath(path);
-
-  if (path.size() > 1) {
-    const auto ancestorProps =
-      effectivePropertyMap({begin(path), prev(end(path))}, engine);
-
-    if (props.empty()) {
-      props = ancestorProps;
-    } else {
-      props.insert(begin(ancestorProps), end(ancestorProps));
-    }
-  }
-
-  return props;
+  static PropertyMap sNullPropertyMap;
+  return &sNullPropertyMap;
 }
 
 } // anon namespace
@@ -65,6 +46,7 @@ PropertyMap effectivePropertyMap(const UiItemPath& path, StyleEngine& engine)
 StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
   : mpEngine(pEngine)
   , mPath(path)
+  , mpProperties(nullProperties())
 {
   if (mpEngine) {
     connect(mpEngine, &StyleEngine::styleChanged, this, &StyleSetProps::onStyleChanged);
@@ -192,10 +174,10 @@ void StyleSetProps::onStyleChanged()
 void StyleSetProps::loadProperties()
 {
   if (mpEngine) {
-    mpProperties = estd::make_unique<PropertyMap>(effectivePropertyMap(mPath, *mpEngine));
+    mpProperties = mpEngine->properties(mPath);
     Q_EMIT propsChanged();
   } else {
-    mpProperties = estd::make_unique<PropertyMap>();
+    mpProperties = nullProperties();
   }
 }
 
