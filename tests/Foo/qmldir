@@ -1,3 +1,7 @@
 module Foo
 
+A 1.0 A.qml
+B 1.0 B.qml
+C 1.0 C.qml
+
 singleton Bar 1.0 Bar.qml

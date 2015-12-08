@@ -37,6 +37,8 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace aqt
 {
@@ -44,6 +46,7 @@ namespace stylesheets
 {
 
 class StyleEngine;
+class StyleSetProps;
 
 /*! @cond DOXYGEN_IGNORE */
 
@@ -199,8 +202,7 @@ class StyleEngine : public QObject, public QQmlParserStatus
 public:
   /*! @cond DOXYGEN_IGNORE */
   explicit StyleEngine(QObject* pParent = nullptr);
-
-  int changeCount() const;
+  ~StyleEngine();
 
   QUrl styleSheetSource() const;
   void setStyleSheetSource(const QUrl& url);
@@ -237,16 +239,8 @@ public:
   virtual void componentComplete();
   /*! @endcond */
 
-  /*! Matches an element path
-   *
-   * The element path @p path is matched against the rules loaded from the
-   * current style sheet.  The resulting set of properties is returned.  If
-   * the path is not matching any rule the result is an empty property map.
-   */
-  PropertyMap matchPath(const UiItemPath& path);
-
   /*! @private */
-  std::string describeMatchedPath(const UiItemPath& path);
+  std::string describeMatchedPath(const UiItemPath& path) const;
 
   /*! Resolve @p url against @p baseUrl or search for it in a search path.
    *
@@ -255,9 +249,34 @@ public:
    */
   QUrl resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const;
 
+  /*! Returns a pointer to StyleSetProps corresponding to @p path
+   *
+   * Subsequent calls with identical @p path will return pointers to
+   * the same StyleSetProps instance.
+   *
+   * Will never return nullptr, but pointers will be invalidated if
+   * and only if this StyleEngine instance is destroyed. Clients should
+   * listen to StyleSetProps::invalidated.
+   */
+  StyleSetProps* styleSetProps(const UiItemPath& path);
+
+  /*! Returns a pointer to the PropertyMap corresponding to @p path
+   *
+   * The element path @p path is matched against the rules loaded from the
+   * current style sheet.  The resulting set of properties is returned.  If
+   * the path is not matching any rule the result is an empty property map.
+   *
+   * Subsequent calls with identical @p path will return pointers to the same
+   * PropertyMap instance.
+   *
+   * Will never return nullptr, but pointers will be invalidated if and only
+   * if the style changes or this StyleEngine instance is destroyed.
+   */
+  PropertyMap* properties(const UiItemPath& path);
+
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
-  void styleChanged(int changeCount);
+  void styleChanged();
   /*! Fires when a new style sheet file name is set to the styleName property */
   void styleNameChanged();
   /*! Fires when a new default style sheet file name is set to the styleName
@@ -316,10 +335,19 @@ private:
   void loadStyle();
   StyleSheet loadStyleSheet(const SourceUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
+  void reloadAllProperties();
 
   void updateSourceUrls();
 
+  PropertyMap* effectivePropertyMap(const UiItemPath& path);
+
 private:
+  using StyleSetPropsByPath =
+    std::unordered_map<UiItemPath, std::unique_ptr<StyleSetProps>, UiItemPathHasher>;
+
+  using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
+  using PropertyMaps = std::unordered_map<UiItemPath, PropertyMap*, UiItemPathHasher>;
+
   QUrl mStylePathUrl;        //!< @deprecated
   QString mStylePath;        //!< @deprecated
   QString mStyleName;        //!< @deprecated
@@ -330,10 +358,14 @@ private:
 
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
   QFileSystemWatcher mFsWatcher;
-  int mChangeCount;
   StyleEngineHost::FontIdCache& mFontIdCache;
 
   StylesDirWatcher mStylesDir;
+
+  StyleSetPropsByPath mStyleSetPropsByPath;
+
+  PropertyMapInstances mPropertyMapInstances;
+  PropertyMaps mPropertyMaps;
 };
 
 } // namespace stylesheets

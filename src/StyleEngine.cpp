@@ -22,9 +22,11 @@ THE SOFTWARE.
 
 #include "StyleEngine.hpp"
 
+#include "estd/memory.hpp"
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleMatchTree.hpp"
+#include "StyleSetProps.hpp"
 #include "UrlUtils.hpp"
 #include "Warnings.hpp"
 
@@ -40,6 +42,8 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <iostream>
+#include <iterator>
+#include <tuple>
 
 namespace aqt
 {
@@ -66,9 +70,25 @@ void setGlobalStyleEngine(StyleEngine* pEngine)
 
 } // anon namespace
 
+StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
+{
+  static StyleEngineHost gGlobalStyleEngineHost;
+
+  return &gGlobalStyleEngineHost;
+}
+
+StyleEngine* StyleEngineHost::globalStyleEngine()
+{
+  return globalStyleEngineImpl();
+}
+
+StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
+{
+  return mFontIdCache;
+}
+
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
-  , mChangeCount(0)
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
@@ -81,9 +101,12 @@ StyleEngine::StyleEngine(QObject* pParent)
           &StyleEngine::fileExtensionsChanged);
 }
 
-int StyleEngine::changeCount() const
+StyleEngine::~StyleEngine()
 {
-  return mChangeCount;
+  for (auto& element : mStyleSetPropsByPath) {
+    auto& pStyleSetProps = element.second;
+    Q_EMIT pStyleSetProps->invalidated();
+  }
 }
 
 QUrl StyleEngine::styleSheetSource() const
@@ -200,12 +223,7 @@ QVariantList StyleEngine::availableStyles()
   return mStylesDir.availableStyleSheetNames();
 }
 
-PropertyMap StyleEngine::matchPath(const UiItemPath& path)
-{
-  return aqt::stylesheets::matchPath(mpStyleTree.get(), path);
-}
-
-std::string StyleEngine::describeMatchedPath(const UiItemPath& path)
+std::string StyleEngine::describeMatchedPath(const UiItemPath& path) const
 {
   return aqt::stylesheets::describeMatchedPath(mpStyleTree.get(), path);
 }
@@ -305,8 +323,22 @@ void StyleEngine::loadStyle()
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
 
-  mChangeCount++;
-  Q_EMIT styleChanged(mChangeCount);
+  reloadAllProperties();
+
+  Q_EMIT styleChanged();
+}
+
+void StyleEngine::reloadAllProperties()
+{
+  mPropertyMaps.clear();
+
+  auto oldPropertyMapInstances = PropertyMapInstances{};
+  oldPropertyMapInstances.swap(mPropertyMapInstances);
+
+  for (auto& element : mStyleSetPropsByPath) {
+    auto& pStyleSetProps = element.second;
+    pStyleSetProps->loadProperties();
+  }
 }
 
 void StyleEngine::classBegin()
@@ -323,29 +355,61 @@ void StyleEngine::componentComplete()
   setGlobalStyleEngine(this);
 }
 
-StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
-{
-  static StyleEngineHost gGlobalStyleEngineHost;
-
-  return &gGlobalStyleEngineHost;
-}
-
-StyleEngine* StyleEngineHost::globalStyleEngine()
-{
-  return globalStyleEngineImpl();
-}
-
-StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
-{
-  return mFontIdCache;
-}
-
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
 {
   return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
 }
 
-//----------------------------------------------------------------------------------------
+StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
+{
+  auto iElement = mStyleSetPropsByPath.find(path);
+
+  if (iElement == mStyleSetPropsByPath.end()) {
+    std::tie(iElement, std::ignore) =
+      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path, this));
+  }
+
+  return iElement->second.get();
+}
+
+PropertyMap* StyleEngine::properties(const UiItemPath& path)
+{
+  return effectivePropertyMap(path);
+}
+
+PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
+{
+  using std::begin;
+  using std::end;
+  using std::prev;
+
+  const auto iElement = mPropertyMaps.find(path);
+  if (iElement != mPropertyMaps.end()) {
+    return iElement->second;
+  }
+
+  auto props = matchPath(mpStyleTree.get(), path);
+
+  if (path.size() > 1) {
+    auto* pAncestorProps = effectivePropertyMap({begin(path), prev(end(path))});
+
+    if (props.empty()) {
+      // point to our ancestor props and return them immediately
+      // without storing our own props instance
+      mPropertyMaps.emplace(path, pAncestorProps);
+      return pAncestorProps;
+    } else {
+      props.insert(begin(*pAncestorProps), end(*pAncestorProps));
+    }
+  }
+
+  mPropertyMapInstances.emplace_back(estd::make_unique<PropertyMap>(std::move(props)));
+
+  auto* pProps = mPropertyMapInstances.back().get();
+  mPropertyMaps.emplace(path, pProps);
+
+  return pProps;
+}
 
 void StyleEngine::SourceUrl::set(const QUrl& url,
                                  StyleEngine* pParent,

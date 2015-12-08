@@ -33,7 +33,6 @@ SUPPRESS_WARNINGS
 #include <gtest/gtest.h>
 RESTORE_WARNINGS
 
-
 //========================================================================================
 
 using namespace aqt::stylesheets;

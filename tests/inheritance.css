@@ -1,0 +1,36 @@
+/* Copyright (c) 2015 Ableton AG, Berlin */
+
+A {
+  forEveryone: "a";
+  onlyA: "A";
+}
+
+B {
+  forEveryone: "b";
+  onlyB: "B";
+}
+
+C {
+  forEveryone: "c";
+  onlyC: "C";
+}
+
+B C {
+  forEveryone: "bc";
+  onlyBC: "BC";
+}
+
+B > C {
+  forEveryone: "b>c";
+  onlyBdirectC: "B>C";
+}
+
+.custom {
+  forEveryone: "custom";
+  onlyCustom: "CUSTOM";
+}
+
+.custom C {
+  forEveryone: "customC";
+  onlyCustomC: "CUSTOMC";
+}

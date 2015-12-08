@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "StyleEngine.hpp"
 #include "StylesDirWatcher.hpp"
 #include "StyleSet.hpp"
+#include "StyleSetProps.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
@@ -36,8 +37,10 @@ void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
 {
   qmlRegisterUncreatableType<aqt::stylesheets::StyleSet>(
     pUri, 1, 0, "StyleSet", "StyleSet is exposed as an attached property");
-  qmlRegisterUncreatableType<aqt::stylesheets::StyleSet, 2>(
-    pUri, 1, 2, "StyleSet", "StyleSet is exposed as an attached property");
+  qmlRegisterUncreatableType<aqt::stylesheets::StyleSetProps>(
+    pUri, 1, 0, "StyleSetProps", "Exposed as StyleSet.props");
+  qmlRegisterUncreatableType<aqt::stylesheets::StyleSetProps, 2>(
+    pUri, 1, 2, "StyleSetProps", "Exposed as StyleSet.props");
   qmlRegisterType<aqt::stylesheets::StyleEngine>(pUri, 1, 0, "StyleEngine");
   qmlRegisterType<aqt::stylesheets::StyleEngine, 1>(pUri, 1, 1, "StyleEngine");
   qmlRegisterType<aqt::stylesheets::StylesDirWatcher>(pUri, 1, 1, "StylesDirWatcher");

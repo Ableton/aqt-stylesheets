@@ -96,7 +96,6 @@ public:
   PropertyValues mValues;
 };
 
-
 } // namespace stylesheets
 } // namespace aqt
 

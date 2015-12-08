@@ -30,6 +30,7 @@ THE SOFTWARE.
 SUPPRESS_WARNINGS
 #include <QtCore/QtCore>
 #include <boost/assert.hpp>
+#include <boost/functional/hash.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -228,15 +229,6 @@ void mergePropSet(MatchNode* parent, int sourceLayer, const PropertySpecSet& ps)
 }
 
 } // anon namespace
-
-void mergeInheritableProperties(PropertyMap& dest, const PropertyMap& src)
-{
-  for (auto const& prop : src) {
-    if (dest.find(prop.first) == dest.end()) {
-      dest.insert(prop);
-    }
-  }
-}
 
 #define DEFAULT_STYLESHEET_LAYER 0
 #define USER_STYLESHEET_LAYER 1
@@ -663,6 +655,19 @@ std::string pathToString(const UiItemPath& path)
   }
 
   return ss.str();
+}
+
+std::size_t hash_value(const PathElement& pathElement)
+{
+  std::size_t seed = boost::hash<std::string>{}(pathElement.mTypeName);
+  boost::hash_combine(
+    seed, boost::hash<std::vector<std::string>>{}(pathElement.mClassNames));
+  return seed;
+}
+
+std::size_t UiItemPathHasher::operator()(const UiItemPath& path) const
+{
+  return boost::hash<UiItemPath>{}(path);
 }
 
 } // namespace stylesheets
