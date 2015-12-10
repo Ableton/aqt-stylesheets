@@ -50,8 +50,6 @@ class StyleSetProps : public QObject
 public:
   /*! @cond DOXYGEN_IGNORE */
   StyleSetProps(const UiItemPath& path, StyleEngine* pEngine);
-
-  static StyleSetProps* nullStyleSetProps();
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */
