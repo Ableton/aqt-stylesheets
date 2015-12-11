@@ -22,11 +22,13 @@ THE SOFTWARE.
 
 #include "StyleSet.hpp"
 
+#include "estd/memory.hpp"
 #include "Log.hpp"
 #include "StyleEngine.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
 RESTORE_WARNINGS
 
@@ -125,11 +127,26 @@ UiItemPath traversePathUp(QObject* pObj)
   return traverseParentChain<UiItemPath>(pObj, collectPathVisitor);
 }
 
+StyleSetProps* nullStyleSetProps(QObject* pObject)
+{
+  static std::unique_ptr<StyleSetProps> spNullProps;
+
+  if (!spNullProps) {
+    auto* pEngine = qmlEngine(pObject);
+    Q_ASSERT(pEngine);
+
+    spNullProps = estd::make_unique<StyleSetProps>(UiItemPath{}, nullptr);
+    QObject::connect(pEngine, &QObject::destroyed, [](QObject*) { spNullProps.reset(); });
+  }
+
+  return spNullProps.get();
+}
+
 } // anon namespace
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mpStyleSetProps(StyleSetProps::nullStyleSetProps())
+  , mpStyleSetProps(nullStyleSetProps(parent()))
 {
   auto* pEngine = StyleEngineHost::globalStyleEngine();
 
@@ -175,7 +192,7 @@ void StyleSet::onStyleEngineLoaded(StyleEngine* pEngine)
              &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
 
   setupStyle();
-  Q_ASSERT(mpStyleSetProps != StyleSetProps::nullStyleSetProps());
+  Q_ASSERT(mpStyleSetProps != nullStyleSetProps(parent()));
 }
 
 void StyleSet::setupStyle()
@@ -244,7 +261,7 @@ void StyleSet::onParentChanged(QQuickItem* pNewParent)
 void StyleSet::onPropsInvalidated()
 {
   mpStyleSetProps->disconnect(this);
-  mpStyleSetProps = StyleSetProps::nullStyleSetProps();
+  mpStyleSetProps = nullStyleSetProps(parent());
   Q_EMIT propsChanged();
 }
 
