@@ -360,6 +360,8 @@ private:
   SourceUrl mStyleSheetSourceUrl;
   SourceUrl mDefaultStyleSheetSourceUrl;
 
+  QUrl mBaseUrl;
+
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
   QFileSystemWatcher mFsWatcher;
   StyleEngineHost::FontIdCache& mFontIdCache;

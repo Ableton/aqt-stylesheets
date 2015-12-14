@@ -88,6 +88,7 @@ StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
 
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
+  , mBaseUrl(qmlEngine(this)->baseUrl())
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
@@ -270,7 +271,7 @@ void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
 StyleSheet StyleEngine::loadStyleSheet(const QUrl& srcurl)
 {
   if (srcurl.isLocalFile() || srcurl.isRelative()) {
-    QString styleFilePath = qmlEngine(this)->baseUrl().resolved(srcurl).toLocalFile();
+    QString styleFilePath = mBaseUrl.resolved(srcurl).toLocalFile();
 
     if (styleFilePath.isEmpty() || !QFile::exists(styleFilePath)) {
       styleSheetsLogError() << "Style '" << styleFilePath.toStdString() << "' not found";
