@@ -118,7 +118,7 @@ void StyleEngine::setStyleSheetSource(const QUrl& url)
   if (mStyleSheetSourceUrl.url() != url) {
     mStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
-    loadStyle();
+    loadStyles();
 
     Q_EMIT styleSheetSourceChanged(url);
   }
@@ -134,7 +134,7 @@ void StyleEngine::setDefaultStyleSheetSource(const QUrl& url)
   if (mDefaultStyleSheetSourceUrl.url() != url) {
     mDefaultStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
-    loadStyle();
+    loadStyles();
 
     Q_EMIT defaultStyleSheetSourceChanged(url);
   }
@@ -228,7 +228,7 @@ std::string StyleEngine::describeMatchedPath(const UiItemPath& path) const
 
 void StyleEngine::onFileChanged(const QString&)
 {
-  loadStyle();
+  loadStyles();
 }
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
@@ -306,7 +306,7 @@ StyleSheet StyleEngine::loadStyleSheet(const SourceUrl& srcurl)
   return StyleSheet();
 }
 
-void StyleEngine::loadStyle()
+void StyleEngine::loadStyles()
 {
   StyleSheet styleSheet;
   StyleSheet defaultStyleSheet;

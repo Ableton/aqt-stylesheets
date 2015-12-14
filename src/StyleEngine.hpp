@@ -332,7 +332,7 @@ private:
     QUrl mSourceUrl;
   };
 
-  void loadStyle();
+  void loadStyles();
   StyleSheet loadStyleSheet(const SourceUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
   void reloadAllProperties();
