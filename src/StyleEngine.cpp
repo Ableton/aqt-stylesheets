@@ -89,6 +89,7 @@ StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
   , mBaseUrl(qmlEngine(this)->baseUrl())
+  , mImportPaths(qmlEngine(this)->importPathList())
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
   , mStylesDir(this)
 {
@@ -356,7 +357,7 @@ void StyleEngine::componentComplete()
 
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
 {
-  return searchForResourceSearchPath(baseUrl, url, qmlEngine(this)->importPathList());
+  return searchForResourceSearchPath(baseUrl, url, mImportPaths);
 }
 
 StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)

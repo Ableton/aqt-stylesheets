@@ -361,6 +361,7 @@ private:
   SourceUrl mDefaultStyleSheetSourceUrl;
 
   QUrl mBaseUrl;
+  QStringList mImportPaths;
 
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
   QFileSystemWatcher mFsWatcher;
