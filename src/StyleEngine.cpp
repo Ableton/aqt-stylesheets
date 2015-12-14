@@ -39,6 +39,7 @@ RESTORE_WARNINGS
 
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <tuple>
 
@@ -49,6 +50,14 @@ namespace stylesheets
 
 namespace
 {
+
+using FontIdCache = std::map<QString, int>;
+
+FontIdCache& fontIdCache()
+{
+  static FontIdCache sFontIdCache;
+  return sFontIdCache;
+}
 
 std::unique_ptr<StyleEngine>& globalStyleEngineImpl()
 {
@@ -75,14 +84,8 @@ StyleEngine* StyleEngineHost::globalStyleEngine()
   return globalStyleEngineImpl().get();
 }
 
-StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
-{
-  return mFontIdCache;
-}
-
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
-  , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
 {
 }
 
@@ -156,15 +159,15 @@ void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
     if (!fontFaceFile.isEmpty()) {
       styleSheetsLogInfo() << "Load font face " << ffd.url << " from "
                            << fontFaceFile.toStdString();
-      std::map<QString, int>::iterator fontCacheIt = mFontIdCache.find(fontFaceFile);
-      if (fontCacheIt == mFontIdCache.end()) {
+      std::map<QString, int>::iterator fontCacheIt = fontIdCache().find(fontFaceFile);
+      if (fontCacheIt == fontIdCache().end()) {
         int fontId = QFontDatabase::addApplicationFont(fontFaceFile);
         styleSheetsLogDebug() << " [" << fontId << "]";
 
         if (fontId != -1) {
           QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
           styleSheetsLogDebug() << " -> family: " << fontFamily.toStdString();
-          mFontIdCache[fontFaceFile] = fontId;
+          fontIdCache()[fontFaceFile] = fontId;
         } else {
           Q_EMIT exception(
             QString::fromLatin1("fontWasNotLoaded"),
