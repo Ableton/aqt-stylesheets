@@ -274,6 +274,12 @@ public:
    */
   PropertyMap* properties(const UiItemPath& path);
 
+  /*! Loads the styles from the previously set style sheet sources
+   *
+   * It is safe to call if the sources have not been set yet or have been only partly set.
+   */
+  void loadStyles();
+
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
   void styleChanged();
@@ -332,7 +338,6 @@ private:
     QUrl mSourceUrl;
   };
 
-  void loadStyles();
   StyleSheet loadStyleSheet(const SourceUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
   void reloadAllProperties();
