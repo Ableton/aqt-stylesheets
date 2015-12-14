@@ -201,7 +201,6 @@ Q_SIGNALS:
   /*! @cond DOXYGEN_IGNORE */
 
 private Q_SLOTS:
-  void onStyleEngineLoaded(StyleEngine* pEngine);
   void onParentChanged(QQuickItem* pNewParent);
 
 private:

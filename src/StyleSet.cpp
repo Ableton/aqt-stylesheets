@@ -151,12 +151,6 @@ StyleSet::StyleSet(QObject* pParent)
     }
 
     mPath = traversePathUp(p);
-
-    if (!pEngine) {
-      connect(StyleEngineHost::globalStyleEngineHost(),
-              &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
-    }
-
     setupStyle();
   }
 }
@@ -164,18 +158,6 @@ StyleSet::StyleSet(QObject* pParent)
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 {
   return new StyleSet(pObject);
-}
-
-void StyleSet::onStyleEngineLoaded(StyleEngine* pEngine)
-{
-  Q_ASSERT(pEngine);
-  Q_UNUSED(pEngine);
-
-  disconnect(StyleEngineHost::globalStyleEngineHost(),
-             &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
-
-  setupStyle();
-  Q_ASSERT(mpStyleSetProps != StyleSetProps::nullStyleSetProps());
 }
 
 void StyleSet::setupStyle()

@@ -54,9 +54,6 @@ public:
   static StyleEngineHost* globalStyleEngineHost();
 
   static StyleEngine* globalStyleEngine();
-
-Q_SIGNALS:
-  void styleEngineLoaded(aqt::stylesheets::StyleEngine* pEngine);
 };
 
 /*! @endcond */
