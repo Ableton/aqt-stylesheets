@@ -267,11 +267,10 @@ void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
   }
 }
 
-StyleSheet StyleEngine::loadStyleSheet(const SourceUrl& srcurl)
+StyleSheet StyleEngine::loadStyleSheet(const QUrl& srcurl)
 {
-  if (srcurl.url().isLocalFile() || srcurl.url().isRelative()) {
-    QString styleFilePath =
-      qmlEngine(this)->baseUrl().resolved(srcurl.url()).toLocalFile();
+  if (srcurl.isLocalFile() || srcurl.isRelative()) {
+    QString styleFilePath = qmlEngine(this)->baseUrl().resolved(srcurl).toLocalFile();
 
     if (styleFilePath.isEmpty() || !QFile::exists(styleFilePath)) {
       styleSheetsLogError() << "Style '" << styleFilePath.toStdString() << "' not found";
@@ -313,11 +312,11 @@ void StyleEngine::loadStyles()
   StyleSheet defaultStyleSheet;
 
   if (!mStyleSheetSourceUrl.isEmpty()) {
-    styleSheet = loadStyleSheet(mStyleSheetSourceUrl);
+    styleSheet = loadStyleSheet(mStyleSheetSourceUrl.url());
   }
 
   if (!mDefaultStyleSheetSourceUrl.isEmpty()) {
-    defaultStyleSheet = loadStyleSheet(mDefaultStyleSheetSourceUrl);
+    defaultStyleSheet = loadStyleSheet(mDefaultStyleSheetSourceUrl.url());
   }
 
   mpStyleTree = createMatchTree(styleSheet, defaultStyleSheet);
