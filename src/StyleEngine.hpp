@@ -323,7 +323,6 @@ private:
   {
   public:
     void set(const QUrl& url, StyleEngine* pParent, QFileSystemWatcher& watcher);
-    QString toLocalFile(StyleEngine* pParent) const;
 
     QUrl url() const
     {
