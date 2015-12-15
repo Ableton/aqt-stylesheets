@@ -26,7 +26,6 @@ THE SOFTWARE.
 #include "CssParser.hpp"
 #include "Log.hpp"
 #include "StyleMatchTree.hpp"
-#include "StyleSetProps.hpp"
 #include "UrlUtils.hpp"
 #include "Warnings.hpp"
 

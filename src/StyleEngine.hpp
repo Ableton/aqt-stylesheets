@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 #include "StyleMatchTree.hpp"
 #include "StylesDirWatcher.hpp"
+#include "StyleSetProps.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
@@ -46,7 +47,6 @@ namespace stylesheets
 {
 
 class StyleEngine;
-class StyleSetProps;
 
 /*! @cond DOXYGEN_IGNORE */
 
