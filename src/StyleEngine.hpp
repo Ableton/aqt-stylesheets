@@ -58,8 +58,6 @@ public:
   /*! @cond DOXYGEN_IGNORE */
   static StyleEngine& instance();
 
-  explicit StyleEngine(QObject* pParent = nullptr);
-
   void bindToQmlEngine(QQmlEngine& qmlEngine);
 
   QUrl styleSheetSource() const;
@@ -127,6 +125,8 @@ Q_SIGNALS:
   Q_REVISION(1) void exception(const QString& type, const QString& message);
 
 private:
+  StyleEngine() = default;
+
   StyleSheet loadStyleSheet(const QUrl& srcurl);
   void resolveFontFaceDecl(const StyleSheet& styleSheet);
   void reloadAllProperties();

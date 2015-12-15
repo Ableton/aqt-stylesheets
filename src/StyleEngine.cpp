@@ -76,11 +76,6 @@ StyleEngine& StyleEngine::instance()
   return *instanceImpl();
 }
 
-StyleEngine::StyleEngine(QObject* pParent)
-  : QObject(pParent)
-{
-}
-
 void StyleEngine::bindToQmlEngine(QQmlEngine& qmlEngine)
 {
   mBaseUrl = qmlEngine.baseUrl();
