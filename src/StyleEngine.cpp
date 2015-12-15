@@ -30,18 +30,16 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtCore/QPointer>
 #include <QtCore/QFile>
-#include <QtCore/QDir>
 #include <QtCore/QUrl>
 #include <QtGui/QFontDatabase>
 #include <QtQml/QQmlEngine>
 #include <QtQml/QQmlFile>
-#include <QtQml/qqml.h>
 RESTORE_WARNINGS
 
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <tuple>
 
 namespace aqt
@@ -52,19 +50,15 @@ namespace stylesheets
 namespace
 {
 
-QPointer<StyleEngine>& globalStyleEngineImpl()
+std::unique_ptr<StyleEngine>& globalStyleEngineImpl()
 {
-  static QPointer<StyleEngine> sGlobalStyleEngine;
-  return sGlobalStyleEngine;
-}
+  static std::unique_ptr<StyleEngine> sGlobalStyleEngine;
 
-void setGlobalStyleEngine(StyleEngine* pEngine)
-{
-  if (globalStyleEngineImpl() != pEngine) {
-    globalStyleEngineImpl() = pEngine;
-    Q_EMIT StyleEngineHost::globalStyleEngineHost()->styleEngineLoaded(
-      globalStyleEngineImpl());
+  if (!sGlobalStyleEngine) {
+    sGlobalStyleEngine = estd::make_unique<StyleEngine>();
   }
+
+  return sGlobalStyleEngine;
 }
 
 } // anon namespace
@@ -78,7 +72,7 @@ StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
 
 StyleEngine* StyleEngineHost::globalStyleEngine()
 {
-  return globalStyleEngineImpl();
+  return globalStyleEngineImpl().get();
 }
 
 StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
@@ -88,149 +82,68 @@ StyleEngineHost::FontIdCache& StyleEngineHost::fontIdCache()
 
 StyleEngine::StyleEngine(QObject* pParent)
   : QObject(pParent)
-  , mBaseUrl(qmlEngine(this)->baseUrl())
-  , mImportPaths(qmlEngine(this)->importPathList())
   , mFontIdCache(StyleEngineHost::globalStyleEngineHost()->fontIdCache())
-  , mStylesDir(this)
 {
-  connect(
-    &mFsWatcher, &QFileSystemWatcher::fileChanged, this, &StyleEngine::onFileChanged);
-
-  connect(&mStylesDir, &StylesDirWatcher::availableStylesChanged, this,
-          &StyleEngine::availableStylesChanged);
-  connect(&mStylesDir, &StylesDirWatcher::fileExtensionsChanged, this,
-          &StyleEngine::fileExtensionsChanged);
 }
 
-StyleEngine::~StyleEngine()
+void StyleEngine::bindToQmlEngine(QQmlEngine& qmlEngine)
 {
+  mBaseUrl = qmlEngine.baseUrl();
+  mImportPaths = qmlEngine.importPathList();
+
+  QObject::connect(
+    &qmlEngine, &QObject::destroyed, [](QObject*) { globalStyleEngineImpl().reset(); });
+}
+
+bool StyleEngine::hasStylesLoaded() const
+{
+  return mHasStylesLoaded;
+}
+
+void StyleEngine::unloadStyles()
+{
+  mHasStylesLoaded = false;
+
   for (auto& element : mStyleSetPropsByPath) {
     auto& pStyleSetProps = element.second;
     pStyleSetProps->invalidate();
   }
+
+  mPropertyMaps.clear();
+  mPropertyMapInstances.clear();
+
+  mpStyleTree = createMatchTree({});
 }
 
 QUrl StyleEngine::styleSheetSource() const
 {
-  return mStyleSheetSourceUrl.url();
+  return mStyleSheetSourceUrl;
 }
 
 void StyleEngine::setStyleSheetSource(const QUrl& url)
 {
-  if (mStyleSheetSourceUrl.url() != url) {
-    mStyleSheetSourceUrl.set(url, this, mFsWatcher);
-
+  if (mStyleSheetSourceUrl != url) {
+    mStyleSheetSourceUrl = url;
     loadStyles();
-
-    Q_EMIT styleSheetSourceChanged(url);
   }
 }
 
 QUrl StyleEngine::defaultStyleSheetSource() const
 {
-  return mDefaultStyleSheetSourceUrl.url();
+  return mDefaultStyleSheetSourceUrl;
 }
 
 void StyleEngine::setDefaultStyleSheetSource(const QUrl& url)
 {
-  if (mDefaultStyleSheetSourceUrl.url() != url) {
-    mDefaultStyleSheetSourceUrl.set(url, this, mFsWatcher);
-
+  if (mDefaultStyleSheetSourceUrl != url) {
+    mDefaultStyleSheetSourceUrl = url;
     loadStyles();
-
-    Q_EMIT defaultStyleSheetSourceChanged(url);
   }
-}
-
-QUrl StyleEngine::stylePath() const
-{
-  return mStylePathUrl;
-}
-
-void StyleEngine::setStylePath(const QUrl& url)
-{
-  mStylesDir.setStylePath(url);
-
-  if (mStylePathUrl != url) {
-    mStylePathUrl = url;
-
-    mStylePath = qmlEngine(this)->baseUrl().resolved(mStylePathUrl).toLocalFile();
-
-    updateSourceUrls();
-  }
-}
-
-QString StyleEngine::styleName() const
-{
-  return mStyleSheetSourceUrl.url().fileName();
-}
-
-void StyleEngine::setStyleName(const QString& styleName)
-{
-  if (mStyleName != styleName) {
-    mStyleName = styleName;
-
-    updateSourceUrls();
-
-    Q_EMIT styleNameChanged();
-  }
-}
-
-QString StyleEngine::defaultStyleName() const
-{
-  return mDefaultStyleSheetSourceUrl.url().fileName();
-}
-
-void StyleEngine::setDefaultStyleName(const QString& styleName)
-{
-  if (mDefaultStyleName != styleName) {
-    mDefaultStyleName = styleName;
-
-    updateSourceUrls();
-
-    Q_EMIT defaultStyleNameChanged();
-  }
-}
-
-void StyleEngine::updateSourceUrls()
-{
-  if (!mStylePath.isEmpty()) {
-    QDir styleDir(mStylePath);
-
-    if (!mStyleName.isEmpty() && styleDir.exists(mStyleName)) {
-      setStyleSheetSource(QUrl::fromLocalFile(styleDir.absoluteFilePath(mStyleName)));
-    }
-
-    if (!mDefaultStyleName.isEmpty() && styleDir.exists(mDefaultStyleName)) {
-      setDefaultStyleSheetSource(
-        QUrl::fromLocalFile(styleDir.absoluteFilePath(mDefaultStyleName)));
-    }
-  }
-}
-
-QVariantList StyleEngine::fileExtensions() const
-{
-  return mStylesDir.fileExtensions();
-}
-
-void StyleEngine::setFileExtensions(const QVariantList& exts)
-{
-  mStylesDir.setFileExtensions(exts);
-}
-
-QVariantList StyleEngine::availableStyles()
-{
-  return mStylesDir.availableStyleSheetNames();
 }
 
 std::string StyleEngine::describeMatchedPath(const UiItemPath& path) const
 {
   return aqt::stylesheets::describeMatchedPath(mpStyleTree.get(), path);
-}
-
-void StyleEngine::onFileChanged(const QString&)
-{
-  loadStyles();
 }
 
 void StyleEngine::resolveFontFaceDecl(const StyleSheet& styleSheet)
@@ -325,6 +238,8 @@ void StyleEngine::loadStyles()
 
   reloadAllProperties();
 
+  mHasStylesLoaded = true;
+
   Q_EMIT styleChanged();
 }
 
@@ -339,20 +254,6 @@ void StyleEngine::reloadAllProperties()
     auto& pStyleSetProps = element.second;
     pStyleSetProps->loadProperties();
   }
-}
-
-void StyleEngine::classBegin()
-{
-}
-
-void StyleEngine::componentComplete()
-{
-  if (globalStyleEngineImpl()) {
-    styleSheetsLogWarning() << "There's a StyleEngine already";
-    return;
-  }
-
-  setGlobalStyleEngine(this);
 }
 
 QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
@@ -409,27 +310,6 @@ PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
   mPropertyMaps.emplace(path, pProps);
 
   return pProps;
-}
-
-void StyleEngine::SourceUrl::set(const QUrl& url,
-                                 StyleEngine* pParent,
-                                 QFileSystemWatcher& watcher)
-{
-  if (mSourceUrl.isLocalFile()) {
-    auto stylePath = qmlEngine(pParent)->baseUrl().resolved(mSourceUrl).toLocalFile();
-    if (!stylePath.isEmpty() && QFile(stylePath).exists()) {
-      watcher.removePath(stylePath);
-    }
-  }
-
-  mSourceUrl = url;
-
-  if (mSourceUrl.isLocalFile()) {
-    auto stylePath = qmlEngine(pParent)->baseUrl().resolved(mSourceUrl).toLocalFile();
-    if (!stylePath.isEmpty() && QFile(stylePath).exists()) {
-      watcher.addPath(stylePath);
-    }
-  }
 }
 
 } // namespace stylesheets

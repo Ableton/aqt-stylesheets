@@ -273,7 +273,6 @@ public:
 
 Q_SIGNALS:
   void propsChanged();
-  void invalidated();
 
 private:
   bool getImpl(Property& def, const QString& key) const;

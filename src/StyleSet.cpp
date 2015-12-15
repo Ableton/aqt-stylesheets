@@ -184,8 +184,6 @@ void StyleSet::setupStyle()
     mpStyleSetProps = pEngine->styleSetProps(mPath);
 
     connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
-    connect(
-      mpStyleSetProps, &StyleSetProps::invalidated, this, &StyleSet::onPropsInvalidated);
 
     Q_EMIT propsChanged();
   }
@@ -239,13 +237,6 @@ void StyleSet::onParentChanged(QQuickItem* pNewParent)
 
     Q_EMIT pathChanged();
   }
-}
-
-void StyleSet::onPropsInvalidated()
-{
-  mpStyleSetProps->disconnect(this);
-  mpStyleSetProps = StyleSetProps::nullStyleSetProps();
-  Q_EMIT propsChanged();
 }
 
 } // namespace stylesheets

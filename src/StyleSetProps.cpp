@@ -75,7 +75,7 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
-  if (mpEngine) {
+  if (mpEngine->hasStylesLoaded()) {
     styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
                             << pathToString(mPath) << ")";
     Q_EMIT mpEngine->exception(QString::fromLatin1("propertyNotFound"),
@@ -173,7 +173,7 @@ void StyleSetProps::loadProperties()
 
 void StyleSetProps::invalidate()
 {
-  Q_EMIT invalidated();
+  mpProperties = nullProperties();
 }
 
 } // namespace stylesheets

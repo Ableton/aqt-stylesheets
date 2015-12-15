@@ -203,7 +203,6 @@ Q_SIGNALS:
 private Q_SLOTS:
   void onStyleEngineLoaded(StyleEngine* pEngine);
   void onParentChanged(QQuickItem* pNewParent);
-  void onPropsInvalidated();
 
 private:
   void setupStyle();
