@@ -50,7 +50,7 @@ StyleEngineSetup::StyleEngineSetup(QObject* pParent)
   connect(&mStylesDir, &StylesDirWatcher::fileExtensionsChanged, this,
           &StyleEngineSetup::fileExtensionsChanged);
 
-  auto* pEngine = StyleEngineHost::globalStyleEngine();
+  auto* pEngine = &StyleEngine::instance();
 
   connect(pEngine, &StyleEngine::styleChanged, this, &StyleEngineSetup::styleChanged);
   connect(pEngine, &StyleEngine::exception, this, &StyleEngineSetup::exception);
@@ -58,7 +58,7 @@ StyleEngineSetup::StyleEngineSetup(QObject* pParent)
 
 StyleEngineSetup::~StyleEngineSetup()
 {
-  StyleEngineHost::globalStyleEngine()->unloadStyles();
+  StyleEngine::instance().unloadStyles();
 }
 
 QUrl StyleEngineSetup::styleSheetSource() const
@@ -71,7 +71,7 @@ void StyleEngineSetup::setStyleSheetSource(const QUrl& url)
   if (mStyleSheetSourceUrl.url() != url) {
     mStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
-    StyleEngineHost::globalStyleEngine()->setStyleSheetSource(url);
+    StyleEngine::instance().setStyleSheetSource(url);
 
     Q_EMIT styleSheetSourceChanged(url);
   }
@@ -87,7 +87,7 @@ void StyleEngineSetup::setDefaultStyleSheetSource(const QUrl& url)
   if (mDefaultStyleSheetSourceUrl.url() != url) {
     mDefaultStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
-    StyleEngineHost::globalStyleEngine()->setDefaultStyleSheetSource(url);
+    StyleEngine::instance().setDefaultStyleSheetSource(url);
 
     Q_EMIT defaultStyleSheetSourceChanged(url);
   }
@@ -176,12 +176,12 @@ QVariantList StyleEngineSetup::availableStyles()
 
 void StyleEngineSetup::onFileChanged(const QString&)
 {
-  StyleEngineHost::globalStyleEngine()->loadStyles();
+  StyleEngine::instance().loadStyles();
 }
 
 void StyleEngineSetup::classBegin()
 {
-  StyleEngineHost::globalStyleEngine()->bindToQmlEngine(*qmlEngine(parent()));
+  StyleEngine::instance().bindToQmlEngine(*qmlEngine(parent()));
 }
 
 void StyleEngineSetup::componentComplete()

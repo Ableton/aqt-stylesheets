@@ -43,21 +43,6 @@ namespace aqt
 namespace stylesheets
 {
 
-class StyleEngine;
-
-/*! @cond DOXYGEN_IGNORE */
-
-class StyleEngineHost : public QObject
-{
-  Q_OBJECT
-public:
-  static StyleEngineHost* globalStyleEngineHost();
-
-  static StyleEngine* globalStyleEngine();
-};
-
-/*! @endcond */
-
 /*! The singleton StyleEngine
  *
  * Provides css properties that it loads from style sheet source urls.
@@ -71,6 +56,8 @@ class StyleEngine : public QObject
 
 public:
   /*! @cond DOXYGEN_IGNORE */
+  static StyleEngine& instance();
+
   explicit StyleEngine(QObject* pParent = nullptr);
 
   void bindToQmlEngine(QQmlEngine& qmlEngine);

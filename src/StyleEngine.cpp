@@ -59,29 +59,21 @@ FontIdCache& fontIdCache()
   return sFontIdCache;
 }
 
-std::unique_ptr<StyleEngine>& globalStyleEngineImpl()
+std::unique_ptr<StyleEngine>& instanceImpl()
 {
-  static std::unique_ptr<StyleEngine> sGlobalStyleEngine;
-
-  if (!sGlobalStyleEngine) {
-    sGlobalStyleEngine = estd::make_unique<StyleEngine>();
-  }
-
-  return sGlobalStyleEngine;
+  static std::unique_ptr<StyleEngine> spInstance;
+  return spInstance;
 }
 
 } // anon namespace
 
-StyleEngineHost* StyleEngineHost::globalStyleEngineHost()
+StyleEngine& StyleEngine::instance()
 {
-  static StyleEngineHost gGlobalStyleEngineHost;
+  if (!instanceImpl()) {
+    instanceImpl().reset(new StyleEngine);
+  }
 
-  return &gGlobalStyleEngineHost;
-}
-
-StyleEngine* StyleEngineHost::globalStyleEngine()
-{
-  return globalStyleEngineImpl().get();
+  return *instanceImpl();
 }
 
 StyleEngine::StyleEngine(QObject* pParent)
@@ -95,7 +87,7 @@ void StyleEngine::bindToQmlEngine(QQmlEngine& qmlEngine)
   mImportPaths = qmlEngine.importPathList();
 
   QObject::connect(
-    &qmlEngine, &QObject::destroyed, [](QObject*) { globalStyleEngineImpl().reset(); });
+    &qmlEngine, &QObject::destroyed, [](QObject*) { instanceImpl().reset(); });
 }
 
 bool StyleEngine::hasStylesLoaded() const
