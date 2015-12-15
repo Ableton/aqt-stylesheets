@@ -72,6 +72,7 @@ void StyleEngineSetup::setStyleSheetSource(const QUrl& url)
     mStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
     StyleEngine::instance().setStyleSheetSource(url);
+    StyleEngine::instance().loadStyles();
 
     Q_EMIT styleSheetSourceChanged(url);
   }
@@ -88,6 +89,7 @@ void StyleEngineSetup::setDefaultStyleSheetSource(const QUrl& url)
     mDefaultStyleSheetSourceUrl.set(url, this, mFsWatcher);
 
     StyleEngine::instance().setDefaultStyleSheetSource(url);
+    StyleEngine::instance().loadStyles();
 
     Q_EMIT defaultStyleSheetSourceChanged(url);
   }

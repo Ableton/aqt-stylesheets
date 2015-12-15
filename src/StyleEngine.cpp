@@ -114,7 +114,6 @@ void StyleEngine::setStyleSheetSource(const QUrl& url)
 {
   if (mStyleSheetSourceUrl != url) {
     mStyleSheetSourceUrl = url;
-    loadStyles();
   }
 }
 
@@ -127,7 +126,6 @@ void StyleEngine::setDefaultStyleSheetSource(const QUrl& url)
 {
   if (mDefaultStyleSheetSourceUrl != url) {
     mDefaultStyleSheetSourceUrl = url;
-    loadStyles();
   }
 }
 
