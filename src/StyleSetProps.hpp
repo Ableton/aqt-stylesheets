@@ -269,6 +269,8 @@ public:
   /*! @cond DOXYGEN_IGNORE */
   void loadProperties();
 
+  void invalidate();
+
 Q_SIGNALS:
   void propsChanged();
   void invalidated();

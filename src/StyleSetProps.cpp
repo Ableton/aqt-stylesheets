@@ -171,5 +171,10 @@ void StyleSetProps::loadProperties()
   }
 }
 
+void StyleSetProps::invalidate()
+{
+  Q_EMIT invalidated();
+}
+
 } // namespace stylesheets
 } // namespace aqt

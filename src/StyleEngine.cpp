@@ -106,7 +106,7 @@ StyleEngine::~StyleEngine()
 {
   for (auto& element : mStyleSetPropsByPath) {
     auto& pStyleSetProps = element.second;
-    Q_EMIT pStyleSetProps->invalidated();
+    pStyleSetProps->invalidate();
   }
 }
 
