@@ -262,7 +262,7 @@ StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
 
   if (iElement == mStyleSetPropsByPath.end()) {
     std::tie(iElement, std::ignore) =
-      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path, this));
+      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path));
   }
 
   return iElement->second.get();
