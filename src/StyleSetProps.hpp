@@ -49,8 +49,6 @@ class StyleSetProps : public QObject
 public:
   /*! @cond DOXYGEN_IGNORE */
   explicit StyleSetProps(const UiItemPath& path);
-
-  static StyleSetProps* nullStyleSetProps();
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */

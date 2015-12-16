@@ -50,12 +50,6 @@ StyleSetProps::StyleSetProps(const UiItemPath& path)
   loadProperties();
 }
 
-StyleSetProps* StyleSetProps::nullStyleSetProps()
-{
-  static StyleSetProps sNullStyleSetProps{{}};
-  return &sNullStyleSetProps;
-}
-
 bool StyleSetProps::isValid() const
 {
   return !mpProperties->empty();

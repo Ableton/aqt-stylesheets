@@ -129,7 +129,7 @@ UiItemPath traversePathUp(QObject* pObj)
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mpStyleSetProps(StyleSetProps::nullStyleSetProps())
+  , mpStyleSetProps(nullptr)
 {
   QObject* p = parent();
   if (p) {
