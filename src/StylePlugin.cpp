@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 #include "StylePlugin.hpp"
 
-#include "StyleEngine.hpp"
+#include "StyleEngineSetup.hpp"
 #include "StylesDirWatcher.hpp"
 #include "StyleSet.hpp"
 #include "StyleSetProps.hpp"
@@ -41,8 +41,8 @@ void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
     pUri, 1, 0, "StyleSetProps", "Exposed as StyleSet.props");
   qmlRegisterUncreatableType<aqt::stylesheets::StyleSetProps, 2>(
     pUri, 1, 2, "StyleSetProps", "Exposed as StyleSet.props");
-  qmlRegisterType<aqt::stylesheets::StyleEngine>(pUri, 1, 0, "StyleEngine");
-  qmlRegisterType<aqt::stylesheets::StyleEngine, 1>(pUri, 1, 1, "StyleEngine");
+  qmlRegisterType<aqt::stylesheets::StyleEngineSetup>(pUri, 1, 0, "StyleEngine");
+  qmlRegisterType<aqt::stylesheets::StyleEngineSetup, 1>(pUri, 1, 1, "StyleEngine");
   qmlRegisterType<aqt::stylesheets::StylesDirWatcher>(pUri, 1, 1, "StylesDirWatcher");
 }
 

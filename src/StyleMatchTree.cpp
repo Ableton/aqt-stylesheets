@@ -591,26 +591,34 @@ void dumpMatchResults(const MatchResult& result, std::ostream& stream = std::cou
 
 std::string describeMatchedPath(const IStyleMatchTree* itree, const UiItemPath& path)
 {
-  const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
+  if (itree) {
+    const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
 
-  MatchResult result = findMatchingRules(tree, path);
-  sortMatchResults(result);
-  std::reverse(result.begin(), result.end());
+    MatchResult result = findMatchingRules(tree, path);
+    sortMatchResults(result);
+    std::reverse(result.begin(), result.end());
 
-  std::ostringstream stream;
-  stream << "Style info for path " << path << std::endl;
-  dumpMatchResults(result, stream);
+    std::ostringstream stream;
+    stream << "Style info for path " << path << std::endl;
+    dumpMatchResults(result, stream);
 
-  return stream.str();
+    return stream.str();
+  }
+
+  return {};
 }
 
 PropertyMap matchPath(const IStyleMatchTree* itree, const UiItemPath& path)
 {
-  const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
+  if (itree) {
+    const StyleMatchTree& tree = *static_cast<const StyleMatchTree*>(itree);
 
-  MatchResult result = findMatchingRules(tree, path);
-  sortMatchResults(result);
-  return mergeMatchResults(result);
+    MatchResult result = findMatchingRules(tree, path);
+    sortMatchResults(result);
+    return mergeMatchResults(result);
+  }
+
+  return PropertyMap{};
 }
 
 std::ostream& operator<<(std::ostream& os, const UiItemPath& path)

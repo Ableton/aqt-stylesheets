@@ -129,10 +129,8 @@ UiItemPath traversePathUp(QObject* pObj)
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mpStyleSetProps(StyleSetProps::nullStyleSetProps())
+  , mpStyleSetProps(nullptr)
 {
-  auto* pEngine = StyleEngineHost::globalStyleEngine();
-
   QObject* p = parent();
   if (p) {
     QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
@@ -143,20 +141,12 @@ StyleSet::StyleSet(QObject* pParent)
                            << p->metaObject()->className() << "'. "
                            << "Hierarchy changes for this component won't be detected.";
 
-      if (pEngine) {
-        Q_EMIT pEngine->exception(
-          QString::fromLatin1("noParentChangeReports"),
-          QString::fromLatin1("Hierarchy changes for this component won't be detected"));
-      }
+      Q_EMIT StyleEngine::instance().exception(
+        QString::fromLatin1("noParentChangeReports"),
+        QString::fromLatin1("Hierarchy changes for this component won't be detected"));
     }
 
     mPath = traversePathUp(p);
-
-    if (!pEngine) {
-      connect(StyleEngineHost::globalStyleEngineHost(),
-              &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
-    }
-
     setupStyle();
   }
 }
@@ -166,29 +156,11 @@ StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
   return new StyleSet(pObject);
 }
 
-void StyleSet::onStyleEngineLoaded(StyleEngine* pEngine)
-{
-  Q_ASSERT(pEngine);
-  Q_UNUSED(pEngine);
-
-  disconnect(StyleEngineHost::globalStyleEngineHost(),
-             &StyleEngineHost::styleEngineLoaded, this, &StyleSet::onStyleEngineLoaded);
-
-  setupStyle();
-  Q_ASSERT(mpStyleSetProps != StyleSetProps::nullStyleSetProps());
-}
-
 void StyleSet::setupStyle()
 {
-  if (auto* pEngine = StyleEngineHost::globalStyleEngine()) {
-    mpStyleSetProps = pEngine->styleSetProps(mPath);
-
-    connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
-    connect(
-      mpStyleSetProps, &StyleSetProps::invalidated, this, &StyleSet::onPropsInvalidated);
-
-    Q_EMIT propsChanged();
-  }
+  mpStyleSetProps = StyleEngine::instance().styleSetProps(mPath);
+  connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+  Q_EMIT propsChanged();
 }
 
 QString StyleSet::name() const
@@ -219,10 +191,7 @@ QString StyleSet::path() const
 
 QString StyleSet::styleInfo() const
 {
-  auto* pEngine = StyleEngineHost::globalStyleEngine();
-  std::string styleInfoStr(pEngine ? pEngine->describeMatchedPath(mPath)
-                                   : "No style engine installed");
-  return QString::fromStdString(styleInfoStr);
+  return QString::fromStdString(StyleEngine::instance().describeMatchedPath(mPath));
 }
 
 StyleSetProps* StyleSet::props()
@@ -239,13 +208,6 @@ void StyleSet::onParentChanged(QQuickItem* pNewParent)
 
     Q_EMIT pathChanged();
   }
-}
-
-void StyleSet::onPropsInvalidated()
-{
-  mpStyleSetProps->disconnect(this);
-  mpStyleSetProps = StyleSetProps::nullStyleSetProps();
-  Q_EMIT propsChanged();
 }
 
 } // namespace stylesheets

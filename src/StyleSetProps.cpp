@@ -43,18 +43,11 @@ PropertyMap* nullProperties()
 
 } // anon namespace
 
-StyleSetProps::StyleSetProps(const UiItemPath& path, StyleEngine* pEngine)
-  : mpEngine(pEngine)
-  , mPath(path)
+StyleSetProps::StyleSetProps(const UiItemPath& path)
+  : mPath(path)
   , mpProperties(nullProperties())
 {
   loadProperties();
-}
-
-StyleSetProps* StyleSetProps::nullStyleSetProps()
-{
-  static StyleSetProps sNullStyleSetProps{{}, nullptr};
-  return &sNullStyleSetProps;
 }
 
 bool StyleSetProps::isValid() const
@@ -75,12 +68,14 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
-  if (mpEngine) {
+  auto& engine = StyleEngine::instance();
+
+  if (engine.hasStylesLoaded()) {
     styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
                             << pathToString(mPath) << ")";
-    Q_EMIT mpEngine->exception(QString::fromLatin1("propertyNotFound"),
-                               QString::fromLatin1("Property '%1' not found (%2)")
-                                 .arg(key, QString::fromStdString(pathToString(mPath))));
+    Q_EMIT engine.exception(QString::fromLatin1("propertyNotFound"),
+                            QString::fromLatin1("Property '%1' not found (%2)")
+                              .arg(key, QString::fromStdString(pathToString(mPath))));
   }
 
   return false;
@@ -153,22 +148,22 @@ QUrl StyleSetProps::url(const QString& key) const
   Property prop;
   auto url = lookupProperty<QUrl>(prop, key);
 
-  if (mpEngine) {
-    auto baseUrl = prop.mSourceLoc.mSourceLayer == 0 ? mpEngine->defaultStyleSheetSource()
-                                                     : mpEngine->styleSheetSource();
-    return mpEngine->resolveResourceUrl(baseUrl, url);
-  }
+  auto& engine = StyleEngine::instance();
 
-  return url;
+  auto baseUrl = prop.mSourceLoc.mSourceLayer == 0 ? engine.defaultStyleSheetSource()
+                                                   : engine.styleSheetSource();
+  return engine.resolveResourceUrl(baseUrl, url);
 }
+
 void StyleSetProps::loadProperties()
 {
-  if (mpEngine) {
-    mpProperties = mpEngine->properties(mPath);
-    Q_EMIT propsChanged();
-  } else {
-    mpProperties = nullProperties();
-  }
+  mpProperties = StyleEngine::instance().properties(mPath);
+  Q_EMIT propsChanged();
+}
+
+void StyleSetProps::invalidate()
+{
+  mpProperties = nullProperties();
 }
 
 } // namespace stylesheets

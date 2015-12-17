@@ -39,7 +39,6 @@ namespace aqt
 namespace stylesheets
 {
 
-class StyleEngine;
 class StyleSet;
 
 /*! Provides style properties to QML via StyleSet */
@@ -49,9 +48,7 @@ class StyleSetProps : public QObject
 
 public:
   /*! @cond DOXYGEN_IGNORE */
-  StyleSetProps(const UiItemPath& path, StyleEngine* pEngine);
-
-  static StyleSetProps* nullStyleSetProps();
+  explicit StyleSetProps(const UiItemPath& path);
   /*! @endcond */
 
   /*! Indicates whether this style set has any properties set */
@@ -269,9 +266,10 @@ public:
   /*! @cond DOXYGEN_IGNORE */
   void loadProperties();
 
+  void invalidate();
+
 Q_SIGNALS:
   void propsChanged();
-  void invalidated();
 
 private:
   bool getImpl(Property& def, const QString& key) const;
@@ -282,7 +280,6 @@ private:
   T lookupProperty(Property& def, const QString& key) const;
 
 private:
-  StyleEngine* const mpEngine;
   UiItemPath mPath;
   PropertyMap* mpProperties;
   /*! @endcond */
