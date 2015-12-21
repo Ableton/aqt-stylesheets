@@ -133,23 +133,23 @@ StyleSet::StyleSet(QObject* pParent)
   , mpStyleSetProps(nullptr)
 {
   QObject* p = parent();
-  if (p) {
-    QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
-    if (pItem != nullptr) {
-      connect(pItem, &QQuickItem::parentChanged, this, &StyleSet::onParentChanged);
-    } else if (p->parent() != nullptr) {
-      styleSheetsLogInfo() << "Parent to StyleSet is not a QQuickItem but '"
-                           << p->metaObject()->className() << "'. "
-                           << "Hierarchy changes for this component won't be detected.";
+  Q_ASSERT(p);
 
-      Q_EMIT StyleEngine::instance().exception(
-        QString::fromLatin1("noParentChangeReports"),
-        QString::fromLatin1("Hierarchy changes for this component won't be detected"));
-    }
+  QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
+  if (pItem != nullptr) {
+    connect(pItem, &QQuickItem::parentChanged, this, &StyleSet::onParentChanged);
+  } else if (p->parent() != nullptr) {
+    styleSheetsLogInfo() << "Parent to StyleSet is not a QQuickItem but '"
+                         << p->metaObject()->className() << "'. "
+                         << "Hierarchy changes for this component won't be detected.";
 
-    mPath = traversePathUp(p);
-    setupStyle();
+    Q_EMIT StyleEngine::instance().exception(
+      QString::fromLatin1("noParentChangeReports"),
+      QString::fromLatin1("Hierarchy changes for this component won't be detected"));
   }
+
+  mPath = traversePathUp(p);
+  setupStyle();
 }
 
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
@@ -174,11 +174,9 @@ void StyleSet::setName(const QString& val)
   if (mName != val) {
     mName = val;
 
-    QObject* p = parent();
-    if (p) {
-      mPath = traversePathUp(p);
-      setupStyle();
-    }
+    Q_ASSERT(parent());
+    mPath = traversePathUp(parent());
+    setupStyle();
 
     Q_EMIT nameChanged(mName);
     Q_EMIT pathChanged();
@@ -202,9 +200,9 @@ StyleSetProps* StyleSet::props()
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
-  QObject* pParent = parent();
-  if (pNewParent != nullptr && pParent != nullptr) {
-    mPath = traversePathUp(pParent);
+  Q_ASSERT(parent());
+  if (pNewParent != nullptr) {
+    mPath = traversePathUp(parent());
     setupStyle();
 
     Q_EMIT pathChanged();
