@@ -105,8 +105,6 @@ T traverseParentChain(QObject* pObj, ObjVisitor visitor)
 class CollectPathVisitor
 {
 public:
-  UiItemPath mResult;
-
   bool operator()(QObject* pObj)
   {
     mResult.emplace_back(typeName(pObj), styleClassName(pObj));
@@ -117,6 +115,9 @@ public:
   {
     return {mResult.rbegin(), mResult.rend()};
   }
+
+private:
+  UiItemPath mResult;
 };
 
 UiItemPath traversePathUp(QObject* pObj)
