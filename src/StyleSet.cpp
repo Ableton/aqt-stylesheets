@@ -158,6 +158,11 @@ StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 
 void StyleSet::setupStyle()
 {
+  if (mpStyleSetProps) {
+    disconnect(
+      mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+  }
+
   mpStyleSetProps = StyleEngine::instance().styleSetProps(mPath);
   connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
   Q_EMIT propsChanged();
