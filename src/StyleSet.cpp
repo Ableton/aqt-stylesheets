@@ -148,8 +148,7 @@ StyleSet::StyleSet(QObject* pParent)
       QString::fromLatin1("Hierarchy changes for this component won't be detected"));
   }
 
-  mPath = traversePathUp(p);
-  setupStyle();
+  setPath(traversePathUp(p));
 }
 
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
@@ -173,19 +172,23 @@ void StyleSet::setName(const QString& val)
 {
   if (mName != val) {
     mName = val;
-
     Q_ASSERT(parent());
-    mPath = traversePathUp(parent());
-    setupStyle();
-
+    setPath(traversePathUp(parent()));
     Q_EMIT nameChanged(mName);
-    Q_EMIT pathChanged();
   }
 }
 
 QString StyleSet::path() const
 {
   return QString::fromStdString(pathToString(mPath));
+}
+
+void StyleSet::setPath(const UiItemPath& path)
+{
+  mPath = path;
+  setupStyle();
+
+  Q_EMIT pathChanged();
 }
 
 QString StyleSet::styleInfo() const
@@ -202,10 +205,7 @@ void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
   Q_ASSERT(parent());
   if (pNewParent != nullptr) {
-    mPath = traversePathUp(parent());
-    setupStyle();
-
-    Q_EMIT pathChanged();
+    setPath(traversePathUp(parent()));
   }
 }
 

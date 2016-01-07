@@ -204,6 +204,7 @@ private Q_SLOTS:
   void onParentChanged(QQuickItem* pNewParent);
 
 private:
+  void setPath(const UiItemPath& path);
   void setupStyle();
 
 private:
