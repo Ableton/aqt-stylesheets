@@ -152,6 +152,7 @@ Item {
 
         ApplicationWindow {
             property alias a: a
+            property alias c: c
 
             Foo.A {
                 id: a
@@ -189,6 +190,21 @@ Item {
                 Instantiator {
                     id: instantiator
                     delegate: Foo.A {}
+                }
+            }
+
+            Foo.C {
+                id: c
+                property alias a: ca
+                property alias b: cb
+
+                Foo.A { id: ca }
+
+                Foo.B {
+                    id: cb
+                    property alias c: cbc
+
+                    Foo.C { id: cbc }
                 }
             }
         }
@@ -230,6 +246,49 @@ Item {
             AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
                 compare(w.a.instantiator.object.StyleSet.path,
                         "ApplicationWindow/A/QQmlInstantiator/A");
+            });
+        }
+
+        function test_reparentedItem() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Force side effect of building the path before reparenting.
+                compare(w.c.b.StyleSet.path, "ApplicationWindow/C/B");
+
+                w.c.b.parent = w.c.a;
+
+                expectFail("", "Reparenting not supported yet");
+                compare(w.c.b.StyleSet.path, "ApplicationWindow/C/A/B");
+            });
+        }
+
+        function test_childOfReparentedItem_StyleSetCreatedBeforeReparenting() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Access StyleSet to create it
+                w.c.b.StyleSet.path;
+
+                // Force side effect of building the path before reparenting the parent.
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C");
+
+                w.c.b.parent = w.c.a;
+
+                expectFail("", "Ancestor reparenting not supported yet");
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
+            });
+        }
+
+        function test_childOfReparentedItem_StyleSetCreatedAfterReparenting() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Force side effect of building the path before reparenting the parent.
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C");
+
+                w.c.b.parent = w.c.a;
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C"); // not yet up-to-date
+
+                // Access StyleSet to create it
+                w.c.b.StyleSet.path;
+
+                expectFail("", "Ancestor reparenting not supported yet");
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
             });
         }
     }
