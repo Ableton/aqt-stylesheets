@@ -268,8 +268,6 @@ Item {
                 compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C");
 
                 w.c.b.parent = w.c.a;
-
-                expectFail("", "Ancestor reparenting not supported yet");
                 compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
             });
         }
@@ -285,7 +283,6 @@ Item {
                 // Access StyleSet to create it
                 w.c.b.StyleSet.path;
 
-                expectFail("", "Ancestor reparenting not supported yet");
                 compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
             });
         }

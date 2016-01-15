@@ -31,6 +31,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <string>
+#include <unordered_set>
 
 namespace aqt
 {
@@ -137,6 +138,38 @@ UiItemPath traversePathUp(StyleSet* pStyleSet)
   return CollectPath(pStyleSet).result();
 }
 
+std::unordered_set<QObject*> allUniqueChildren(QObject* pParent)
+{
+  using std::begin;
+  using std::end;
+
+  const auto& children = pParent->children();
+
+  auto result = std::unordered_set<QObject*>{begin(children), end(children)};
+
+  if (auto pItem = qobject_cast<QQuickItem*>(pParent)) {
+    const auto& childItems = pItem->childItems();
+    result.insert(begin(childItems), end(childItems));
+  }
+
+  return result;
+}
+
+void propagatePathDown(QObject* pRoot)
+{
+  const auto children = allUniqueChildren(pRoot);
+
+  for (auto pChild : children) {
+    if (uiPathParent(pChild) == pRoot) {
+      if (auto pStyleSet = qobject_cast<StyleSet*>(
+            qmlAttachedPropertiesObject<StyleSet>(pChild, false))) {
+        pStyleSet->refreshPath();
+      }
+      propagatePathDown(pChild);
+    }
+  }
+}
+
 } // anon namespace
 
 StyleSet::StyleSet(QObject* pParent)
@@ -160,6 +193,7 @@ StyleSet::StyleSet(QObject* pParent)
   }
 
   refreshPath();
+  propagatePathDown(p);
 }
 
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
@@ -231,7 +265,11 @@ StyleSetProps* StyleSet::props()
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
   if (pNewParent != nullptr) {
-    setPath(traversePathUp(this));
+    const auto newPath = traversePathUp(this);
+    if (mPath != newPath) {
+      setPath(newPath);
+      propagatePathDown(parent());
+    }
   }
 }
 

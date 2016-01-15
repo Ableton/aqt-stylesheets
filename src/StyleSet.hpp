@@ -98,6 +98,10 @@ class StyleEngine;
  * color(const QString&, const QColor&) const may not
  * return expected values until the StyleEngine is actually initialized.
  *
+ * @attention To properly support property updates when an ancestor item is reparented (by
+ * binding to the parent property in QML or by using a QML view that internally reparents
+ * its children like e.g. ListView) the reparented item needs to have a StyleSet attached.
+ *
  * @par Import in QML:
  * ```import Aqt.StyleSheets 1.0```
  * @since 1.0
