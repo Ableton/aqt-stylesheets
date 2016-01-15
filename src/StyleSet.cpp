@@ -97,11 +97,8 @@ T traverseParentChain(QObject* pObj, ObjVisitor visitor)
 {
   QObject* p = pObj;
   while (p) {
-    if (visitor(p)) {
-      p = uiPathParent(p);
-    } else {
-      p = nullptr;
-    }
+    visitor(p);
+    p = uiPathParent(p);
   }
 
   return visitor.result();
@@ -110,10 +107,9 @@ T traverseParentChain(QObject* pObj, ObjVisitor visitor)
 class CollectPathVisitor
 {
 public:
-  bool operator()(QObject* pObj)
+  void operator()(QObject* pObj)
   {
     mResult.emplace_back(typeName(pObj), styleClassName(pObj));
-    return true;
   }
 
   UiItemPath result() const
