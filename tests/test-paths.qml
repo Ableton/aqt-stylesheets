@@ -231,7 +231,7 @@ Item {
         function test_hierarchyWithFlickable() {
             AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
                 compare(w.a.flickable.a.StyleSet.path,
-                        "ApplicationWindow/A/QQuickFlickable/A");
+                        "ApplicationWindow/A/QQuickFlickable/QQuickItem/A");
             });
         }
 
@@ -255,8 +255,6 @@ Item {
                 compare(w.c.b.StyleSet.path, "ApplicationWindow/C/B");
 
                 w.c.b.parent = w.c.a;
-
-                expectFail("", "Reparenting not supported yet");
                 compare(w.c.b.StyleSet.path, "ApplicationWindow/C/A/B");
             });
         }

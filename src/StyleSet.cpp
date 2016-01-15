@@ -82,7 +82,7 @@ std::vector<std::string> styleClassName(QObject* pObj)
 QObject* uiPathParent(QObject* pObj)
 {
   QObject* pParent = pObj->parent();
-  if (!pParent) {
+  if (!pParent || !pParent->isWindowType()) {
     if (QQuickItem* pItem = qobject_cast<QQuickItem*>(pObj)) {
       if (QQuickItem* pParentItem = pItem->parentItem()) {
         return pParentItem;

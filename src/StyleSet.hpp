@@ -73,12 +73,12 @@ class StyleEngine;
  * example the path for each item is added as a comment:
  *
  * @code
- * Rectangle {               // QQuickRectangle
- *   Text {                  // QQuickRectangle QQuickText
+ * Rectangle {              // QQuickRectangle
+ *   Text {                 // QQuickRectangle QQuickText
  *   }
- *   Item {                  // QQuickRectangle QQuickItem
- *     ListView {            // QQuickRectangle QQuickItem QQuickListView
- *       delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
+ *   Item {                 // QQuickRectangle QQuickItem
+ *     ListView {           // QQuickRectangle QQuickItem QQuickListView
+ *       delegate: MyView { // QQuickRectangle QQuickItem QQuickListView QQuickItem MyView
  *       }
  *     }
  *   }
@@ -88,7 +88,8 @@ class StyleEngine;
  * MyView is a user type defined in the module's qmldir file as MyView.
  * Built-in types like Rectangle or Text begin with @c QQuick.  For
  * debugging purposes the path of an item can be printed to stdout with the
- * StyleSet::path property.
+ * StyleSet::path property. ListView places its delegate in a content item which is
+ * why there is a QQuickItem in the path between QQuickListView and QQuickItem.
  *
  * @note Matching, determining element path and properties may be delayed in case
  * the global style engine has not been initialized yet (e.g. because it is
