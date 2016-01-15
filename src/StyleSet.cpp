@@ -92,16 +92,14 @@ QObject* uiPathParent(QObject* pObj)
   return pParent;
 }
 
-template <typename T, typename ObjVisitor>
-T traverseParentChain(QObject* pObj, ObjVisitor visitor)
+template <typename ObjVisitor>
+void traverseParentChain(QObject* pObj, ObjVisitor& visitor)
 {
   QObject* p = pObj;
   while (p) {
     visitor(p);
     p = uiPathParent(p);
   }
-
-  return visitor.result();
 }
 
 class CollectPathVisitor
@@ -124,7 +122,8 @@ private:
 UiItemPath traversePathUp(QObject* pObj)
 {
   CollectPathVisitor collectPathVisitor;
-  return traverseParentChain<UiItemPath>(pObj, collectPathVisitor);
+  traverseParentChain(pObj, collectPathVisitor);
+  return collectPathVisitor.result();
 }
 
 } // anon namespace
