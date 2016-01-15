@@ -147,7 +147,7 @@ class StyleSet : public QObject
    * the root of the QML object hierarchy.  The path is mostly useful for
    * debugging purposes.
    */
-  Q_PROPERTY(QString path READ path NOTIFY pathChanged)
+  Q_PROPERTY(QString path READ pathString NOTIFY pathChanged)
 
   /*! @public Contains the style properties for the element this StyleSet is
    * attached to
@@ -174,7 +174,7 @@ public:
   QString name() const;
   void setName(const QString& val);
 
-  QString path() const;
+  QString pathString() const;
   StyleSetProps* props();
 
   QString styleInfo() const;

@@ -180,7 +180,7 @@ void StyleSet::setName(const QString& val)
   }
 }
 
-QString StyleSet::path() const
+QString StyleSet::pathString() const
 {
   return QString::fromStdString(pathToString(mPath));
 }
