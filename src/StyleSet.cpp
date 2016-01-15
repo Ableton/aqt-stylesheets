@@ -96,6 +96,7 @@ class CollectPath
 {
 public:
   CollectPath(StyleSet* pStyleSet)
+    : mpStyleSet(pStyleSet)
   {
     QObject* pParent = pStyleSet->parent();
     Q_ASSERT(pParent);
@@ -111,11 +112,23 @@ private:
   void traverseParentChain(QObject* pObj)
   {
     if (pObj) {
-      traverseParentChain(uiPathParent(pObj));
-      mResult.emplace_back(typeName(pObj), styleClassName(pObj));
+      if (StyleSet* pOtherStyleSet = otherStyleSet(pObj)) {
+        mResult = pOtherStyleSet->path();
+      } else {
+        traverseParentChain(uiPathParent(pObj));
+        mResult.emplace_back(typeName(pObj), styleClassName(pObj));
+      }
     }
   }
 
+  StyleSet* otherStyleSet(QObject* pObj)
+  {
+    auto* pStyleSet =
+      qobject_cast<StyleSet*>(qmlAttachedPropertiesObject<StyleSet>(pObj, false));
+    return pStyleSet != mpStyleSet ? pStyleSet : nullptr;
+  }
+
+  StyleSet* mpStyleSet;
   UiItemPath mResult;
 };
 
@@ -178,6 +191,11 @@ void StyleSet::setName(const QString& val)
     setPath(traversePathUp(this));
     Q_EMIT nameChanged(mName);
   }
+}
+
+const UiItemPath& StyleSet::path() const
+{
+  return mPath;
 }
 
 QString StyleSet::pathString() const

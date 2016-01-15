@@ -175,6 +175,7 @@ public:
   void setName(const QString& val);
 
   QString pathString() const;
+  const UiItemPath& path() const;
   StyleSetProps* props();
 
   QString styleInfo() const;
