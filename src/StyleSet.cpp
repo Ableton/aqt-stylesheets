@@ -96,8 +96,8 @@ template <typename ObjVisitor>
 void traverseParentChain(QObject* pObj, ObjVisitor& visitor)
 {
   if (pObj) {
-    visitor(pObj);
     traverseParentChain(uiPathParent(pObj), visitor);
+    visitor(pObj);
   }
 }
 
@@ -109,9 +109,9 @@ public:
     mResult.emplace_back(typeName(pObj), styleClassName(pObj));
   }
 
-  UiItemPath result() const
+  const UiItemPath& result() const
   {
-    return {mResult.rbegin(), mResult.rend()};
+    return mResult;
   }
 
 private:
