@@ -79,21 +79,26 @@ std::vector<std::string> styleClassName(QObject* pObj)
   return classNames;
 }
 
+QObject* uiPathParent(QObject* pObj)
+{
+  QObject* pParent = pObj->parent();
+  if (!pParent) {
+    if (QQuickItem* pItem = qobject_cast<QQuickItem*>(pObj)) {
+      if (QQuickItem* pParentItem = pItem->parentItem()) {
+        return pParentItem;
+      }
+    }
+  }
+  return pParent;
+}
+
 template <typename T, typename ObjVisitor>
 T traverseParentChain(QObject* pObj, ObjVisitor visitor)
 {
   QObject* p = pObj;
   while (p) {
     if (visitor(p)) {
-      QObject* nextp = p->parent();
-      if (!nextp) {
-        if (QQuickItem* pItem = qobject_cast<QQuickItem*>(p)) {
-          if (QQuickItem* pParentItem = pItem->parentItem()) {
-            nextp = pParentItem;
-          }
-        }
-      }
-      p = nextp;
+      p = uiPathParent(p);
     } else {
       p = nullptr;
     }
