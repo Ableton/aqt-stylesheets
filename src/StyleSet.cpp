@@ -223,6 +223,7 @@ void StyleSet::setName(const QString& val)
   if (mName != val) {
     mName = val;
     refreshPath();
+    propagatePathDown(parent());
     Q_EMIT nameChanged(mName);
   }
 }

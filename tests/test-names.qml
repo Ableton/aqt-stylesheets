@@ -68,11 +68,7 @@ Item {
                         "QQuickItem/QQuickItem/QQuickItem/QQuickItem/QQuickItem");
 
                 a.b.StyleSet.name = "bar";
-
-                expectFailContinue("", "Parent name change not supported yet");
                 compare(a.b.c.StyleSet.path, "QQuickItem/QQuickItem.bar/QQuickItem");
-
-                expectFail("", "Ancestor name change not supported yet");
                 compare(a.b.c.d.e.StyleSet.path,
                         "QQuickItem/QQuickItem.bar/QQuickItem/QQuickItem/QQuickItem");
             });
