@@ -95,10 +95,9 @@ QObject* uiPathParent(QObject* pObj)
 template <typename ObjVisitor>
 void traverseParentChain(QObject* pObj, ObjVisitor& visitor)
 {
-  QObject* p = pObj;
-  while (p) {
-    visitor(p);
-    p = uiPathParent(p);
+  if (pObj) {
+    visitor(pObj);
+    traverseParentChain(uiPathParent(pObj), visitor);
   }
 }
 
