@@ -95,9 +95,11 @@ QObject* uiPathParent(QObject* pObj)
 class CollectPath
 {
 public:
-  CollectPath(QObject* pObj)
+  CollectPath(StyleSet* pStyleSet)
   {
-    traverseParentChain(pObj);
+    QObject* pParent = pStyleSet->parent();
+    Q_ASSERT(pParent);
+    traverseParentChain(pParent);
   }
 
   const UiItemPath& result() const
@@ -117,9 +119,9 @@ private:
   UiItemPath mResult;
 };
 
-UiItemPath traversePathUp(QObject* pObj)
+UiItemPath traversePathUp(StyleSet* pStyleSet)
 {
-  return CollectPath(pObj).result();
+  return CollectPath(pStyleSet).result();
 }
 
 } // anon namespace
@@ -144,7 +146,7 @@ StyleSet::StyleSet(QObject* pParent)
       QString::fromLatin1("Hierarchy changes for this component won't be detected"));
   }
 
-  setPath(traversePathUp(p));
+  setPath(traversePathUp(this));
 }
 
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
@@ -173,8 +175,7 @@ void StyleSet::setName(const QString& val)
 {
   if (mName != val) {
     mName = val;
-    Q_ASSERT(parent());
-    setPath(traversePathUp(parent()));
+    setPath(traversePathUp(this));
     Q_EMIT nameChanged(mName);
   }
 }
@@ -206,9 +207,8 @@ StyleSetProps* StyleSet::props()
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
-  Q_ASSERT(parent());
   if (pNewParent != nullptr) {
-    setPath(traversePathUp(parent()));
+    setPath(traversePathUp(this));
   }
 }
 
