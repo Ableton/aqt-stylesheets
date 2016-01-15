@@ -92,21 +92,12 @@ QObject* uiPathParent(QObject* pObj)
   return pParent;
 }
 
-template <typename ObjVisitor>
-void traverseParentChain(QObject* pObj, ObjVisitor& visitor)
-{
-  if (pObj) {
-    traverseParentChain(uiPathParent(pObj), visitor);
-    visitor(pObj);
-  }
-}
-
-class CollectPathVisitor
+class CollectPath
 {
 public:
-  void operator()(QObject* pObj)
+  CollectPath(QObject* pObj)
   {
-    mResult.emplace_back(typeName(pObj), styleClassName(pObj));
+    traverseParentChain(pObj);
   }
 
   const UiItemPath& result() const
@@ -115,14 +106,20 @@ public:
   }
 
 private:
+  void traverseParentChain(QObject* pObj)
+  {
+    if (pObj) {
+      traverseParentChain(uiPathParent(pObj));
+      mResult.emplace_back(typeName(pObj), styleClassName(pObj));
+    }
+  }
+
   UiItemPath mResult;
 };
 
 UiItemPath traversePathUp(QObject* pObj)
 {
-  CollectPathVisitor collectPathVisitor;
-  traverseParentChain(pObj, collectPathVisitor);
-  return collectPathVisitor.result();
+  return CollectPath(pObj).result();
 }
 
 } // anon namespace
