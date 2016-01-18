@@ -18,6 +18,7 @@ Item {
 
     TestCase {
         name: "class names change path"
+        when: windowShown
 
         function test_singleClassName() {
             AqtTests.Utils.withComponent(itemComponent, null, {}, function(item) {

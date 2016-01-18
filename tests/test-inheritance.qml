@@ -53,6 +53,7 @@ Item {
 
     TestCase {
         name: "properties are inherited"
+        when: windowShown
 
         function test_propertyInheritance_data() {
             return [
