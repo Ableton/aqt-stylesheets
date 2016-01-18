@@ -185,10 +185,12 @@ QString StyleSet::path() const
 
 void StyleSet::setPath(const UiItemPath& path)
 {
-  mPath = path;
-  setupStyle();
+  if (mPath != path) {
+    mPath = path;
+    setupStyle();
 
-  Q_EMIT pathChanged();
+    Q_EMIT pathChanged();
+  }
 }
 
 QString StyleSet::styleInfo() const
