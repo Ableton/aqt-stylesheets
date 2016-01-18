@@ -144,4 +144,147 @@ Item {
             compare(spy.count, 0);
         }
     }
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: parentHierarchyCase
+
+        ApplicationWindow {
+            property alias a: a
+            property alias c: c
+
+            Foo.A {
+                id: a
+                property alias b: ab
+                property alias listView: listView
+                property alias flickable: flickable
+                property alias loader: loader
+                property alias instantiator: instantiator
+
+                Foo.B {
+                    id: ab
+                    property alias c: abc
+
+                    Foo.C { id: abc }
+                }
+
+                ListView {
+                    id: listView
+                    model: 1
+                    delegate: Foo.B {}
+                }
+
+                Flickable {
+                    id: flickable
+                    property alias a: flickable_a
+
+                    Foo.A { id: flickable_a }
+                }
+
+                Loader {
+                    id: loader
+                    sourceComponent: Foo.C {}
+                }
+
+                Instantiator {
+                    id: instantiator
+                    delegate: Foo.A {}
+                }
+            }
+
+            Foo.C {
+                id: c
+                property alias a: ca
+                property alias b: cb
+
+                Foo.A { id: ca }
+
+                Foo.B {
+                    id: cb
+                    property alias c: cbc
+
+                    Foo.C { id: cbc }
+                }
+            }
+        }
+    }
+
+    TestCase {
+        name: "build path by walking parentItem and parent hierarchy"
+        when: windowShown
+
+        function test_simpleHierarchy() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                compare(w.a.b.c.StyleSet.path,
+                        "ApplicationWindow/A/B/C");
+            });
+        }
+
+        function test_hierarchyWithListView() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                compare(w.a.listView.currentItem.StyleSet.path,
+                        "ApplicationWindow/A/QQuickListView/QQuickItem/B");
+            });
+        }
+
+        function test_hierarchyWithFlickable() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                compare(w.a.flickable.a.StyleSet.path,
+                        "ApplicationWindow/A/QQuickFlickable/QQuickItem/A");
+            });
+        }
+
+        function test_hierarchyWithLoader() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                compare(w.a.loader.item.StyleSet.path,
+                        "ApplicationWindow/A/QQuickLoader/C");
+            });
+        }
+
+        function test_hierarchyWithInstantiator() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                compare(w.a.instantiator.object.StyleSet.path,
+                        "ApplicationWindow/A/QQmlInstantiator/A");
+            });
+        }
+
+        function test_reparentedItem() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Force side effect of building the path before reparenting.
+                compare(w.c.b.StyleSet.path, "ApplicationWindow/C/B");
+
+                w.c.b.parent = w.c.a;
+                compare(w.c.b.StyleSet.path, "ApplicationWindow/C/A/B");
+            });
+        }
+
+        function test_childOfReparentedItem_StyleSetCreatedBeforeReparenting() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Access StyleSet to create it
+                w.c.b.StyleSet.path;
+
+                // Force side effect of building the path before reparenting the parent.
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C");
+
+                w.c.b.parent = w.c.a;
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
+            });
+        }
+
+        function test_childOfReparentedItem_StyleSetCreatedAfterReparenting() {
+            AqtTests.Utils.withComponent(parentHierarchyCase, null, {}, function(w) {
+                // Force side effect of building the path before reparenting the parent.
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C");
+
+                w.c.b.parent = w.c.a;
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/B/C"); // not yet up-to-date
+
+                // Access StyleSet to create it
+                w.c.b.StyleSet.path;
+
+                compare(w.c.b.c.StyleSet.path, "ApplicationWindow/C/A/B/C");
+            });
+        }
+    }
 }

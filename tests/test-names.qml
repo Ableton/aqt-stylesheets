@@ -13,11 +13,32 @@ Item {
 
     Component {
         id: itemComponent
-        Item {}
+
+        Item {
+            id: a
+            property alias b: b
+
+            Item {
+                id: b
+                property alias c: c
+
+                Item {
+                    id: c
+                    property alias d: d
+
+                    Item {
+                        id: d
+                        property alias e: e
+                        Item { id: e }
+                    }
+                }
+            }
+        }
     }
 
     TestCase {
         name: "class names change path"
+        when: windowShown
 
         function test_singleClassName() {
             AqtTests.Utils.withComponent(itemComponent, null, {}, function(item) {
@@ -37,6 +58,19 @@ Item {
             AqtTests.Utils.withComponent(itemComponent, null, {}, function(item) {
                 item.StyleSet.name = "bar  foo ";
                 compare(item.StyleSet.path, "QQuickItem.{bar,foo}");
+            });
+        }
+
+        function test_nameChangeIsPropagatedToDescendants(a) {
+            AqtTests.Utils.withComponent(itemComponent, null, {}, function(a) {
+                compare(a.b.c.StyleSet.path, "QQuickItem/QQuickItem/QQuickItem");
+                compare(a.b.c.d.e.StyleSet.path,
+                        "QQuickItem/QQuickItem/QQuickItem/QQuickItem/QQuickItem");
+
+                a.b.StyleSet.name = "bar";
+                compare(a.b.c.StyleSet.path, "QQuickItem/QQuickItem.bar/QQuickItem");
+                compare(a.b.c.d.e.StyleSet.path,
+                        "QQuickItem/QQuickItem.bar/QQuickItem/QQuickItem/QQuickItem");
             });
         }
     }

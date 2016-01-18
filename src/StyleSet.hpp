@@ -73,12 +73,12 @@ class StyleEngine;
  * example the path for each item is added as a comment:
  *
  * @code
- * Rectangle {               // QQuickRectangle
- *   Text {                  // QQuickRectangle QQuickText
+ * Rectangle {              // QQuickRectangle
+ *   Text {                 // QQuickRectangle QQuickText
  *   }
- *   Item {                  // QQuickRectangle QQuickItem
- *     ListView {            // QQuickRectangle QQuickItem QQuickListView
- *       delegate: MyView {  // QQuickRectangle QQuickItem QQuickListView MyView
+ *   Item {                 // QQuickRectangle QQuickItem
+ *     ListView {           // QQuickRectangle QQuickItem QQuickListView
+ *       delegate: MyView { // QQuickRectangle QQuickItem QQuickListView QQuickItem MyView
  *       }
  *     }
  *   }
@@ -88,7 +88,8 @@ class StyleEngine;
  * MyView is a user type defined in the module's qmldir file as MyView.
  * Built-in types like Rectangle or Text begin with @c QQuick.  For
  * debugging purposes the path of an item can be printed to stdout with the
- * StyleSet::path property.
+ * StyleSet::path property. ListView places its delegate in a content item which is
+ * why there is a QQuickItem in the path between QQuickListView and QQuickItem.
  *
  * @note Matching, determining element path and properties may be delayed in case
  * the global style engine has not been initialized yet (e.g. because it is
@@ -96,6 +97,10 @@ class StyleEngine;
  * functions like get(const QString&) const or
  * color(const QString&, const QColor&) const may not
  * return expected values until the StyleEngine is actually initialized.
+ *
+ * @attention To properly support property updates when an ancestor item is reparented (by
+ * binding to the parent property in QML or by using a QML view that internally reparents
+ * its children like e.g. ListView) the reparented item needs to have a StyleSet attached.
  *
  * @par Import in QML:
  * ```import Aqt.StyleSheets 1.0```
@@ -147,7 +152,7 @@ class StyleSet : public QObject
    * the root of the QML object hierarchy.  The path is mostly useful for
    * debugging purposes.
    */
-  Q_PROPERTY(QString path READ path NOTIFY pathChanged)
+  Q_PROPERTY(QString path READ pathString NOTIFY pathChanged)
 
   /*! @public Contains the style properties for the element this StyleSet is
    * attached to
@@ -174,7 +179,10 @@ public:
   QString name() const;
   void setName(const QString& val);
 
-  QString path() const;
+  QString pathString() const;
+  const UiItemPath& path() const;
+  void refreshPath();
+
   StyleSetProps* props();
 
   QString styleInfo() const;
@@ -204,6 +212,7 @@ private Q_SLOTS:
   void onParentChanged(QQuickItem* pNewParent);
 
 private:
+  void setPath(const UiItemPath& path);
   void setupStyle();
 
 private:

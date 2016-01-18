@@ -31,6 +31,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <string>
+#include <unordered_set>
 
 namespace aqt
 {
@@ -79,50 +80,94 @@ std::vector<std::string> styleClassName(QObject* pObj)
   return classNames;
 }
 
-template <typename T, typename ObjVisitor>
-T traverseParentChain(QObject* pObj, ObjVisitor visitor)
+QObject* uiPathParent(QObject* pObj)
 {
-  QObject* p = pObj;
-  while (p) {
-    if (visitor(p)) {
-      QObject* nextp = p->parent();
-      if (!nextp) {
-        if (QQuickItem* pItem = qobject_cast<QQuickItem*>(p)) {
-          if (QQuickItem* pParentItem = pItem->parentItem()) {
-            nextp = pParentItem;
-          }
-        }
+  QObject* pParent = pObj->parent();
+  if (!pParent || !pParent->isWindowType()) {
+    if (QQuickItem* pItem = qobject_cast<QQuickItem*>(pObj)) {
+      if (QQuickItem* pParentItem = pItem->parentItem()) {
+        return pParentItem;
       }
-      p = nextp;
-    } else {
-      p = nullptr;
+    }
+  }
+  return pParent;
+}
+
+class CollectPath
+{
+public:
+  CollectPath(StyleSet* pStyleSet)
+    : mpStyleSet(pStyleSet)
+  {
+    QObject* pParent = pStyleSet->parent();
+    Q_ASSERT(pParent);
+    traverseParentChain(pParent);
+  }
+
+  const UiItemPath& result() const
+  {
+    return mResult;
+  }
+
+private:
+  void traverseParentChain(QObject* pObj)
+  {
+    if (pObj) {
+      if (StyleSet* pOtherStyleSet = otherStyleSet(pObj)) {
+        mResult = pOtherStyleSet->path();
+      } else {
+        traverseParentChain(uiPathParent(pObj));
+        mResult.emplace_back(typeName(pObj), styleClassName(pObj));
+      }
     }
   }
 
-  return visitor.result();
-}
+  StyleSet* otherStyleSet(QObject* pObj)
+  {
+    auto* pStyleSet =
+      qobject_cast<StyleSet*>(qmlAttachedPropertiesObject<StyleSet>(pObj, false));
+    return pStyleSet != mpStyleSet ? pStyleSet : nullptr;
+  }
 
-class CollectPathVisitor
-{
-public:
+  StyleSet* mpStyleSet;
   UiItemPath mResult;
-
-  bool operator()(QObject* pObj)
-  {
-    mResult.emplace_back(typeName(pObj), styleClassName(pObj));
-    return true;
-  }
-
-  UiItemPath result() const
-  {
-    return {mResult.rbegin(), mResult.rend()};
-  }
 };
 
-UiItemPath traversePathUp(QObject* pObj)
+UiItemPath traversePathUp(StyleSet* pStyleSet)
 {
-  CollectPathVisitor collectPathVisitor;
-  return traverseParentChain<UiItemPath>(pObj, collectPathVisitor);
+  return CollectPath(pStyleSet).result();
+}
+
+std::unordered_set<QObject*> allUniqueChildren(QObject* pParent)
+{
+  using std::begin;
+  using std::end;
+
+  const auto& children = pParent->children();
+
+  auto result = std::unordered_set<QObject*>{begin(children), end(children)};
+
+  if (auto pItem = qobject_cast<QQuickItem*>(pParent)) {
+    const auto& childItems = pItem->childItems();
+    result.insert(begin(childItems), end(childItems));
+  }
+
+  return result;
+}
+
+void propagatePathDown(QObject* pRoot)
+{
+  const auto children = allUniqueChildren(pRoot);
+
+  for (auto pChild : children) {
+    if (uiPathParent(pChild) == pRoot) {
+      if (auto pStyleSet = qobject_cast<StyleSet*>(
+            qmlAttachedPropertiesObject<StyleSet>(pChild, false))) {
+        pStyleSet->refreshPath();
+      }
+      propagatePathDown(pChild);
+    }
+  }
 }
 
 } // anon namespace
@@ -132,23 +177,23 @@ StyleSet::StyleSet(QObject* pParent)
   , mpStyleSetProps(nullptr)
 {
   QObject* p = parent();
-  if (p) {
-    QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
-    if (pItem != nullptr) {
-      connect(pItem, &QQuickItem::parentChanged, this, &StyleSet::onParentChanged);
-    } else if (p->parent() != nullptr) {
-      styleSheetsLogInfo() << "Parent to StyleSet is not a QQuickItem but '"
-                           << p->metaObject()->className() << "'. "
-                           << "Hierarchy changes for this component won't be detected.";
+  Q_ASSERT(p);
 
-      Q_EMIT StyleEngine::instance().exception(
-        QString::fromLatin1("noParentChangeReports"),
-        QString::fromLatin1("Hierarchy changes for this component won't be detected"));
-    }
+  QQuickItem* pItem = qobject_cast<QQuickItem*>(p);
+  if (pItem != nullptr) {
+    connect(pItem, &QQuickItem::parentChanged, this, &StyleSet::onParentChanged);
+  } else if (p->parent() != nullptr) {
+    styleSheetsLogInfo() << "Parent to StyleSet is not a QQuickItem but '"
+                         << p->metaObject()->className() << "'. "
+                         << "Hierarchy changes for this component won't be detected.";
 
-    mPath = traversePathUp(p);
-    setupStyle();
+    Q_EMIT StyleEngine::instance().exception(
+      QString::fromLatin1("noParentChangeReports"),
+      QString::fromLatin1("Hierarchy changes for this component won't be detected"));
   }
+
+  refreshPath();
+  propagatePathDown(p);
 }
 
 StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
@@ -158,6 +203,11 @@ StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 
 void StyleSet::setupStyle()
 {
+  if (mpStyleSetProps) {
+    disconnect(
+      mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+  }
+
   mpStyleSetProps = StyleEngine::instance().styleSetProps(mPath);
   connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
   Q_EMIT propsChanged();
@@ -172,21 +222,35 @@ void StyleSet::setName(const QString& val)
 {
   if (mName != val) {
     mName = val;
-
-    QObject* p = parent();
-    if (p) {
-      mPath = traversePathUp(p);
-      setupStyle();
-    }
-
+    refreshPath();
+    propagatePathDown(parent());
     Q_EMIT nameChanged(mName);
-    Q_EMIT pathChanged();
   }
 }
 
-QString StyleSet::path() const
+const UiItemPath& StyleSet::path() const
+{
+  return mPath;
+}
+
+QString StyleSet::pathString() const
 {
   return QString::fromStdString(pathToString(mPath));
+}
+
+void StyleSet::refreshPath()
+{
+  setPath(traversePathUp(this));
+}
+
+void StyleSet::setPath(const UiItemPath& path)
+{
+  if (mPath != path) {
+    mPath = path;
+    setupStyle();
+
+    Q_EMIT pathChanged();
+  }
 }
 
 QString StyleSet::styleInfo() const
@@ -201,12 +265,12 @@ StyleSetProps* StyleSet::props()
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
 {
-  QObject* pParent = parent();
-  if (pNewParent != nullptr && pParent != nullptr) {
-    mPath = traversePathUp(pParent);
-    setupStyle();
-
-    Q_EMIT pathChanged();
+  if (pNewParent != nullptr) {
+    const auto newPath = traversePathUp(this);
+    if (mPath != newPath) {
+      setPath(newPath);
+      propagatePathDown(parent());
+    }
   }
 }
 
