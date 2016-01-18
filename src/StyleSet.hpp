@@ -177,6 +177,8 @@ public:
 
   QString pathString() const;
   const UiItemPath& path() const;
+  void refreshPath();
+
   StyleSetProps* props();
 
   QString styleInfo() const;
