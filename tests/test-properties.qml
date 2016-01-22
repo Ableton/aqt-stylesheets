@@ -182,14 +182,14 @@ Item {
         id: missingPropertyScene
 
         Item {
-            property alias notExisting: rect2.notExisting
+            property alias rect: rect2
 
             Rectangle {
                 id: rect2
                 StyleSet.name: "root"
                 anchors.fill: parent
 
-                property var notExisting: StyleSet.props.get("not-existing")
+                property var notExisting: "someArbitraryValue"
             }
         }
     }
@@ -202,7 +202,8 @@ Item {
             msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*not-existing.*/);
             AqtTests.Utils.withComponent(missingPropertyScene, scene, {}, function(comp) {
-                compare(comp.notExisting, undefined);
+                comp.rect.notExisting = comp.rect.StyleSet.props.get("not-existing");
+                compare(comp.rect.notExisting, undefined);
             });
         }
     }
