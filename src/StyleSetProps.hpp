@@ -34,6 +34,8 @@ SUPPRESS_WARNINGS
 #include <QtGui/QFont>
 RESTORE_WARNINGS
 
+#include <unordered_set>
+
 namespace aqt
 {
 namespace stylesheets
@@ -280,8 +282,16 @@ private:
   T lookupProperty(Property& def, const QString& key) const;
 
 private:
+  struct QStringHasher {
+    std::size_t operator()(const QString& string) const
+    {
+      return qHash(string);
+    }
+  };
+
   UiItemPath mPath;
   PropertyMap* mpProperties;
+  mutable std::unordered_set<QString, QStringHasher> mMissingProps;
   /*! @endcond */
 };
 

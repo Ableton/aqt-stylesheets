@@ -70,6 +70,8 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
+  mMissingProps.insert(key);
+
   auto& engine = StyleEngine::instance();
 
   if (engine.hasStylesLoaded()) {
@@ -159,12 +161,14 @@ QUrl StyleSetProps::url(const QString& key) const
 
 void StyleSetProps::loadProperties()
 {
+  mMissingProps.clear();
   mpProperties = StyleEngine::instance().properties(mPath);
   Q_EMIT propsChanged();
 }
 
 void StyleSetProps::invalidate()
 {
+  mMissingProps.clear();
   mpProperties = nullProperties();
 }
 
