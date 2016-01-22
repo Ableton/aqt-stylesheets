@@ -73,10 +73,6 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
   mMissingProps.insert(key);
   StyleEngine::instance().setMissingPropertiesFound();
 
-  if (StyleEngine::instance().hasStylesLoaded()) {
-    checkProperties();
-  }
-
   return false;
 }
 

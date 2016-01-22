@@ -321,6 +321,14 @@ void StyleEngine::notifyMissingProperties()
 
 void StyleEngine::checkProperties()
 {
+  for (auto& element : mStyleSetPropsRefs) {
+    if (element.second.usageCount() > 1) {
+      element.second.get()->checkProperties();
+    }
+  }
+
+  mMissingPropertiesFound = false;
+  mMissingPropertiesNotified = false;
 }
 
 } // namespace stylesheets

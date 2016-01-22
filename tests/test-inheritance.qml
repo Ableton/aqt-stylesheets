@@ -3,7 +3,7 @@
 import QtQuick 2.3
 import QtTest 1.0
 
-import Aqt.StyleSheets 1.1
+import Aqt.StyleSheets 1.3
 import Aqt.Testing 1.0 as AqtTests
 
 import Foo 1.0
@@ -143,6 +143,11 @@ Item {
         Item {
             property alias a: a
 
+            StyleChecker {
+                id: styleChecker
+                active: true
+            }
+
             A {
                 id: a
                 property alias listView: listView
@@ -191,7 +196,7 @@ Item {
             AqtTests.Utils.withComponent(incompletePathScene, scene, {}, function(comp) {
                 compare(comp.a.listView.currentItem.c.inherited, "A");
 
-                expectFail("", "warning issued for intermediate state");
+                waitForRendering(comp);
                 compare(missingPropertiesSpy.count, 0);
             });
         }
