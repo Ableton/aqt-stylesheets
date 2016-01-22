@@ -270,6 +270,8 @@ public:
 
   void invalidate();
 
+  void checkProperties() const;
+
 Q_SIGNALS:
   void propsChanged();
 

@@ -73,14 +73,8 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
   mMissingProps.insert(key);
   StyleEngine::instance().setMissingPropertiesFound();
 
-  auto& engine = StyleEngine::instance();
-
-  if (engine.hasStylesLoaded()) {
-    styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
-                            << pathToString(mPath) << ")";
-    Q_EMIT engine.exception(QString::fromLatin1("propertyNotFound"),
-                            QString::fromLatin1("Property '%1' not found (%2)")
-                              .arg(key, QString::fromStdString(pathToString(mPath))));
+  if (StyleEngine::instance().hasStylesLoaded()) {
+    checkProperties();
   }
 
   return false;
@@ -171,6 +165,20 @@ void StyleSetProps::invalidate()
 {
   mMissingProps.clear();
   mpProperties = nullProperties();
+}
+
+void StyleSetProps::checkProperties() const
+{
+  for (const auto& key : mMissingProps) {
+    styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
+                            << pathToString(mPath) << ")";
+    Q_EMIT StyleEngine::instance().exception(
+      QString::fromLatin1("propertyNotFound"),
+      QString::fromLatin1("Property '%1' not found (%2)")
+        .arg(key, QString::fromStdString(pathToString(mPath))));
+  }
+
+  mMissingProps.clear();
 }
 
 StyleSetPropsRef::StyleSetPropsRef()
