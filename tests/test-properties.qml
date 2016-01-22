@@ -198,12 +198,23 @@ Item {
         name: "lookup missing properties."
         when: windowShown
 
+        SignalSpy {
+            id: missingPropertiesSpy
+            target: styleEngine
+            signalName: "exception"
+        }
+
         function test_lookupNotExistingProperty() {
             msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*not-existing.*/);
             AqtTests.Utils.withComponent(missingPropertyScene, scene, {}, function(comp) {
+                compare(missingPropertiesSpy.count, 0);
+
                 comp.rect.notExisting = comp.rect.StyleSet.props.get("not-existing");
                 compare(comp.rect.notExisting, undefined);
+
+                compare(missingPropertiesSpy.count, 1);
+                compare(missingPropertiesSpy.signalArguments[0][0], "propertyNotFound");
             });
         }
     }
