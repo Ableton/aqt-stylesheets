@@ -126,6 +126,8 @@ Q_SIGNALS:
    */
   Q_REVISION(1) void exception(const QString& type, const QString& message);
 
+  void propertiesPotentiallyMissing();
+
 private:
   StyleEngine() = default;
 
@@ -134,6 +136,8 @@ private:
   void reloadAllProperties();
 
   PropertyMap* effectivePropertyMap(const UiItemPath& path);
+
+  void notifyMissingProperties();
 
 private:
   using StyleSetPropsInstances = std::vector<std::unique_ptr<UsageCountedStyleSetProps>>;
@@ -159,6 +163,7 @@ private:
 
   bool mHasStylesLoaded = false;
   bool mMissingPropertiesFound = false;
+  bool mMissingPropertiesNotified = false;
 };
 
 } // namespace stylesheets

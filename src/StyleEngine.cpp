@@ -227,6 +227,7 @@ void StyleEngine::loadStyles()
   reloadAllProperties();
 
   mHasStylesLoaded = true;
+  notifyMissingProperties();
 
   Q_EMIT styleChanged();
 }
@@ -307,6 +308,15 @@ PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
 void StyleEngine::setMissingPropertiesFound()
 {
   mMissingPropertiesFound = true;
+  notifyMissingProperties();
+}
+
+void StyleEngine::notifyMissingProperties()
+{
+  if (mHasStylesLoaded && mMissingPropertiesFound && !mMissingPropertiesNotified) {
+    mMissingPropertiesNotified = true;
+    Q_EMIT propertiesPotentiallyMissing();
+  }
 }
 
 } // namespace stylesheets
