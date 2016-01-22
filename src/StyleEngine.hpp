@@ -135,7 +135,7 @@ private:
 
 private:
   using StyleSetPropsInstances = std::vector<std::unique_ptr<UsageCountedStyleSetProps>>;
-  using StyleSetPropsByPath =
+  using StyleSetPropsRefs =
     std::unordered_map<UiItemPath, StyleSetPropsRef, UiItemPathHasher>;
 
   using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
@@ -150,7 +150,7 @@ private:
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
 
   StyleSetPropsInstances mStyleSetPropsInstances;
-  StyleSetPropsByPath mStyleSetPropsByPath;
+  StyleSetPropsRefs mStyleSetPropsRefs;
 
   PropertyMapInstances mPropertyMapInstances;
   PropertyMaps mPropertyMaps;
