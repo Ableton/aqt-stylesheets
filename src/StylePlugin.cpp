@@ -22,6 +22,7 @@ THE SOFTWARE.
 
 #include "StylePlugin.hpp"
 
+#include "StyleChecker.hpp"
 #include "StyleEngineSetup.hpp"
 #include "StylesDirWatcher.hpp"
 #include "StyleSet.hpp"
@@ -44,6 +45,7 @@ void aqt::stylesheets::StylePlugin::registerTypes(const char* pUri)
   qmlRegisterType<aqt::stylesheets::StyleEngineSetup>(pUri, 1, 0, "StyleEngine");
   qmlRegisterType<aqt::stylesheets::StyleEngineSetup, 1>(pUri, 1, 1, "StyleEngine");
   qmlRegisterType<aqt::stylesheets::StylesDirWatcher>(pUri, 1, 1, "StylesDirWatcher");
+  qmlRegisterType<aqt::stylesheets::StyleChecker>(pUri, 1, 3, "StyleChecker");
 }
 
 #if !defined(NOT_INCLUDE_MOC)

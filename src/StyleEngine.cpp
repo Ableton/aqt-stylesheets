@@ -319,5 +319,9 @@ void StyleEngine::notifyMissingProperties()
   }
 }
 
+void StyleEngine::checkProperties()
+{
+}
+
 } // namespace stylesheets
 } // namespace aqt

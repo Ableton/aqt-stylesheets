@@ -112,6 +112,8 @@ public:
 
   void setMissingPropertiesFound();
 
+  void checkProperties();
+
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
   void styleChanged();

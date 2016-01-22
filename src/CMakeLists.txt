@@ -47,6 +47,8 @@ target_compile_options(StyleSheetParser
 target_link_libraries(StyleSheetParser Qt5::Quick)
 
 add_library(StylePlugin MODULE
+  StyleChecker.cpp
+  StyleChecker.hpp
   StyleEngine.cpp
   StyleEngine.hpp
   StyleEngineSetup.cpp
