@@ -11,6 +11,13 @@ import Foo 1.0
 Item {
     id: scene
 
+    /*! ensure minimum width to be larger than the minimum allowed width on
+     * Windows */
+    implicitWidth: 124
+    /*! there are no constraints on the height, but it is convenient to have a
+     *  default size */
+    implicitHeight: 116
+
     StyleEngine {
         id: styleEngine
         styleSheetSource: "inheritance.css"
