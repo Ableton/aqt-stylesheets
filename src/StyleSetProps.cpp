@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include "Property.hpp"
 #include "StyleEngine.hpp"
 
+#include <algorithm>
+
 namespace aqt
 {
 namespace stylesheets
@@ -164,6 +166,57 @@ void StyleSetProps::loadProperties()
 void StyleSetProps::invalidate()
 {
   mpProperties = nullProperties();
+}
+
+StyleSetPropsRef::StyleSetPropsRef()
+  : StyleSetPropsRef{nullptr}
+{
+}
+
+StyleSetPropsRef::StyleSetPropsRef(UsageCountedStyleSetProps* pUsageCountedStyleSetProps)
+  : mpUsageCountedStyleSetProps{pUsageCountedStyleSetProps}
+{
+  if (mpUsageCountedStyleSetProps) {
+    ++mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef::~StyleSetPropsRef()
+{
+  if (mpUsageCountedStyleSetProps) {
+    --mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef::StyleSetPropsRef(const StyleSetPropsRef& other)
+  : mpUsageCountedStyleSetProps{other.mpUsageCountedStyleSetProps}
+{
+  if (mpUsageCountedStyleSetProps) {
+    ++mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef& StyleSetPropsRef::operator=(StyleSetPropsRef other)
+{
+  swap(*this, other);
+  return *this;
+}
+
+size_t StyleSetPropsRef::usageCount() const
+{
+  return mpUsageCountedStyleSetProps ? mpUsageCountedStyleSetProps->usageCount : 0;
+}
+
+StyleSetProps* StyleSetPropsRef::get()
+{
+  return mpUsageCountedStyleSetProps ? &mpUsageCountedStyleSetProps->styleSetProps
+                                     : nullptr;
+}
+
+void swap(StyleSetPropsRef& a, StyleSetPropsRef& b)
+{
+  using std::swap;
+  swap(a.mpUsageCountedStyleSetProps, b.mpUsageCountedStyleSetProps);
 }
 
 } // namespace stylesheets

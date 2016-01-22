@@ -216,7 +216,7 @@ private:
   void setupStyle();
 
 private:
-  StyleSetProps* mpStyleSetProps;
+  StyleSetPropsRef mStyleSetPropsRef;
   QString mName;
   UiItemPath mPath;
 

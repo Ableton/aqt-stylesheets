@@ -95,7 +95,7 @@ void StyleEngine::unloadStyles()
   mHasStylesLoaded = false;
 
   for (auto& element : mStyleSetPropsByPath) {
-    auto& pStyleSetProps = element.second;
+    auto pStyleSetProps = element.second.get();
     pStyleSetProps->invalidate();
   }
 
@@ -239,7 +239,7 @@ void StyleEngine::reloadAllProperties()
   oldPropertyMapInstances.swap(mPropertyMapInstances);
 
   for (auto& element : mStyleSetPropsByPath) {
-    auto& pStyleSetProps = element.second;
+    auto pStyleSetProps = element.second.get();
     pStyleSetProps->loadProperties();
   }
 }
@@ -249,16 +249,20 @@ QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
   return searchForResourceSearchPath(baseUrl, url, mImportPaths);
 }
 
-StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
+StyleSetPropsRef StyleEngine::styleSetProps(const UiItemPath& path)
 {
   auto iElement = mStyleSetPropsByPath.find(path);
 
   if (iElement == mStyleSetPropsByPath.end()) {
+    mStyleSetPropsInstances.emplace_back(
+      estd::make_unique<UsageCountedStyleSetProps>(path));
+
+    auto pStyleSetProps = mStyleSetPropsInstances.back().get();
     std::tie(iElement, std::ignore) =
-      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path));
+      mStyleSetPropsByPath.emplace(path, StyleSetPropsRef{pStyleSetProps});
   }
 
-  return iElement->second.get();
+  return iElement->second;
 }
 
 PropertyMap* StyleEngine::properties(const UiItemPath& path)

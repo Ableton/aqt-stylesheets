@@ -77,15 +77,15 @@ public:
    */
   QUrl resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const;
 
-  /*! Returns a pointer to StyleSetProps corresponding to @p path
+  /*! Returns a StyleSetPropsRef to StyleSetProps corresponding to @p path
    *
-   * Subsequent calls with identical @p path will return pointers to
-   * the same StyleSetProps instance.
+   * Subsequent calls with identical @p path will return StyleSetPropsRefs with pointers
+   * to the same StyleSetProps instance.
    *
-   * Will never return nullptr, but pointers will be invalidated if
+   * StyleSetPropsRef.get() will never return nullptr, but pointers will be invalidated if
    * and only if this StyleEngine instance is destroyed.
    */
-  StyleSetProps* styleSetProps(const UiItemPath& path);
+  StyleSetPropsRef styleSetProps(const UiItemPath& path);
 
   /*! Returns a pointer to the PropertyMap corresponding to @p path
    *
@@ -134,8 +134,9 @@ private:
   PropertyMap* effectivePropertyMap(const UiItemPath& path);
 
 private:
+  using StyleSetPropsInstances = std::vector<std::unique_ptr<UsageCountedStyleSetProps>>;
   using StyleSetPropsByPath =
-    std::unordered_map<UiItemPath, std::unique_ptr<StyleSetProps>, UiItemPathHasher>;
+    std::unordered_map<UiItemPath, StyleSetPropsRef, UiItemPathHasher>;
 
   using PropertyMapInstances = std::vector<std::unique_ptr<PropertyMap>>;
   using PropertyMaps = std::unordered_map<UiItemPath, PropertyMap*, UiItemPathHasher>;
@@ -148,6 +149,7 @@ private:
 
   std::unique_ptr<IStyleMatchTree> mpStyleTree;
 
+  StyleSetPropsInstances mStyleSetPropsInstances;
   StyleSetPropsByPath mStyleSetPropsByPath;
 
   PropertyMapInstances mPropertyMapInstances;

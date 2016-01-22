@@ -174,7 +174,6 @@ void propagatePathDown(QObject* pRoot)
 
 StyleSet::StyleSet(QObject* pParent)
   : QObject(pParent)
-  , mpStyleSetProps(nullptr)
 {
   QObject* p = parent();
   Q_ASSERT(p);
@@ -203,13 +202,18 @@ StyleSet* StyleSet::qmlAttachedProperties(QObject* pObject)
 
 void StyleSet::setupStyle()
 {
-  if (mpStyleSetProps) {
+  auto pStyleSetProps = mStyleSetPropsRef.get();
+
+  if (pStyleSetProps) {
     disconnect(
-      mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+      pStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
   }
 
-  mpStyleSetProps = StyleEngine::instance().styleSetProps(mPath);
-  connect(mpStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+  mStyleSetPropsRef = StyleEngine::instance().styleSetProps(mPath);
+
+  pStyleSetProps = mStyleSetPropsRef.get();
+  connect(pStyleSetProps, &StyleSetProps::propsChanged, this, &StyleSet::propsChanged);
+
   Q_EMIT propsChanged();
 }
 
@@ -260,7 +264,7 @@ QString StyleSet::styleInfo() const
 
 StyleSetProps* StyleSet::props()
 {
-  return mpStyleSetProps;
+  return mStyleSetPropsRef.get();
 }
 
 void StyleSet::onParentChanged(QQuickItem* pNewParent)
