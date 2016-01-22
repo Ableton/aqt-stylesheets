@@ -304,5 +304,10 @@ PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
   return pProps;
 }
 
+void StyleEngine::setMissingPropertiesFound()
+{
+  mMissingPropertiesFound = true;
+}
+
 } // namespace stylesheets
 } // namespace aqt

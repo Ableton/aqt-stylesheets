@@ -110,6 +110,8 @@ public:
   bool hasStylesLoaded() const;
   void unloadStyles();
 
+  void setMissingPropertiesFound();
+
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
   void styleChanged();
@@ -156,6 +158,7 @@ private:
   PropertyMaps mPropertyMaps;
 
   bool mHasStylesLoaded = false;
+  bool mMissingPropertiesFound = false;
 };
 
 } // namespace stylesheets

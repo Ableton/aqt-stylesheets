@@ -71,6 +71,7 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
   }
 
   mMissingProps.insert(key);
+  StyleEngine::instance().setMissingPropertiesFound();
 
   auto& engine = StyleEngine::instance();
 
