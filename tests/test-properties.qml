@@ -4,7 +4,7 @@ import QtQuick 2.3
 import QtTest 1.0
 import QtQuick.Layouts 1.1
 
-import Aqt.StyleSheets 1.2
+import Aqt.StyleSheets 1.3
 import Aqt.Testing 1.0 as AqtTests
 
 Item {
@@ -182,14 +182,17 @@ Item {
         id: missingPropertyScene
 
         Item {
-            property alias notExisting: rect2.notExisting
+            property alias rect: rect2
+            property alias checkStyles: styleChecker.active
+
+            StyleChecker { id: styleChecker }
 
             Rectangle {
                 id: rect2
                 StyleSet.name: "root"
                 anchors.fill: parent
 
-                property var notExisting: StyleSet.props.get("not-existing")
+                property var notExisting: "someArbitraryValue"
             }
         }
     }
@@ -198,11 +201,42 @@ Item {
         name: "lookup missing properties."
         when: windowShown
 
-        function test_lookupNotExistingProperty() {
+        SignalSpy {
+            id: missingPropertiesSpy
+            target: styleEngine
+            signalName: "exception"
+        }
+
+        function cleanup() {
+            missingPropertiesSpy.clear();
+        }
+
+        function test_lookupNotExistingPropertyWarnsIfStyleCheckerActive() {
             msgTracker.expectMessage(AqtTests.MsgTracker.Warning,
                                      /^.*Property.*not-existing.*/);
             AqtTests.Utils.withComponent(missingPropertyScene, scene, {}, function(comp) {
-                compare(comp.notExisting, undefined);
+                comp.checkStyles = true;
+                compare(missingPropertiesSpy.count, 0);
+
+                comp.rect.notExisting = comp.rect.StyleSet.props.get("not-existing");
+                compare(comp.rect.notExisting, undefined);
+
+                waitForRendering(comp);
+                compare(missingPropertiesSpy.count, 1);
+                compare(missingPropertiesSpy.signalArguments[0][0], "propertyNotFound");
+            });
+        }
+
+        function test_lookupNotExistingPropertyDoesNotWarnIfStyleCheckerNotActive() {
+            AqtTests.Utils.withComponent(missingPropertyScene, scene, {}, function(comp) {
+                comp.checkStyles = false;
+                compare(missingPropertiesSpy.count, 0);
+
+                comp.rect.notExisting = comp.rect.StyleSet.props.get("not-existing");
+                compare(comp.rect.notExisting, undefined);
+
+                waitForRendering(comp);
+                compare(missingPropertiesSpy.count, 0);
             });
         }
     }

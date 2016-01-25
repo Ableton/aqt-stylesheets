@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include "Property.hpp"
 #include "StyleEngine.hpp"
 
+#include <algorithm>
+
 namespace aqt
 {
 namespace stylesheets
@@ -68,15 +70,8 @@ bool StyleSetProps::getImpl(Property& prop, const QString& key) const
     return true;
   }
 
-  auto& engine = StyleEngine::instance();
-
-  if (engine.hasStylesLoaded()) {
-    styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
-                            << pathToString(mPath) << ")";
-    Q_EMIT engine.exception(QString::fromLatin1("propertyNotFound"),
-                            QString::fromLatin1("Property '%1' not found (%2)")
-                              .arg(key, QString::fromStdString(pathToString(mPath))));
-  }
+  mMissingProps.insert(key);
+  StyleEngine::instance().setMissingPropertiesFound();
 
   return false;
 }
@@ -157,13 +152,80 @@ QUrl StyleSetProps::url(const QString& key) const
 
 void StyleSetProps::loadProperties()
 {
+  mMissingProps.clear();
   mpProperties = StyleEngine::instance().properties(mPath);
   Q_EMIT propsChanged();
 }
 
 void StyleSetProps::invalidate()
 {
+  mMissingProps.clear();
   mpProperties = nullProperties();
+}
+
+void StyleSetProps::checkProperties() const
+{
+  for (const auto& key : mMissingProps) {
+    styleSheetsLogWarning() << "Property " << key.toStdString() << " not found ("
+                            << pathToString(mPath) << ")";
+    Q_EMIT StyleEngine::instance().exception(
+      QString::fromLatin1("propertyNotFound"),
+      QString::fromLatin1("Property '%1' not found (%2)")
+        .arg(key, QString::fromStdString(pathToString(mPath))));
+  }
+
+  mMissingProps.clear();
+}
+
+StyleSetPropsRef::StyleSetPropsRef()
+  : StyleSetPropsRef{nullptr}
+{
+}
+
+StyleSetPropsRef::StyleSetPropsRef(UsageCountedStyleSetProps* pUsageCountedStyleSetProps)
+  : mpUsageCountedStyleSetProps{pUsageCountedStyleSetProps}
+{
+  if (mpUsageCountedStyleSetProps) {
+    ++mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef::~StyleSetPropsRef()
+{
+  if (mpUsageCountedStyleSetProps) {
+    --mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef::StyleSetPropsRef(const StyleSetPropsRef& other)
+  : mpUsageCountedStyleSetProps{other.mpUsageCountedStyleSetProps}
+{
+  if (mpUsageCountedStyleSetProps) {
+    ++mpUsageCountedStyleSetProps->usageCount;
+  }
+}
+
+StyleSetPropsRef& StyleSetPropsRef::operator=(StyleSetPropsRef other)
+{
+  swap(*this, other);
+  return *this;
+}
+
+size_t StyleSetPropsRef::usageCount() const
+{
+  return mpUsageCountedStyleSetProps ? mpUsageCountedStyleSetProps->usageCount : 0;
+}
+
+StyleSetProps* StyleSetPropsRef::get()
+{
+  return mpUsageCountedStyleSetProps ? &mpUsageCountedStyleSetProps->styleSetProps
+                                     : nullptr;
+}
+
+void swap(StyleSetPropsRef& a, StyleSetPropsRef& b)
+{
+  using std::swap;
+  swap(a.mpUsageCountedStyleSetProps, b.mpUsageCountedStyleSetProps);
 }
 
 } // namespace stylesheets

@@ -3,13 +3,20 @@
 import QtQuick 2.3
 import QtTest 1.0
 
-import Aqt.StyleSheets 1.1
+import Aqt.StyleSheets 1.3
 import Aqt.Testing 1.0 as AqtTests
 
 import Foo 1.0
 
 Item {
     id: scene
+
+    /*! ensure minimum width to be larger than the minimum allowed width on
+     * Windows */
+    implicitWidth: 124
+    /*! there are no constraints on the height, but it is convenient to have a
+     *  default size */
+    implicitHeight: 116
 
     StyleEngine {
         id: styleEngine
@@ -124,6 +131,73 @@ Item {
             AqtTests.Utils.withComponent(styledSceneComponent, scene, {}, function(a) {
                 var obj = eval(data.objectPath);
                 compare(obj.StyleSet.props.string(data.prop), data.expectedValue);
+            });
+        }
+    }
+
+    //--------------------------------------------------------------------------
+
+    Component {
+        id: incompletePathScene
+
+        Item {
+            property alias a: a
+
+            StyleChecker {
+                id: styleChecker
+                active: true
+            }
+
+            A {
+                id: a
+                property alias listView: listView
+
+                ListView {
+                    id: listView
+
+                    model: 1
+                    delegate: B {
+                        property alias c: c
+
+                        // c) This property ensures that the path of c's StyleSet is
+                        // updated when B gets reparented by the ListView.
+                        property string own: StyleSet.props.string("onlyB")
+
+                        C {
+                            id: c
+
+                            // a) This binding ensures that the StyleSet is created
+                            // before the evaluation of c) will propagate the reparenting.
+                            // Therefore the initial path of the StyleSet is incomplete.
+                            StyleSet.name: ""
+
+                            // b) This style property won't be found when the binding is
+                            // initially evaluated because it uses the incomplete path
+                            // of a).
+                            property string inherited: StyleSet.props.string("onlyA")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    TestCase {
+        name: "intermediate missing properties"
+        when: windowShown
+
+        SignalSpy {
+            id: missingPropertiesSpy
+            target: styleEngine
+            signalName: "exception"
+        }
+
+        function test_noWarningIsIssuedForIntermediateMissingProperties() {
+            AqtTests.Utils.withComponent(incompletePathScene, scene, {}, function(comp) {
+                compare(comp.a.listView.currentItem.c.inherited, "A");
+
+                waitForRendering(comp);
+                compare(missingPropertiesSpy.count, 0);
             });
         }
     }

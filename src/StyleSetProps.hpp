@@ -34,6 +34,8 @@ SUPPRESS_WARNINGS
 #include <QtGui/QFont>
 RESTORE_WARNINGS
 
+#include <unordered_set>
+
 namespace aqt
 {
 namespace stylesheets
@@ -268,6 +270,8 @@ public:
 
   void invalidate();
 
+  void checkProperties() const;
+
 Q_SIGNALS:
   void propsChanged();
 
@@ -280,8 +284,54 @@ private:
   T lookupProperty(Property& def, const QString& key) const;
 
 private:
+  struct QStringHasher {
+    std::size_t operator()(const QString& string) const
+    {
+      return qHash(string);
+    }
+  };
+
   UiItemPath mPath;
   PropertyMap* mpProperties;
+  mutable std::unordered_set<QString, QStringHasher> mMissingProps;
+  /*! @endcond */
+};
+
+/*! @cond DOXYGEN_IGNORE */
+
+struct UsageCountedStyleSetProps {
+  explicit UsageCountedStyleSetProps(const UiItemPath& path)
+    : styleSetProps{path}
+  {
+  }
+
+  StyleSetProps styleSetProps;
+  size_t usageCount = 0;
+};
+
+/*! @endcond */
+
+/*! Points to a StyleSetProps instance and counts the usages of it */
+class StyleSetPropsRef
+{
+public:
+  /*! @cond DOXYGEN_IGNORE */
+  StyleSetPropsRef();
+  explicit StyleSetPropsRef(UsageCountedStyleSetProps* pUsageCountedStyleSetProps);
+  ~StyleSetPropsRef();
+
+  StyleSetPropsRef(const StyleSetPropsRef& other);
+  StyleSetPropsRef& operator=(StyleSetPropsRef other);
+  /*! @endcond */
+
+  size_t usageCount() const;
+  StyleSetProps* get();
+
+  /*! @cond DOXYGEN_IGNORE */
+  friend void swap(StyleSetPropsRef& a, StyleSetPropsRef& b);
+
+private:
+  UsageCountedStyleSetProps* mpUsageCountedStyleSetProps;
   /*! @endcond */
 };
 

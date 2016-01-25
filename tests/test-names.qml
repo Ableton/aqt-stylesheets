@@ -7,6 +7,14 @@ import Aqt.StyleSheets 1.1
 import Aqt.Testing 1.0 as AqtTests
 
 Item {
+    /*! ensure minimum width to be larger than the minimum allowed width on
+     * Windows */
+    implicitWidth: 124
+    /*! there are no constraints on the height, but it is convenient to have a
+     *  default size */
+    implicitHeight: 116
+
+
     StyleEngine {
         styleSheetSource: "names.css"
     }

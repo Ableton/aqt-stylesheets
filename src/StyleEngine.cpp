@@ -94,8 +94,8 @@ void StyleEngine::unloadStyles()
 {
   mHasStylesLoaded = false;
 
-  for (auto& element : mStyleSetPropsByPath) {
-    auto& pStyleSetProps = element.second;
+  for (auto& element : mStyleSetPropsRefs) {
+    auto pStyleSetProps = element.second.get();
     pStyleSetProps->invalidate();
   }
 
@@ -227,6 +227,7 @@ void StyleEngine::loadStyles()
   reloadAllProperties();
 
   mHasStylesLoaded = true;
+  notifyMissingProperties();
 
   Q_EMIT styleChanged();
 }
@@ -238,8 +239,8 @@ void StyleEngine::reloadAllProperties()
   auto oldPropertyMapInstances = PropertyMapInstances{};
   oldPropertyMapInstances.swap(mPropertyMapInstances);
 
-  for (auto& element : mStyleSetPropsByPath) {
-    auto& pStyleSetProps = element.second;
+  for (auto& element : mStyleSetPropsRefs) {
+    auto pStyleSetProps = element.second.get();
     pStyleSetProps->loadProperties();
   }
 }
@@ -249,16 +250,20 @@ QUrl StyleEngine::resolveResourceUrl(const QUrl& baseUrl, const QUrl& url) const
   return searchForResourceSearchPath(baseUrl, url, mImportPaths);
 }
 
-StyleSetProps* StyleEngine::styleSetProps(const UiItemPath& path)
+StyleSetPropsRef StyleEngine::styleSetProps(const UiItemPath& path)
 {
-  auto iElement = mStyleSetPropsByPath.find(path);
+  auto iElement = mStyleSetPropsRefs.find(path);
 
-  if (iElement == mStyleSetPropsByPath.end()) {
+  if (iElement == mStyleSetPropsRefs.end()) {
+    mStyleSetPropsInstances.emplace_back(
+      estd::make_unique<UsageCountedStyleSetProps>(path));
+
+    auto pStyleSetProps = mStyleSetPropsInstances.back().get();
     std::tie(iElement, std::ignore) =
-      mStyleSetPropsByPath.emplace(path, estd::make_unique<StyleSetProps>(path));
+      mStyleSetPropsRefs.emplace(path, StyleSetPropsRef{pStyleSetProps});
   }
 
-  return iElement->second.get();
+  return iElement->second;
 }
 
 PropertyMap* StyleEngine::properties(const UiItemPath& path)
@@ -298,6 +303,32 @@ PropertyMap* StyleEngine::effectivePropertyMap(const UiItemPath& path)
   mPropertyMaps.emplace(path, pProps);
 
   return pProps;
+}
+
+void StyleEngine::setMissingPropertiesFound()
+{
+  mMissingPropertiesFound = true;
+  notifyMissingProperties();
+}
+
+void StyleEngine::notifyMissingProperties()
+{
+  if (mHasStylesLoaded && mMissingPropertiesFound && !mMissingPropertiesNotified) {
+    mMissingPropertiesNotified = true;
+    Q_EMIT propertiesPotentiallyMissing();
+  }
+}
+
+void StyleEngine::checkProperties()
+{
+  for (auto& element : mStyleSetPropsRefs) {
+    if (element.second.usageCount() > 1) {
+      element.second.get()->checkProperties();
+    }
+  }
+
+  mMissingPropertiesFound = false;
+  mMissingPropertiesNotified = false;
 }
 
 } // namespace stylesheets
