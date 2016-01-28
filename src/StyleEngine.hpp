@@ -142,7 +142,7 @@ private:
   void notifyMissingProperties();
 
 private:
-  using StyleSetPropsInstances = std::vector<std::unique_ptr<UsageCountedStyleSetProps>>;
+  using StyleSetPropsInstances = std::vector<std::shared_ptr<UsageCountedStyleSetProps>>;
   using StyleSetPropsRefs =
     std::unordered_map<UiItemPath, StyleSetPropsRef, UiItemPathHasher>;
 

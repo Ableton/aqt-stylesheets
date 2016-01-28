@@ -256,9 +256,9 @@ StyleSetPropsRef StyleEngine::styleSetProps(const UiItemPath& path)
 
   if (iElement == mStyleSetPropsRefs.end()) {
     mStyleSetPropsInstances.emplace_back(
-      estd::make_unique<UsageCountedStyleSetProps>(path));
+      std::make_shared<UsageCountedStyleSetProps>(path));
 
-    auto pStyleSetProps = mStyleSetPropsInstances.back().get();
+    auto pStyleSetProps = mStyleSetPropsInstances.back();
     std::tie(iElement, std::ignore) =
       mStyleSetPropsRefs.emplace(path, StyleSetPropsRef{pStyleSetProps});
   }
