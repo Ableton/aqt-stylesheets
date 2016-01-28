@@ -182,26 +182,26 @@ StyleSetPropsRef::StyleSetPropsRef()
 {
 }
 
-StyleSetPropsRef::StyleSetPropsRef(UsageCountedStyleSetProps* pUsageCountedStyleSetProps)
+StyleSetPropsRef::StyleSetPropsRef(const std::shared_ptr<UsageCountedStyleSetProps>& pUsageCountedStyleSetProps)
   : mpUsageCountedStyleSetProps{pUsageCountedStyleSetProps}
 {
-  if (mpUsageCountedStyleSetProps) {
-    ++mpUsageCountedStyleSetProps->usageCount;
+  if (auto pStyleSetProps = mpUsageCountedStyleSetProps.lock()) {
+    ++pStyleSetProps->usageCount;
   }
 }
 
 StyleSetPropsRef::~StyleSetPropsRef()
 {
-  if (mpUsageCountedStyleSetProps) {
-    --mpUsageCountedStyleSetProps->usageCount;
+  if (auto pStyleSetProps = mpUsageCountedStyleSetProps.lock()) {
+    --pStyleSetProps->usageCount;
   }
 }
 
 StyleSetPropsRef::StyleSetPropsRef(const StyleSetPropsRef& other)
   : mpUsageCountedStyleSetProps{other.mpUsageCountedStyleSetProps}
 {
-  if (mpUsageCountedStyleSetProps) {
-    ++mpUsageCountedStyleSetProps->usageCount;
+  if (auto pStyleSetProps = mpUsageCountedStyleSetProps.lock()) {
+    ++pStyleSetProps->usageCount;
   }
 }
 
@@ -213,13 +213,18 @@ StyleSetPropsRef& StyleSetPropsRef::operator=(StyleSetPropsRef other)
 
 size_t StyleSetPropsRef::usageCount() const
 {
-  return mpUsageCountedStyleSetProps ? mpUsageCountedStyleSetProps->usageCount : 0;
+  if (auto pStyleSetProps = mpUsageCountedStyleSetProps.lock()) {
+    return pStyleSetProps->usageCount;
+  }
+  return 0;
 }
 
 StyleSetProps* StyleSetPropsRef::get()
 {
-  return mpUsageCountedStyleSetProps ? &mpUsageCountedStyleSetProps->styleSetProps
-                                     : nullptr;
+  if (auto pStyleSetProps = mpUsageCountedStyleSetProps.lock()) {
+    return &pStyleSetProps->styleSetProps;
+  }
+  return nullptr;
 }
 
 void swap(StyleSetPropsRef& a, StyleSetPropsRef& b)

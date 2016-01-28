@@ -317,7 +317,7 @@ class StyleSetPropsRef
 public:
   /*! @cond DOXYGEN_IGNORE */
   StyleSetPropsRef();
-  explicit StyleSetPropsRef(UsageCountedStyleSetProps* pUsageCountedStyleSetProps);
+  explicit StyleSetPropsRef(const std::shared_ptr<UsageCountedStyleSetProps>& pUsageCountedStyleSetProps);
   ~StyleSetPropsRef();
 
   StyleSetPropsRef(const StyleSetPropsRef& other);
@@ -331,7 +331,7 @@ public:
   friend void swap(StyleSetPropsRef& a, StyleSetPropsRef& b);
 
 private:
-  UsageCountedStyleSetProps* mpUsageCountedStyleSetProps;
+  std::weak_ptr<UsageCountedStyleSetProps> mpUsageCountedStyleSetProps;
   /*! @endcond */
 };
 
