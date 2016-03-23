@@ -136,7 +136,7 @@ QFont::HintingPreference takeFontHintingFromTokenList(QStringList& tokens)
 
 struct FontSize {
   int pixelSize = 0;
-  qreal pointSize = 0.0f;
+  qreal pointSize = 0.0;
 };
 
 /**
@@ -218,24 +218,24 @@ int transformAlphaFromFloatRatio(const std::string& arg)
   return boost::algorithm::clamp(int(std::round(256 * factor)), 0, 255);
 }
 
-float hslHue(const std::string& arg)
+double hslHue(const std::string& arg)
 {
-  return boost::algorithm::clamp(boost::lexical_cast<int>(arg) / 360.0f, 0.0f, 1.0f);
+  return boost::algorithm::clamp(boost::lexical_cast<int>(arg) / 360.0, 0.0, 1.0);
 }
 
-float percentageToFactor(const std::string& arg)
+double percentageToFactor(const std::string& arg)
 {
   if (!arg.empty() && arg.back() == '%') {
     return boost::algorithm::clamp(
-      boost::lexical_cast<int>(arg.substr(0, arg.size() - 1)) / 100.0f, 0.0f, 1.0f);
+      boost::lexical_cast<int>(arg.substr(0, arg.size() - 1)) / 100.0, 0.0, 1.0);
   }
 
   throw boost::bad_lexical_cast();
 }
 
-float factorFromFloat(const std::string& arg)
+double factorFromFloat(const std::string& arg)
 {
-  return boost::algorithm::clamp(boost::lexical_cast<float>(arg), 0.0f, 1.0f);
+  return boost::algorithm::clamp(boost::lexical_cast<double>(arg), 0.0, 1.0);
 }
 
 ExprValue makeRgbaColor(const std::vector<std::string>& args)
@@ -291,7 +291,7 @@ ExprValue makeHslColor(const std::vector<std::string>& args)
     try {
       QColor color;
       color.setHslF(
-        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0f);
+        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
     } catch (const boost::bad_lexical_cast&) {
       styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";
@@ -325,7 +325,7 @@ ExprValue makeHsbColor(const std::vector<std::string>& args)
     try {
       QColor color;
       color.setHsvF(
-        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0f);
+        hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
     } catch (const boost::bad_lexical_cast&) {
       styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";

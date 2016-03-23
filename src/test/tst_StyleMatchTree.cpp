@@ -604,8 +604,8 @@ TEST(StyleMatchTreeTest, hslColors)
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(120, propertyAsColor(pm, "color").hslHue());
-  EXPECT_NEAR(1.0f, propertyAsColor(pm, "color").hslSaturationF(), 0.00001f);
-  EXPECT_NEAR(0.5f, propertyAsColor(pm, "color").lightnessF(), 0.00001f);
+  EXPECT_NEAR(1.0, propertyAsColor(pm, "color").hslSaturationF(), 0.00001);
+  EXPECT_NEAR(0.5, propertyAsColor(pm, "color").lightnessF(), 0.00001);
 }
 
 TEST(StyleMatchTreeTest, hslaColors)
@@ -621,7 +621,7 @@ TEST(StyleMatchTreeTest, hslaColors)
 
   EXPECT_EQ(1, pm.size());
   EXPECT_EQ(359, propertyAsColor(pm, "color").hslHue());
-  EXPECT_NEAR(0.97f, propertyAsColor(pm, "color").hslSaturationF(), 0.00001f);
-  EXPECT_NEAR(0.13f, propertyAsColor(pm, "color").lightnessF(), 0.00001f);
-  EXPECT_NEAR(0.23f, propertyAsColor(pm, "color").alphaF(), 0.00001f);
+  EXPECT_NEAR(0.97, propertyAsColor(pm, "color").hslSaturationF(), 0.00001);
+  EXPECT_NEAR(0.13, propertyAsColor(pm, "color").lightnessF(), 0.00001);
+  EXPECT_NEAR(0.23, propertyAsColor(pm, "color").alphaF(), 0.00001);
 }
