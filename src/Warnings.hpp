@@ -76,6 +76,18 @@ THE SOFTWARE.
   #define RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
 
+#elif defined(__GNUC__)
+
+  #define SUPPRESS_WARNINGS \
+    _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
+    _Pragma("GCC diagnostic ignored \"-Wsign-compare\"") \
+    /**/
+
+  #define RESTORE_WARNINGS \
+    _Pragma("GCC diagnostic pop") \
+    /**/
+
 #elif defined(_MSC_VER)
 
   #if _MSC_VER < 1900
