@@ -134,6 +134,13 @@ THE SOFTWARE.
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))
 
+#elif defined(__GNUC__)
+
+  #define SUPPRESS_WARNINGS _Pragma("GCC diagnostic push") \
+    _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+
+  #define RESTORE_WARNINGS _Pragma("GCC diagnostic pop")
+
 #else
 
   #define SUPPRESS_WARNINGS
