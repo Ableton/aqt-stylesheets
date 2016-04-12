@@ -65,7 +65,7 @@ std::string getFirstValue(const PropertyValues& val, const std::string& def = ""
   return def;
 }
 
-Expression getExpr(const PropertyValues& val, size_t idx, const Expression& def = {})
+Expression getExpr(const PropertyValues& val, size_t idx, const Expression& def = Expression{})
 {
   if (!val.empty()) {
     if (const Expression* expr = boost::get<Expression>(&val[idx])) {
