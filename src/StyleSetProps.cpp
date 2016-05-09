@@ -82,16 +82,24 @@ QVariant StyleSetProps::get(const QString& key) const
   getImpl(prop, key);
 
   if (prop.mValues.size() == 1) {
-    auto conv = convertProperty<QString>(prop.mValues[0]);
-    if (conv) {
-      return QVariant::fromValue(*conv);
+    try {
+      auto conv = convertProperty<QString>(prop.mValues[0]);
+      if (conv) {
+        return QVariant::fromValue(*conv);
+      }
+    } catch (ConvertException& e) {
+      styleSheetsLogWarning() << e.what();
     }
   } else if (prop.mValues.size() > 1) {
     QVariantList result;
     for (const auto& propValue : prop.mValues) {
-      auto conv = convertProperty<QString>(propValue);
-      if (conv) {
-        result.push_back(conv.get());
+      try {
+        auto conv = convertProperty<QString>(propValue);
+        if (conv) {
+          result.push_back(conv.get());
+        }
+      } catch (ConvertException& e) {
+        styleSheetsLogWarning() << e.what();
       }
     }
 
@@ -106,11 +114,17 @@ QVariant StyleSetProps::values(const QString& key) const
   Property prop;
   getImpl(prop, key);
 
-  if (prop.mValues.size() == 1) {
-    return convertValueToVariant(prop.mValues[0]);
+  try {
+    if (prop.mValues.size() == 1) {
+      return convertValueToVariant(prop.mValues[0]);
+    }
+
+    return convertValueToVariantList(prop.mValues);
+  } catch (ConvertException& e) {
+    styleSheetsLogWarning() << e.what();
   }
 
-  return convertValueToVariantList(prop.mValues);
+  return QVariant();
 }
 
 QColor StyleSetProps::color(const QString& key) const

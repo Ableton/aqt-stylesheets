@@ -23,7 +23,6 @@ THE SOFTWARE.
 #include "Convert.hpp"
 
 #include "Warnings.hpp"
-#include "LogUtils.hpp"
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
@@ -36,7 +35,7 @@ RESTORE_WARNINGS
 //========================================================================================
 
 using namespace aqt::stylesheets;
-using namespace aqt::log_utils;
+
 
 TEST(Convert, qString)
 {
@@ -160,20 +159,22 @@ TEST(Convert, colors_rgb_expression)
 
 TEST(Convert, colors_rgb_expression_fails)
 {
-  LogTracker tracker;
-
   // rgb() requires exactly 3 parameters
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgb", std::vector<std::string>{"254", "112", "1", "0.5"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgb", std::vector<std::string>{"254", "112", "1", "0.5"}});
+  }, ConvertException);
 
-  EXPECT_FALSE(
-    convertProperty<QColor>(Expression{"rgb", std::vector<std::string>{"254"}}));
+  EXPECT_THROW({
+    auto foo =
+      convertProperty<QColor>(Expression{"rgb", std::vector<std::string>{"254"}});
+  }, ConvertException);
 
   // rgb() requires integers or percentage, not floats for the color channel
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgb", std::vector<std::string>{"0.1", "1.0", "0.3"}}));
-
-  EXPECT_EQ(6, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgb", std::vector<std::string>{"0.1", "1.0", "0.3"}});
+  }, ConvertException);
 }
 
 TEST(Convert, colors_rgba_expression)
@@ -189,29 +190,33 @@ TEST(Convert, colors_rgba_expression)
 
 TEST(Convert, colors_rgba_expression_fails)
 {
-  LogTracker tracker;
-
   // rgba() requires exactly 4 parameters
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgba", std::vector<std::string>{"254", "112", "1"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgba", std::vector<std::string>{"254", "112", "1"}});
+  }, ConvertException);
 
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgba", std::vector<std::string>{"254", "112", "23", "0.5", "712"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgba", std::vector<std::string>{"254", "112", "23", "0.5", "712"}});
+  }, ConvertException);
 
   // rgba() requires integers or percentage for the color channels, but a float
   // for the alpha channel
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgba", std::vector<std::string>{"0.1", "1.0", "0.3", "0.4"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"rgba", std::vector<std::string>{"100%", "100%", "100%", "100%"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgba", std::vector<std::string>{"0.1", "1.0", "0.3", "0.4"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"rgba", std::vector<std::string>{"100%", "100%", "100%", "100%"}});
+  }, ConvertException);
 
   // BUT: the following expression works, because "12" is a rather large float
   // which is clamped to 1.0f (=255).
   EXPECT_EQ(QColor(128, 64, 0, 255),
             *convertProperty<QColor>(
               Expression{"rgba", std::vector<std::string>{"128", "64", "0", "12"}}));
-
-  EXPECT_EQ(8, tracker.messageCount(LogTracker::kWarn));
 }
 
 TEST(Convert, colors_hsl_expression)
@@ -230,21 +235,25 @@ TEST(Convert, colors_hsl_expression)
 
 TEST(Convert, colors_hsl_expression_fails)
 {
-  LogTracker tracker;
-
   // hsl() needs exactly 3 arguments
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsl", std::vector<std::string>{"90", "25%", "75%", "0.1"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsl", std::vector<std::string>{"90", "25%", "75%", "0.1"}});
+  }, ConvertException);
 
   // arguments are degrees, percentage, percantage
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsl", std::vector<std::string>{"90%", "0%", "100%"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsl", std::vector<std::string>{"255", "50", "100"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsl", std::vector<std::string>{"0.5", "0.75", "1.0"}}));
-
-  EXPECT_EQ(8, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsl", std::vector<std::string>{"90%", "0%", "100%"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsl", std::vector<std::string>{"255", "50", "100"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsl", std::vector<std::string>{"0.5", "0.75", "1.0"}});
+  }, ConvertException);
 }
 
 TEST(Convert, colors_hsla_expression)
@@ -263,21 +272,25 @@ TEST(Convert, colors_hsla_expression)
 
 TEST(Convert, colors_hsla_expression_fails)
 {
-  LogTracker tracker;
-
   // hsla() needs exactly 4 arguments
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsla", std::vector<std::string>{"90", "25%", "75%"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsla", std::vector<std::string>{"90", "25%", "75%"}});
+  }, ConvertException);
 
   // arguments are degrees, percentage, percantage
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsla", std::vector<std::string>{"90%", "0%", "100%", "20%"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsla", std::vector<std::string>{"255", "50", "100", "75"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsla", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
-
-  EXPECT_EQ(8, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsla", std::vector<std::string>{"90%", "0%", "100%", "20%"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsla", std::vector<std::string>{"255", "50", "100", "75"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsla", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}});
+  }, ConvertException);
 }
 
 TEST(Convert, colors_hsb_expression)
@@ -296,21 +309,25 @@ TEST(Convert, colors_hsb_expression)
 
 TEST(Convert, colors_hsb_expression_fails)
 {
-  LogTracker tracker;
-
   // hsb() needs exactly 3 arguments
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsb", std::vector<std::string>{"90", "25%", "75%", "0.1"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsb", std::vector<std::string>{"90", "25%", "75%", "0.1"}});
+  }, ConvertException);
 
   // arguments are degrees, percentage, percantage
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsb", std::vector<std::string>{"90%", "0%", "100%"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsb", std::vector<std::string>{"255", "50", "100"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsb", std::vector<std::string>{"0.5", "0.75", "1.0"}}));
-
-  EXPECT_EQ(8, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsb", std::vector<std::string>{"90%", "0%", "100%"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsb", std::vector<std::string>{"255", "50", "100"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsb", std::vector<std::string>{"0.5", "0.75", "1.0"}});
+  }, ConvertException);
 }
 
 TEST(Convert, colors_hsba_expression)
@@ -329,21 +346,25 @@ TEST(Convert, colors_hsba_expression)
 
 TEST(Convert, colors_hsba_expression_fails)
 {
-  LogTracker tracker;
-
   // hsba() needs exactly 4 arguments
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsba", std::vector<std::string>{"90", "25%", "75%"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsba", std::vector<std::string>{"90", "25%", "75%"}});
+  }, ConvertException);
 
   // arguments are degrees, percentage, percantage
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsba", std::vector<std::string>{"90%", "0%", "100%", "20%"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsba", std::vector<std::string>{"255", "50", "100", "75"}}));
-  EXPECT_FALSE(convertProperty<QColor>(
-    Expression{"hsba", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}}));
-
-  EXPECT_EQ(8, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsba", std::vector<std::string>{"90%", "0%", "100%", "20%"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsba", std::vector<std::string>{"255", "50", "100", "75"}});
+  }, ConvertException);
+  EXPECT_THROW({
+    auto foo = convertProperty<QColor>(
+      Expression{"hsba", std::vector<std::string>{"0.5", "0.75", "1.0", "0.3"}});
+  }, ConvertException);
 }
 
 //------------------------------------------------------------------------------
@@ -368,14 +389,14 @@ TEST(Convert, url_from_expressions)
 
 TEST(Convert, url_conversion_fails)
 {
-  LogTracker tracker;
-
   // url() expects 1 argument exactly
-  EXPECT_FALSE(convertProperty<QUrl>(
-    Expression{"url", std::vector<std::string>{"abc.png", "foo/bar"}}));
+  EXPECT_THROW({
+    auto foo = convertProperty<QUrl>(
+      Expression{"url", std::vector<std::string>{"abc.png", "foo/bar"}});
+  }, ConvertException);
 
-  EXPECT_FALSE(
-    convertProperty<QUrl>(Expression{"rgb", std::vector<std::string>{"1", "2", "3"}}));
-
-  EXPECT_EQ(3, tracker.messageCount(LogTracker::kWarn));
+  EXPECT_THROW({
+    auto foo =
+      convertProperty<QUrl>(Expression{"rgb", std::vector<std::string>{"1", "2", "3"}});
+  }, ConvertException);
 }

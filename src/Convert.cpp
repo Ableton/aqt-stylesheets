@@ -22,7 +22,6 @@ THE SOFTWARE.
 
 #include "Convert.hpp"
 
-#include "Log.hpp"
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
@@ -245,12 +244,13 @@ ExprValue makeRgbaColor(const std::vector<std::string>& args)
       return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
                     rgbColorOrPercentage(args[2]), transformAlphaFromFloatRatio(args[3]));
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kRgbaColorExpr << "() expression with bad value";
+      throw ConvertException(
+        std::string().append(kRgbaColorExpr).append("() expression with bad value"));
     }
-  } else {
-    styleSheetsLogWarning() << kRgbaColorExpr << "() expression expects 4 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(
+    std::string().append(kRgbaColorExpr).append("() expression expects 4 arguments"));
 }
 
 ExprValue makeRgbColor(const std::vector<std::string>& args)
@@ -260,12 +260,12 @@ ExprValue makeRgbColor(const std::vector<std::string>& args)
       return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
                     rgbColorOrPercentage(args[2]), 0xff);
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kRgbColorExpr << "() expression with bad value";
+      throw ConvertException(
+        std::string().append(kRgbColorExpr).append("() expression with bad value"));
     }
-  } else {
-    styleSheetsLogWarning() << kRgbColorExpr << "() expression expects 3 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(std::string().append(kRgbColorExpr).append("() expression expects 3 arguments"));
 }
 
 ExprValue makeHslaColor(const std::vector<std::string>& args)
@@ -277,12 +277,13 @@ ExprValue makeHslaColor(const std::vector<std::string>& args)
                     percentageToFactor(args[2]), factorFromFloat(args[3]));
       return color;
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kHslaColorExpr << "() expression with bad values";
+      throw ConvertException(
+        std::string().append(kHslaColorExpr).append("() expression with bad values"));
     }
-  } else {
-    styleSheetsLogWarning() << kHslaColorExpr << "() expression expects 3 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(
+    std::string().append(kHslaColorExpr).append("() expression expects 4 arguments"));
 }
 
 ExprValue makeHslColor(const std::vector<std::string>& args)
@@ -294,12 +295,13 @@ ExprValue makeHslColor(const std::vector<std::string>& args)
         hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";
+      throw ConvertException(
+        std::string().append(kHslColorExpr).append("() expression with bad values"));
     }
-  } else {
-    styleSheetsLogWarning() << kHslColorExpr << "() expression expects 3 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(
+    std::string().append(kHslColorExpr).append("() expression expects 3 arguments"));
 }
 
 ExprValue makeHsbaColor(const std::vector<std::string>& args)
@@ -311,12 +313,13 @@ ExprValue makeHsbaColor(const std::vector<std::string>& args)
                     percentageToFactor(args[2]), factorFromFloat(args[3]));
       return color;
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kHslaColorExpr << "() expression with bad values";
+      throw ConvertException(
+        std::string().append(kHslaColorExpr).append("() expression with bad values"));
     }
-  } else {
-    styleSheetsLogWarning() << kHslaColorExpr << "() expression expects 3 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(
+    std::string().append(kHslaColorExpr).append("() expression expects 3 arguments"));
 }
 
 ExprValue makeHsbColor(const std::vector<std::string>& args)
@@ -328,12 +331,13 @@ ExprValue makeHsbColor(const std::vector<std::string>& args)
         hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
     } catch (const boost::bad_lexical_cast&) {
-      styleSheetsLogWarning() << kHslColorExpr << "() expression with bad values";
+      throw ConvertException(
+        std::string().append(kHslColorExpr).append("() expression with bad values"));
     }
-  } else {
-    styleSheetsLogWarning() << kHslColorExpr << "() expression expects 3 arguments";
   }
-  return Undefined();
+
+  throw ConvertException(
+    std::string().append(kHslColorExpr).append("() expression expects 3 arguments"));
 }
 
 //------------------------------------------------------------------------------
@@ -342,11 +346,10 @@ ExprValue makeUrl(const std::vector<std::string>& args)
 {
   if (args.size() == 1u) {
     return QUrl(QString::fromStdString(args.front()));
-  } else {
-    styleSheetsLogWarning() << kUrlExpr << "() expression expects 1 argument";
   }
 
-  return Undefined();
+  throw ConvertException(
+    std::string().append(kUrlExpr).append("() expression expects 1 argument"));
 }
 
 //------------------------------------------------------------------------------
@@ -369,11 +372,10 @@ ExprValue evaluateExpression(const Expression& expr)
   auto iFind = funcMap.find(expr.name);
   if (iFind != funcMap.end()) {
     return iFind->second(expr.args);
-  } else {
-    styleSheetsLogWarning() << "Unsupported expression '" << expr.name << "'";
   }
 
-  return Undefined();
+  throw ConvertException(
+    std::string("Unsupported expression '").append(expr.name).append("'"));
 }
 
 struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> {
@@ -391,11 +393,10 @@ struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> 
     auto value = evaluateExpression(expr);
     if (const QColor* color = boost::get<QColor>(&value)) {
       return *color;
-    } else {
-      styleSheetsLogWarning() << "Not a color expression '" << expr.name << "'";
     }
 
-    return boost::none;
+    throw ConvertException(
+      std::string("Not a color expression '").append(expr.name).append("'"));
   }
 };
 
@@ -476,11 +477,10 @@ boost::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
       auto exprValue = evaluateExpression(expr);
       if (const QUrl* url = boost::get<QUrl>(&exprValue)) {
         return *url;
-      } else {
-        styleSheetsLogWarning() << "Not an url expression '" << expr.name << "'";
       }
 
-      return boost::none;
+      throw ConvertException(
+        std::string("Not an url expression '").append(expr.name).append("'"));
     }
   };
 
