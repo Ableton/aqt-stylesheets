@@ -27,6 +27,8 @@ THE SOFTWARE.
 SUPPRESS_WARNINGS
 #if defined(USE_BOOST_LOG)
 #include <boost/log/trivial.hpp>
+#elif defined(USE_CUSTOM_LOG)
+#include CUSTOM_LOG_INCLUDE
 #else
 #include <QtCore/QtDebug>
 #endif
@@ -38,7 +40,8 @@ RESTORE_WARNINGS
 #define styleSheetsLogInfo() BOOST_LOG_TRIVIAL(info)
 #define styleSheetsLogDebug() BOOST_LOG_TRIVIAL(debug)
 
-#else
+#elif !defined(USE_CUSTOM_LOG)
+
 #define styleSheetsLogError() qCritical() << "CRITICAL:"
 #define styleSheetsLogWarning() qWarning() << "WARN:"
 #define styleSheetsLogInfo() qDebug() << "INFO:"
