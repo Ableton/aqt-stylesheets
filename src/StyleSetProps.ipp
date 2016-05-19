@@ -59,9 +59,13 @@ T StyleSetProps::lookupProperty(Property& def, const QString& key) const
 {
   if (getImpl(def, key)) {
     if (def.mValues.size() == 1) {
-      auto result = convertProperty<T>(def.mValues[0]);
-      if (result) {
-        return result.get();
+      try {
+        auto result = convertProperty<T>(def.mValues[0]);
+        if (result) {
+          return result.get();
+        }
+      } catch (const ConvertException& e) {
+        styleSheetsLogWarning() << e.what();
       }
     }
 

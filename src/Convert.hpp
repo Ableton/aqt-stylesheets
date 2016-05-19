@@ -41,6 +41,24 @@ namespace aqt
 namespace stylesheets
 {
 
+/*! Exception thrown whenever a conversion fails */
+class ConvertException
+{
+public:
+  ConvertException(std::string msg)
+    : mMsg(std::move(msg))
+  {
+  }
+
+  std::string what() const
+  {
+    return mMsg;
+  }
+
+  std::string mMsg;
+};
+
+
 /*! @cond DOXYGEN_IGNORE */
 template <typename T>
 struct PropertyValueConvertTraits;
