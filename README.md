@@ -23,10 +23,6 @@ Dependencies:
   - Boost (>= 1.54)
   - CMake (>= 2.8.12)
 
-Test dependencies:
-
-  - GoogleTest (https://chromium.googlesource.com/external/googletest.git)
-
 Mac:
 
   - Xcode v5.1 or higher
@@ -54,7 +50,6 @@ The unit tests can be executed with ctest:
 You might set the following variables:
 
 - Boost_INCLUDE_DIR   to the folder, where Boost headers are found
-- GTEST_SOURCE        to the folder of GoogleTest sources.
 
 In case the CMake files shipped with Qt are not found, set the CMAKE_PREFIX_PATH
 to the Qt installation prefix. See the
@@ -64,7 +59,7 @@ Example:
 
 ```
   cmake .. -DCMAKE_PREFIX_PATH=~/Qt/Qt5.3.1/clang_64 \
-  -DGTEST_SOURCE=~/Dev/googletest -DBoost_INCLUDE_DIR=/opt/local/include/
+           -DBoost_INCLUDE_DIR=/opt/local/include/
 ```
 
 

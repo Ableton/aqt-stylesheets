@@ -82,14 +82,7 @@ if(DEFINED Boost_INCLUDE_DIR)
 endif()
 find_package(Boost 1.54 REQUIRED)
 
-set(GTEST_FOUND FALSE)
-if(EXISTS "${GTEST_SOURCE}" AND IS_DIRECTORY "${GTEST_SOURCE}")
-  get_filename_component(GTEST_SOURCE ${GTEST_SOURCE} ABSOLUTE)
-  set(GTEST_FOUND TRUE)
-endif()
-
 include(FeatureSummary)
-add_feature_info(GoogleTest ${GTEST_FOUND} "used for unit testing.")
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 add_subdirectory(src)

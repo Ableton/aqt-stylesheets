@@ -101,6 +101,4 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/qml/Aqt"
   DESTINATION "${PLUGIN_INSTALL_DIR}"
   FILES_MATCHING REGEX ".*\\.(qml|js)$")
 
-if(GTEST_FOUND)
-  add_subdirectory(test)
-endif()
+add_subdirectory(test)

@@ -9,11 +9,10 @@ env:
 install:
     - brew install qt5
     - export PATH=/usr/local/opt/qt5/bin:$PATH
-    - git clone https://github.com/google/googletest.git /Users/travis/build/googletest
 
 before_script:
     - mkdir build && cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION -DGTEST_SOURCE=/Users/travis/build/googletest/googletest
+    - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION
 
 script:
     - cmake --build .
