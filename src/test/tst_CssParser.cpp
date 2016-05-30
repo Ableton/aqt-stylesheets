@@ -27,7 +27,7 @@ THE SOFTWARE.
 SUPPRESS_WARNINGS
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
-#include <gtest/gtest.h>
+#include <catch/catch.hpp>
 RESTORE_WARNINGS
 
 //========================================================================================
@@ -65,7 +65,9 @@ std::string getFirstValue(const PropertyValues& val, const std::string& def = ""
   return def;
 }
 
-Expression getExpr(const PropertyValues& val, size_t idx, const Expression& def = Expression{})
+Expression getExpr(const PropertyValues& val,
+                   size_t idx,
+                   const Expression& def = Expression{})
 {
   if (!val.empty()) {
     if (const Expression* expr = boost::get<Expression>(&val[idx])) {
@@ -83,7 +85,7 @@ size_t getNumberOfValues(const PropertyValues& val)
 
 } // anonymous namespace
 
-TEST(CssParserTest, ParserFromString_basic)
+TEST_CASE("Parsing CSS from string", "[css][parse]")
 {
   const std::string src =
     "A { \n"
@@ -91,14 +93,14 @@ TEST(CssParserTest, ParserFromString_basic)
     "}\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
+  REQUIRE(ss.propsets.size() == 1);
 
-  EXPECT_EQ(ss.propsets[0].properties.size(), 1);
-  EXPECT_EQ(ss.propsets[0].properties[0].name, "background");
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[0].values), std::string("red"));
+  REQUIRE(ss.propsets[0].properties.size() == 1);
+  REQUIRE(ss.propsets[0].properties[0].name == "background");
+  REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("red"));
 }
 
-TEST(CssParserTest, ParserFromString_selectors)
+TEST_CASE("Parsing CSS from string - different selector styles", "[css][parse]")
 {
   const std::string src =
     "A.b { color: #123456; }\n"
@@ -109,68 +111,68 @@ TEST(CssParserTest, ParserFromString_selectors)
     ".b.a { text: 'a and b'; }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 6);
-  EXPECT_EQ(selectorName(ss, 0, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 0, 0, 1), ".b");
+  REQUIRE(ss.propsets.size() == 6);
+  REQUIRE(selectorName(ss, 0, 0, 0) == "A");
+  REQUIRE(selectorName(ss, 0, 0, 1) == ".b");
 
-  EXPECT_EQ(selectorName(ss, 1, 0, 0), ".b");
+  REQUIRE(selectorName(ss, 1, 0, 0) == ".b");
 
-  EXPECT_EQ(selectorName(ss, 2, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 2, 1, 0), "B");
-  EXPECT_EQ(selectorName(ss, 2, 1, 1), ".b");
+  REQUIRE(selectorName(ss, 2, 0, 0) == "A");
+  REQUIRE(selectorName(ss, 2, 1, 0) == "B");
+  REQUIRE(selectorName(ss, 2, 1, 1) == ".b");
 
-  EXPECT_EQ(selectorName(ss, 3, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 3, 1, 0), "B");
-  EXPECT_EQ(selectorName(ss, 3, 2, 0), ".b");
+  REQUIRE(selectorName(ss, 3, 0, 0) == "A");
+  REQUIRE(selectorName(ss, 3, 1, 0) == "B");
+  REQUIRE(selectorName(ss, 3, 2, 0) == ".b");
 
-  EXPECT_EQ(ss.propsets[3].properties.size(), 1);
-  EXPECT_EQ(ss.propsets[3].properties[0].name, "foreground");
-  EXPECT_EQ(getFirstValue(ss.propsets[3].properties[0].values), std::string("black"));
+  REQUIRE(ss.propsets[3].properties.size() == 1);
+  REQUIRE(ss.propsets[3].properties[0].name == "foreground");
+  REQUIRE(getFirstValue(ss.propsets[3].properties[0].values) == std::string("black"));
 
-  EXPECT_EQ(selectorName(ss, 4, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 4, 1, 0), ".b");
-  EXPECT_EQ(selectorName(ss, 4, 2, 0), ".c");
+  REQUIRE(selectorName(ss, 4, 0, 0) == "A");
+  REQUIRE(selectorName(ss, 4, 1, 0) == ".b");
+  REQUIRE(selectorName(ss, 4, 2, 0) == ".c");
 
-  EXPECT_EQ(selectorName(ss, 5, 0, 0), ".b");
-  EXPECT_EQ(selectorName(ss, 5, 0, 1), ".a");
+  REQUIRE(selectorName(ss, 5, 0, 0) == ".b");
+  REQUIRE(selectorName(ss, 5, 0, 1) == ".a");
 }
 
-TEST(CssParserTest, ParserFromString_separatedSelectors)
+TEST_CASE("Parsing CSS from string - separated selectors", "[css][parse]")
 {
   const std::string src =
     "A, B, C { foreground: black; }\n"
     "A.a B.b, A.a C.c { foreground: black; }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(selectorNames(ss, 0, 0, 0, 0), "A");
-  EXPECT_EQ(selectorNames(ss, 0, 1, 0, 0), "B");
-  EXPECT_EQ(selectorNames(ss, 0, 2, 0, 0), "C");
+  REQUIRE(ss.propsets.size() == 2);
+  REQUIRE(selectorNames(ss, 0, 0, 0, 0) == "A");
+  REQUIRE(selectorNames(ss, 0, 1, 0, 0) == "B");
+  REQUIRE(selectorNames(ss, 0, 2, 0, 0) == "C");
 
-  EXPECT_EQ(selectorNames(ss, 1, 0, 0, 0), "A");
-  EXPECT_EQ(selectorNames(ss, 1, 0, 0, 1), ".a");
-  EXPECT_EQ(selectorNames(ss, 1, 0, 1, 0), "B");
-  EXPECT_EQ(selectorNames(ss, 1, 0, 1, 1), ".b");
-  EXPECT_EQ(selectorNames(ss, 1, 1, 0, 0), "A");
-  EXPECT_EQ(selectorNames(ss, 1, 1, 0, 1), ".a");
-  EXPECT_EQ(selectorNames(ss, 1, 1, 1, 0), "C");
-  EXPECT_EQ(selectorNames(ss, 1, 1, 1, 1), ".c");
+  REQUIRE(selectorNames(ss, 1, 0, 0, 0) == "A");
+  REQUIRE(selectorNames(ss, 1, 0, 0, 1) == ".a");
+  REQUIRE(selectorNames(ss, 1, 0, 1, 0) == "B");
+  REQUIRE(selectorNames(ss, 1, 0, 1, 1) == ".b");
+  REQUIRE(selectorNames(ss, 1, 1, 0, 0) == "A");
+  REQUIRE(selectorNames(ss, 1, 1, 0, 1) == ".a");
+  REQUIRE(selectorNames(ss, 1, 1, 1, 0) == "C");
+  REQUIRE(selectorNames(ss, 1, 1, 1, 1) == ".c");
 }
 
-TEST(CssParserTest, ParserFromString_childrenSelectors)
+TEST_CASE("Parsing CSS from string - child selectors", "[css][parse]")
 {
   const std::string src = "A.b > B.c { color: #123456; }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
-  EXPECT_EQ(selectorName(ss, 0, 0, 0), "A");
-  EXPECT_EQ(selectorName(ss, 0, 0, 1), ".b");
-  EXPECT_EQ(selectorName(ss, 0, 1, 0), ">");
-  EXPECT_EQ(selectorName(ss, 0, 2, 0), "B");
-  EXPECT_EQ(selectorName(ss, 0, 2, 1), ".c");
+  REQUIRE(ss.propsets.size() == 1);
+  REQUIRE(selectorName(ss, 0, 0, 0) == "A");
+  REQUIRE(selectorName(ss, 0, 0, 1) == ".b");
+  REQUIRE(selectorName(ss, 0, 1, 0) == ">");
+  REQUIRE(selectorName(ss, 0, 2, 0) == "B");
+  REQUIRE(selectorName(ss, 0, 2, 1) == ".c");
 }
 
-TEST(CssParserTest, ParserFromString_properties)
+TEST_CASE("Parsing CSS from string - properties", "[css][parse]")
 {
   const std::string src =
     "X {\n"
@@ -183,18 +185,18 @@ TEST(CssParserTest, ParserFromString_properties)
     "}\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 6);
+  REQUIRE(ss.propsets.size() == 1);
+  REQUIRE(ss.propsets[0].properties.size() == 6);
 
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[0].values), std::string("#123456"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[1].values), std::string("string"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[2].values), std::string("string"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[3].values), std::string("1234"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[4].values), std::string("123.45"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[5].values), std::string("symbol"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("#123456"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[1].values) == std::string("string"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[2].values) == std::string("string"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[3].values) == std::string("1234"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[4].values) == std::string("123.45"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[5].values) == std::string("symbol"));
 }
 
-TEST(CssParserTest, ParserFromString_stringProperties)
+TEST_CASE("Parsing CSS from string - string properties", "[css][parse]")
 {
   const std::string src =
     "X {\n"
@@ -203,45 +205,45 @@ TEST(CssParserTest, ParserFromString_stringProperties)
     "}\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 2);
+  REQUIRE(ss.propsets.size() == 1);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
 
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[0].values), std::string("str\"ing"));
-  EXPECT_EQ(getFirstValue(ss.propsets[0].properties[1].values), std::string("str'ing"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("str\"ing"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[1].values) == std::string("str'ing"));
 }
 
-TEST(CssParserTest, ParserFromString_emptyString)
+TEST_CASE("Parsing CSS from string - empty strings", "[css][parse]")
 {
   const std::string src = "";
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 0);
+  REQUIRE(ss.propsets.size() == 0);
 }
 
-TEST(CssParserTest, ParserFromString_onlyWhitespace)
+TEST_CASE("Parsing CSS from string - only whitespace", "[css][parse]")
 {
   const std::string src =
     "\n\n\n"
     "\t\t       \n\r"
     "\n";
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 0);
+  REQUIRE(ss.propsets.size() == 0);
 }
 
-TEST(CssParserTest, ParserFromString_onlyCppComment)
+TEST_CASE("Parsing CSS from string - only cpp comments", "[css][parse]")
 {
   const std::string src = "// Copyright 2014 by Yoyodyne Inc.\n";
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 0);
+  REQUIRE(ss.propsets.size() == 0);
 }
 
-TEST(CssParserTest, ParserFromString_onlyComment)
+TEST_CASE("Parsing CSS from string - only comments", "[css][parse]")
 {
   const std::string src = "/* Copyright 2014 by Yoyodyne Inc. */\n";
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 0);
+  REQUIRE(ss.propsets.size() == 0);
 }
 
-TEST(CssParserTest, ParserFromString_crlfNewlines)
+TEST_CASE("Parsing CSS from string - CRLF newlines", "[css][parse]")
 {
   const std::string src =
     "X {\r\n"
@@ -253,12 +255,12 @@ TEST(CssParserTest, ParserFromString_crlfNewlines)
     "}\r\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 2);
-  EXPECT_EQ(ss.propsets[1].properties.size(), 1);
+  REQUIRE(ss.propsets.size() == 2);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
+  REQUIRE(ss.propsets[1].properties.size() == 1);
 }
 
-TEST(CssParserTest, ParserFromString_mixedNewlines)
+TEST_CASE("Parsing CSS from string - mixed new lines", "[css][parse]")
 {
   const std::string src =
     "X {\r\n"
@@ -270,12 +272,12 @@ TEST(CssParserTest, ParserFromString_mixedNewlines)
     "}\n\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 2);
-  EXPECT_EQ(ss.propsets[1].properties.size(), 1);
+  REQUIRE(ss.propsets.size() == 2);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
+  REQUIRE(ss.propsets[1].properties.size() == 1);
 }
 
-TEST(CssParserTest, ParserFromString_noNewlines)
+TEST_CASE("Parsing CSS from string - no line breaks", "[css][parse]")
 {
   const std::string src =
     "X {"
@@ -287,12 +289,12 @@ TEST(CssParserTest, ParserFromString_noNewlines)
     "}";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 2);
-  EXPECT_EQ(ss.propsets[1].properties.size(), 1);
+  REQUIRE(ss.propsets.size() == 2);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
+  REQUIRE(ss.propsets[1].properties.size() == 1);
 }
 
-TEST(CssParserTest, ParserFromString_noSemicolons)
+TEST_CASE("Parsing CSS from string - no semicolons", "[css][parse]")
 {
   const std::string src =
     "X {"
@@ -304,12 +306,12 @@ TEST(CssParserTest, ParserFromString_noSemicolons)
     "}";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 2);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 2);
-  EXPECT_EQ(ss.propsets[1].properties.size(), 1);
+  REQUIRE(ss.propsets.size() == 2);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
+  REQUIRE(ss.propsets[1].properties.size() == 1);
 }
 
-TEST(CssParserTest, ParserFromString_multipleValues)
+TEST_CASE("Parsing CSS from string - multiple values", "[css][parse]")
 {
   const std::string src =
     "X {"
@@ -317,41 +319,42 @@ TEST(CssParserTest, ParserFromString_multipleValues)
     "}";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
-  EXPECT_EQ(ss.propsets[0].properties.size(), 1);
-  EXPECT_EQ(getNumberOfValues(ss.propsets[0].properties[0].values), 4);
+  REQUIRE(ss.propsets.size() == 1);
+  REQUIRE(ss.propsets[0].properties.size() == 1);
+  REQUIRE(getNumberOfValues(ss.propsets[0].properties[0].values) == 4);
 }
 
-TEST(CssParserTest, ParserFromString_fontFaceDeclarations)
+TEST_CASE("Parsing CSS from string - font face declarations", "[css][parse]")
 {
   const std::string src =
     "// Copyright\n"
     "@font-face { src: url('../../Assets/times.ttf'); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 0);
-  EXPECT_EQ(ss.fontfaces.size(), 1);
+  REQUIRE(ss.propsets.size() == 0);
+  REQUIRE(ss.fontfaces.size() == 1);
 
-  EXPECT_EQ(ss.fontfaces[0].url, "../../Assets/times.ttf");
+  REQUIRE(ss.fontfaces[0].url == "../../Assets/times.ttf");
 }
 
 //----------------------------------------------------------------------------------------
 
-TEST(CssParserTest, ParserFromString_Expressions)
+TEST_CASE("Parsing CSS from string - URL expressions", "[css][parse][expressions]")
 {
   const std::string src = "foo { bar: url('hello world'); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(1, ss.propsets.size());
-  EXPECT_EQ(1, ss.propsets[0].properties.size());
-  EXPECT_EQ(1, getNumberOfValues(ss.propsets[0].properties[0].values));
+  REQUIRE(1 == ss.propsets.size());
+  REQUIRE(1 == ss.propsets[0].properties.size());
+  REQUIRE(1 == getNumberOfValues(ss.propsets[0].properties[0].values));
 
-  EXPECT_EQ(std::string("url"), getExpr(ss.propsets[0].properties[0].values, 0).name);
-  EXPECT_EQ((std::vector<std::string>{"hello world"}),
+  REQUIRE(std::string("url") == getExpr(ss.propsets[0].properties[0].values, 0).name);
+  REQUIRE((std::vector<std::string>{"hello world"}) ==
             getExpr(ss.propsets[0].properties[0].values, 0).args);
 }
 
-TEST(CssParserTest, ParserFromString_ExpressionsInLists)
+TEST_CASE("Parsing CSS from string - multiple expressions per property",
+          "[css][parse][expressions]")
 {
   const std::string src =
     "foo { bar: rgba(123, 45, 92, 0.1), "
@@ -359,17 +362,17 @@ TEST(CssParserTest, ParserFromString_ExpressionsInLists)
     "           hsla(320, 100%, 20%, 0.3); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(1, ss.propsets.size());
-  EXPECT_EQ(1, ss.propsets[0].properties.size());
+  REQUIRE(1 == ss.propsets.size());
+  REQUIRE(1 == ss.propsets[0].properties.size());
 
-  EXPECT_EQ(std::string("rgba"), getExpr(ss.propsets[0].properties[0].values, 0).name);
-  EXPECT_EQ((std::vector<std::string>{"123", "45", "92", "0.1"}),
+  REQUIRE(std::string("rgba") == getExpr(ss.propsets[0].properties[0].values, 0).name);
+  REQUIRE((std::vector<std::string>{"123", "45", "92", "0.1"}) ==
             getExpr(ss.propsets[0].properties[0].values, 0).args);
-  EXPECT_EQ(std::string("foo"), getExpr(ss.propsets[0].properties[0].values, 1).name);
-  EXPECT_TRUE(getExpr(ss.propsets[0].properties[0].values, 1).args.empty());
+  REQUIRE(std::string("foo") == getExpr(ss.propsets[0].properties[0].values, 1).name);
+  REQUIRE(getExpr(ss.propsets[0].properties[0].values, 1).args.empty());
 
-  EXPECT_EQ(std::string("hsla"), getExpr(ss.propsets[0].properties[0].values, 2).name);
-  EXPECT_EQ((std::vector<std::string>{"320", "100%", "20%", "0.3"}),
+  REQUIRE(std::string("hsla") == getExpr(ss.propsets[0].properties[0].values, 2).name);
+  REQUIRE((std::vector<std::string>{"320", "100%", "20%", "0.3"}) ==
             getExpr(ss.propsets[0].properties[0].values, 2).args);
 }
 

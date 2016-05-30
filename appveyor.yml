@@ -12,11 +12,10 @@ environment:
 
 install:
   - set PATH=%PATH%;%CMAKE_PREFIX_PATH%\bin
-  - git clone https://github.com/google/googletest.git C:\projects\googletest
 
 build_script:
   - mkdir build && cd build
-  - cmake .. -G"%CMAKE_GENERATOR%" -DGTEST_SOURCE=C:\projects\googletest\googletest -DBoost_INCLUDE_DIR=%BOOST_ROOT%
+  - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
   - cmake --build . --config %CONFIGURATION%
 
 test_script:

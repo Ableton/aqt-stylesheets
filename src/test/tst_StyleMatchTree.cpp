@@ -27,13 +27,12 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <boost/variant/get.hpp>
+#include <catch/catch.hpp>
 #include <QtCore/QString>
 #include <QtGui/QColor>
-#include <gtest/gtest.h>
-#include <boost/variant/get.hpp>
 RESTORE_WARNINGS
 
-#include <iostream>
 
 //========================================================================================
 
@@ -60,7 +59,7 @@ QColor propertyAsColor(PropertyMap pm, const char* pPropertyName)
 }
 } // anon namespace
 
-TEST(StyleMatchTreeTest, matchByTypeName)
+TEST_CASE("Match by type name", "[match]")
 {
   const std::string src =
     "A { \n"
@@ -72,11 +71,11 @@ TEST(StyleMatchTreeTest, matchByTypeName)
   UiItemPath p = {PathElement("A")};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("red", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("red" == propertyAsString(pm, "background"));
 }
 
-TEST(StyleMatchTreeTest, matchByTypeAndObjectName)
+TEST_CASE("Match by type and object name", "[match]")
 {
   const std::string src =
     ".boo { background: red; }\n"
@@ -88,30 +87,30 @@ TEST(StyleMatchTreeTest, matchByTypeAndObjectName)
 
   UiItemPath p = {PathElement("Foo")};
   PropertyMap pm = matchPath(mt.get(), p);
-  EXPECT_EQ(0, pm.size());
+  REQUIRE(0 == pm.size());
 
   p = {PathElement("", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("red", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("red" == propertyAsString(pm, "background"));
 
   p = {PathElement("", {"boo", "foo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("blue", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("blue" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("yellow", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("yellow" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Bar", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 }
 
-TEST(StyleMatchTreeTest, matchDescendants)
+TEST_CASE("Match descendants", "[match]")
 {
   const std::string src =
     "Foo       { background: red; }\n"
@@ -122,22 +121,22 @@ TEST(StyleMatchTreeTest, matchDescendants)
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar")};
   PropertyMap pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
+  REQUIRE(1 == pm.size());
   // "Foo > Bar" and "Foo Bar" have same specificity, therefore the later
   // wins.
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE("green" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar")};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 
   p = {PathElement("Gaz"), PathElement("Bar")};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(0, pm.size());
+  REQUIRE(0 == pm.size());
 }
 
-TEST(StyleMatchTreeTest, laterMatchesWin)
+TEST_CASE("Later matches win", "[match]")
 {
   const std::string src =
     "Foo       { background: red; }\n"
@@ -148,11 +147,11 @@ TEST(StyleMatchTreeTest, laterMatchesWin)
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar")};
   PropertyMap pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("yellow", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("yellow" == propertyAsString(pm, "background"));
 }
 
-TEST(StyleMatchTreeTest, matchSeparatedQueries)
+TEST_CASE("Match separated queries", "[match]")
 {
   const std::string src =
     "Foo, Bar { background: red; }\n"
@@ -163,31 +162,31 @@ TEST(StyleMatchTreeTest, matchSeparatedQueries)
 
   UiItemPath p = {PathElement("Foo")};
   PropertyMap pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("red", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("red" == propertyAsString(pm, "background"));
 
   p = {PathElement("Bar")};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("red", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("red" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"a"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("blue", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("blue" == propertyAsString(pm, "background"));
 
   p = {PathElement("Bar", {"b"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("blue", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("blue" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo", {"a"}), PathElement("Bar", {"b"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("black", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("black" == propertyAsString(pm, "background"));
 }
 
-TEST(StyleMatchTreeTest, matchChildren)
+TEST_CASE("Match children", "[match]")
 {
   const std::string src = "Foo > .boo { background: green; }\n";
 
@@ -195,15 +194,15 @@ TEST(StyleMatchTreeTest, matchChildren)
 
   UiItemPath p = {PathElement("Foo"), PathElement("Bar", {"boo"})};
   PropertyMap pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(0, pm.size());
+  REQUIRE(0 == pm.size());
 }
 
-TEST(StyleMatchTreeTest, matchDescendantsAlways)
+TEST_CASE("Match descendants always", "[match]")
 {
   const std::string src = "Foo .boo { background: green; }\n";
 
@@ -211,24 +210,24 @@ TEST(StyleMatchTreeTest, matchDescendantsAlways)
   auto p =
     UiItemPath{PathElement("Mam"), PathElement("Foo"), PathElement("Bar", {"boo"})};
   auto pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"), PathElement("Gaz"), PathElement("Bar", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 
   p = {PathElement("Foo"),
        PathElement("mam"),
        PathElement("Gaz"),
        PathElement("Bar", {"boo"})};
   pm = matchPath(mt.get(), p);
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "background"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "background"));
 }
 
-TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectors)
+TEST_CASE("Inherit properties from all matching selectors", "[match]")
 {
   const std::string src =
     "          Foo { propA: 1; }\n"
@@ -239,13 +238,13 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectors)
   UiItemPath p = {PathElement("Foo", {"bar"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
-TEST(StyleMatchTreeTest, inheritedPropertiesAreLessSpecific)
+TEST_CASE("Inherited properties are less specific", "[match]")
 {
   const std::string src =
     "          Foo { color: red; }\n"
@@ -255,11 +254,11 @@ TEST(StyleMatchTreeTest, inheritedPropertiesAreLessSpecific)
   UiItemPath p = {PathElement("Foo", {"bar"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("green", propertyAsString(pm, "color"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("green" == propertyAsString(pm, "color"));
 }
 
-TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithManyParents)
+TEST_CASE("Inherit properties from all matching selectors with many parents", "[match]")
 {
   const std::string src =
     "          Bar     { propA: 1; }\n"
@@ -273,16 +272,16 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithManyParent
   UiItemPath p = {PathElement("Foo", {"a", "x"}), PathElement("Bar", {"b", "y"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(6, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("4", propertyAsString(pm, "propD"));
-  EXPECT_EQ("5", propertyAsString(pm, "propE"));
-  EXPECT_EQ("6", propertyAsString(pm, "propF"));
+  REQUIRE(6 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("4" == propertyAsString(pm, "propD"));
+  REQUIRE("5" == propertyAsString(pm, "propE"));
+  REQUIRE("6" == propertyAsString(pm, "propF"));
 }
 
-TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithParent)
+TEST_CASE("Inherit properties from all matching selectors with parent", "[match]")
 {
   const std::string src =
     "          Bar { propA: 1; }\n"
@@ -293,13 +292,13 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithParent)
   UiItemPath p = {PathElement("Foo"), PathElement("Bar", {"b"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
-TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithClassedParents)
+TEST_CASE("Inherit properties from all matching selectors with classed parents", "[match]")
 {
   const std::string src =
     "          Bar { propA: 1; }\n"
@@ -310,13 +309,13 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromAllMatchingSelectorsWithClassedPar
   UiItemPath p = {PathElement("Foo", {"b"}), PathElement("Bar")};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
-TEST(StyleMatchTreeTest, inheritPropertiesFromDuplicateMatchingSelectors)
+TEST_CASE("Inherit properties from duplicate matching selectors", "[match]")
 {
   const std::string src =
     " Foo { propA: 1; }\n"
@@ -329,15 +328,15 @@ TEST(StyleMatchTreeTest, inheritPropertiesFromDuplicateMatchingSelectors)
   UiItemPath p = {PathElement("Foo", {"bar"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(pm.size(), 5);
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("4", propertyAsString(pm, "propD"));
-  EXPECT_EQ("5", propertyAsString(pm, "propE"));
+  REQUIRE(pm.size() == 5);
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("4" == propertyAsString(pm, "propD"));
+  REQUIRE("5" == propertyAsString(pm, "propE"));
 }
 
-TEST(StyleMatchTreeTest, duplicatedPropertiesInIdenticalSelectorsMatchLastOccurrence)
+TEST_CASE("Duplicated properties in identical selectors match last occurrence", "[match]")
 {
   const std::string src =
     " Foo { propA: first; }\n"
@@ -349,12 +348,12 @@ TEST(StyleMatchTreeTest, duplicatedPropertiesInIdenticalSelectorsMatchLastOccurr
   UiItemPath p = {PathElement("Foo", {"bar"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(pm.size(), 2);
-  EXPECT_EQ("last", propertyAsString(pm, "propA"));
-  EXPECT_EQ("end", propertyAsString(pm, "propB"));
+  REQUIRE(pm.size() == 2);
+  REQUIRE("last" == propertyAsString(pm, "propA"));
+  REQUIRE("end" == propertyAsString(pm, "propB"));
 }
 
-TEST(StyleMatchTreeTest, defaultStyleSheet)
+TEST_CASE("Default stylesheet", "[match]")
 {
   const std::string defaultSrc =
     "Bar { propA: 100;\n"
@@ -371,23 +370,23 @@ TEST(StyleMatchTreeTest, defaultStyleSheet)
   UiItemPath p = {PathElement("Bar")};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("5", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("5" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 
   p = {PathElement("Foo"), PathElement("Bar")};
   pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(5, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("5", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("2", propertyAsString(pm, "propD"));
-  EXPECT_EQ("11", propertyAsString(pm, "propE"));
+  REQUIRE(5 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("5" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("2" == propertyAsString(pm, "propD"));
+  REQUIRE("11" == propertyAsString(pm, "propE"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNames)
+TEST_CASE("Multiple classnames", "[match]")
 {
   const std::string src =
     "Bar         { propA: 1 }\n"
@@ -403,24 +402,24 @@ TEST(StyleMatchTreeTest, multipleClassNames)
   UiItemPath p = {PathElement("Bar", {"boo", "def"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(4, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("7", propertyAsString(pm, "propE"));
+  REQUIRE(4 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("7" == propertyAsString(pm, "propE"));
 
   p = {PathElement("Foo", {"abc"}), PathElement("Bar", {"boo", "def"})};
   pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(5, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("4", propertyAsString(pm, "propD"));
-  EXPECT_EQ("7", propertyAsString(pm, "propE"));
+  REQUIRE(5 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("4" == propertyAsString(pm, "propD"));
+  REQUIRE("7" == propertyAsString(pm, "propE"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNamesAndDefaultStyleSheet)
+TEST_CASE("Multiple classnames and default stylesheet", "[match]")
 {
   const std::string defaultSrc =
     "Bar.aha { propA: 100;\n"
@@ -437,15 +436,15 @@ TEST(StyleMatchTreeTest, multipleClassNamesAndDefaultStyleSheet)
   UiItemPath p = {PathElement("Foo", {"boo", "gaz"}), PathElement("Bar", {"aha", "nam"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(5, pm.size());
-  EXPECT_EQ("100", propertyAsString(pm, "propA"));
-  EXPECT_EQ("5", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
-  EXPECT_EQ("2", propertyAsString(pm, "propD"));
-  EXPECT_EQ("11", propertyAsString(pm, "propE"));
+  REQUIRE(5 == pm.size());
+  REQUIRE("100" == propertyAsString(pm, "propA"));
+  REQUIRE("5" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
+  REQUIRE("2" == propertyAsString(pm, "propD"));
+  REQUIRE("11" == propertyAsString(pm, "propE"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNamesUndefinedClassNameDontMatter)
+TEST_CASE("Multiple class names undefined class name doesnt matter", "[match]")
 {
   const std::string src =
     "Bar     { propA: 1 }\n"
@@ -455,12 +454,12 @@ TEST(StyleMatchTreeTest, multipleClassNamesUndefinedClassNameDontMatter)
   UiItemPath p = {PathElement("Bar", {"boo", "abc", "xyz", "def"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(2, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
+  REQUIRE(2 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNames_theLastOfAmbiguousDefinitionsWins)
+TEST_CASE("Match multiple classnames - the last of ambiguous definitions wins", "[match]")
 {
   const std::string src =
     ".typeA { color: red; }\n"
@@ -471,23 +470,23 @@ TEST(StyleMatchTreeTest, multipleClassNames_theLastOfAmbiguousDefinitionsWins)
   UiItemPath p = {PathElement("Bar", {"typeA", "typeB"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("blue", propertyAsString(pm, "color"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("blue" == propertyAsString(pm, "color"));
 
   p = {PathElement("Bar", {"typeC", "typeB"})};
   pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("yellow", propertyAsString(pm, "color"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("yellow" == propertyAsString(pm, "color"));
 
   p = {PathElement("Bar", {"typeB", "typeC", "typeA"})};
   pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ("yellow", propertyAsString(pm, "color"));
+  REQUIRE(1 == pm.size());
+  REQUIRE("yellow" == propertyAsString(pm, "color"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNamesMatchChildren)
+TEST_CASE("Multiple classnames with children notation", "[match]")
 {
   const std::string src =
     "Abc.mno                   { propA: 1 }\n"
@@ -498,13 +497,13 @@ TEST(StyleMatchTreeTest, multipleClassNamesMatchChildren)
   UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
-TEST(StyleMatchTreeTest, multipleClassNames_even_without_whitespace)
+TEST_CASE("Multiple classnames - match even without whitespace", "[match]")
 {
   const std::string src =
     "Abc.mno                 { propA: 1 }\n"
@@ -515,15 +514,15 @@ TEST(StyleMatchTreeTest, multipleClassNames_even_without_whitespace)
   UiItemPath p = {PathElement("Bar", {"boo", "def"}), PathElement("Abc", {"mno", "ixw"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(3, pm.size());
-  EXPECT_EQ("1", propertyAsString(pm, "propA"));
-  EXPECT_EQ("2", propertyAsString(pm, "propB"));
-  EXPECT_EQ("3", propertyAsString(pm, "propC"));
+  REQUIRE(3 == pm.size());
+  REQUIRE("1" == propertyAsString(pm, "propA"));
+  REQUIRE("2" == propertyAsString(pm, "propB"));
+  REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
 //----------------------------------------------------------------------------------------
 
-TEST(StyleMatchTreeTest, rgbColors_with_percentage_value)
+TEST_CASE("Store RGB colors with percentage value", "[expressions]")
 {
   const std::string src =
     ".foo { color: rgb(0%, 25%, 100%); }\n"
@@ -536,92 +535,92 @@ TEST(StyleMatchTreeTest, rgbColors_with_percentage_value)
     UiItemPath p = {PathElement("Bar", {"foo"})};
     PropertyMap pm = matchPath(mt.get(), p);
 
-    EXPECT_EQ(1, pm.size());
-    EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
-    EXPECT_EQ(0x40, propertyAsColor(pm, "color").green());
-    EXPECT_EQ(0xff, propertyAsColor(pm, "color").blue());
-    EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+    REQUIRE(1 == pm.size());
+    REQUIRE(0x00 == propertyAsColor(pm, "color").red());
+    REQUIRE(0x40 == propertyAsColor(pm, "color").green());
+    REQUIRE(0xff == propertyAsColor(pm, "color").blue());
+    REQUIRE(0xff == propertyAsColor(pm, "color").alpha());
   }
 
   {
     UiItemPath p = {PathElement("Bar", {"bar"})};
     PropertyMap pm = matchPath(mt.get(), p);
 
-    EXPECT_EQ(1, pm.size());
-    EXPECT_EQ(0x1a, propertyAsColor(pm, "color").red());
-    EXPECT_EQ(0xbf, propertyAsColor(pm, "color").green());
-    EXPECT_EQ(0xf2, propertyAsColor(pm, "color").blue());
-    EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+    REQUIRE(1 == pm.size());
+    REQUIRE(0x1a == propertyAsColor(pm, "color").red());
+    REQUIRE(0xbf == propertyAsColor(pm, "color").green());
+    REQUIRE(0xf2 == propertyAsColor(pm, "color").blue());
+    REQUIRE(0xff == propertyAsColor(pm, "color").alpha());
   }
 }
 
-TEST(StyleMatchTreeTest, rgbColors)
+TEST_CASE("RGB colors", "[expressions]")
 {
   const std::string src = ".foo { color: rgb(0, 16, 32); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
+  REQUIRE(ss.propsets.size() == 1);
 
   auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
-  EXPECT_EQ(0x10, propertyAsColor(pm, "color").green());
-  EXPECT_EQ(0x20, propertyAsColor(pm, "color").blue());
-  EXPECT_EQ(0xff, propertyAsColor(pm, "color").alpha());
+  REQUIRE(1 == pm.size());
+  REQUIRE(0x00 == propertyAsColor(pm, "color").red());
+  REQUIRE(0x10 == propertyAsColor(pm, "color").green());
+  REQUIRE(0x20 == propertyAsColor(pm, "color").blue());
+  REQUIRE(0xff == propertyAsColor(pm, "color").alpha());
 }
 
-TEST(StyleMatchTreeTest, rgbaColors)
+TEST_CASE("RGBA colors", "[expressions]")
 {
   const std::string src = ".foo { color: rgba(0, 16, 32, 0.5); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
+  REQUIRE(ss.propsets.size() == 1);
 
   auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ(0x00, propertyAsColor(pm, "color").red());
-  EXPECT_EQ(0x10, propertyAsColor(pm, "color").green());
-  EXPECT_EQ(0x20, propertyAsColor(pm, "color").blue());
-  EXPECT_EQ(0x80, propertyAsColor(pm, "color").alpha());
+  REQUIRE(1 == pm.size());
+  REQUIRE(0x00 == propertyAsColor(pm, "color").red());
+  REQUIRE(0x10 == propertyAsColor(pm, "color").green());
+  REQUIRE(0x20 == propertyAsColor(pm, "color").blue());
+  REQUIRE(0x80 == propertyAsColor(pm, "color").alpha());
 }
 
-TEST(StyleMatchTreeTest, hslColors)
+TEST_CASE("HSL colors", "[expressions]")
 {
   const std::string src = ".foo { color: hsl(120, 100%, 50%); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
+  REQUIRE(ss.propsets.size() == 1);
 
   auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ(120, propertyAsColor(pm, "color").hslHue());
-  EXPECT_NEAR(1.0, propertyAsColor(pm, "color").hslSaturationF(), 0.00001);
-  EXPECT_NEAR(0.5, propertyAsColor(pm, "color").lightnessF(), 0.00001);
+  REQUIRE(1 == pm.size());
+  REQUIRE(120 == propertyAsColor(pm, "color").hslHue());
+  REQUIRE(propertyAsColor(pm, "color").hslSaturationF() == Approx(1.0));
+  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.5));
 }
 
-TEST(StyleMatchTreeTest, hslaColors)
+TEST_CASE("HSLA colors", "[expressions]")
 {
   const std::string src = ".foo { color: hsla(359, 97%, 13%, 0.23); }\n";
 
   StyleSheet ss = parseStdString(src);
-  EXPECT_EQ(ss.propsets.size(), 1);
+  REQUIRE(ss.propsets.size() == 1);
 
   auto mt = createMatchTree(parseStdString(src));
   UiItemPath p = {PathElement("Bar", {"foo"})};
   PropertyMap pm = matchPath(mt.get(), p);
 
-  EXPECT_EQ(1, pm.size());
-  EXPECT_EQ(359, propertyAsColor(pm, "color").hslHue());
-  EXPECT_NEAR(0.97, propertyAsColor(pm, "color").hslSaturationF(), 0.00001);
-  EXPECT_NEAR(0.13, propertyAsColor(pm, "color").lightnessF(), 0.00001);
-  EXPECT_NEAR(0.23, propertyAsColor(pm, "color").alphaF(), 0.00001);
+  REQUIRE(1 == pm.size());
+  REQUIRE(359 == propertyAsColor(pm, "color").hslHue());
+  REQUIRE(propertyAsColor(pm, "color").hslSaturationF() == Approx(0.97));
+  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.13));
+  REQUIRE(propertyAsColor(pm, "color").alphaF() == Approx(0.23));
 }

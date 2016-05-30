@@ -18,27 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-add_library(gtest_internal STATIC
-  ${GTEST_SOURCE}/src/gtest-all.cc
-  ${GTEST_SOURCE}/src/gtest_main.cc
-)
-target_include_directories(gtest_internal PUBLIC
-  ${GTEST_SOURCE} ${GTEST_SOURCE}/include)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
-    OR CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
-  target_compile_options(gtest_internal PUBLIC
-    ${cxx11_options} -Wno-global-constructors)
-endif()
 
 add_executable(StyleSheetParserTest
+  main.cpp
   tst_Convert.cpp
   tst_CssParser.cpp
   tst_StyleMatchTree.cpp
   tst_UrlUtils.cpp
 )
 
+target_include_directories(StyleSheetParserTest PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include;${PROJECT_SOURCE_DIR}/third-party;${Boost_INCLUDE_DIRS}")
+
 target_link_libraries(StyleSheetParserTest
-  StyleSheetParser gtest_internal)
+  StyleSheetParser)
+
 
 add_test(StyleSheetParserTestCase StyleSheetParserTest)

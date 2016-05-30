@@ -26,12 +26,12 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <catch/catch.hpp>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QTemporaryDir>
 #include <QtCore/QFile>
 #include <QtCore/QUrl>
-#include <gtest/gtest.h>
 RESTORE_WARNINGS
 
 using namespace aqt::stylesheets;
@@ -41,7 +41,7 @@ namespace
 void createFile(QString path)
 {
   QFile f(path);
-  ASSERT_TRUE(f.open(QIODevice::WriteOnly | QIODevice::Truncate));
+  CHECK(f.open(QIODevice::WriteOnly | QIODevice::Truncate));
   f.close();
 }
 
@@ -57,46 +57,46 @@ void testWithSandbox(TestFn&& testFn)
 }
 } // anon namespace
 
-TEST(UrlUtils, resolveResourceUrl_local_to_http)
+TEST_CASE("Resolving URLs - local to http", "[url]")
 {
-  EXPECT_EQ(QUrl("http://abc.org/foo.png"),
-            searchForResourceSearchPath(QUrl("http://abc.org"), QUrl("./foo.png"), {}));
-  EXPECT_EQ(QUrl("http://abc.org/foo.png"),
-            searchForResourceSearchPath(QUrl("http://abc.org"), QUrl("foo.png"), {}));
+  REQUIRE(QUrl("http://abc.org/foo.png")
+          == searchForResourceSearchPath(QUrl("http://abc.org"), QUrl("./foo.png"), {}));
+  REQUIRE(QUrl("http://abc.org/foo.png")
+          == searchForResourceSearchPath(QUrl("http://abc.org"), QUrl("foo.png"), {}));
 
-  EXPECT_EQ(
-    QUrl("http://abc.org/x/y/foo.png"),
-    searchForResourceSearchPath(QUrl("http://abc.org/x/y/z"), QUrl("foo.png"), {}));
-  EXPECT_EQ(
-    QUrl("http://abc.org/foo.png"),
-    searchForResourceSearchPath(QUrl("http://abc.org/x/y/z"), QUrl("/foo.png"), {}));
+  REQUIRE(
+    QUrl("http://abc.org/x/y/foo.png")
+    == searchForResourceSearchPath(QUrl("http://abc.org/x/y/z"), QUrl("foo.png"), {}));
+  REQUIRE(
+    QUrl("http://abc.org/foo.png")
+    == searchForResourceSearchPath(QUrl("http://abc.org/x/y/z"), QUrl("/foo.png"), {}));
 }
 
-TEST(UrlUtils, resolveResourceUrl_http_to_http)
+TEST_CASE("Resolving URLs - http to http", "[url]")
 {
-  EXPECT_EQ(QUrl("http://xyz.com/foo.png"),
-            searchForResourceSearchPath(
-              QUrl("http://abc.org"), QUrl("http://xyz.com/foo.png"), {}));
+  REQUIRE(QUrl("http://xyz.com/foo.png")
+          == searchForResourceSearchPath(
+               QUrl("http://abc.org"), QUrl("http://xyz.com/foo.png"), {}));
 }
 
-TEST(UrlUtils, resolveResourceUrl_qrc_to_http)
+TEST_CASE("Resolving URLs - qrc to http", "[url]")
 {
-  EXPECT_EQ(QUrl("qrc:assets/icons/foo.png"),
-            searchForResourceSearchPath(
-              QUrl("http://abc.org"), QUrl("qrc:assets/icons/foo.png"), {}));
+  REQUIRE(QUrl("qrc:assets/icons/foo.png")
+          == searchForResourceSearchPath(
+               QUrl("http://abc.org"), QUrl("qrc:assets/icons/foo.png"), {}));
 }
 
-TEST(UrlUtils, resolveResourceUrl_local_relative_to_qrc)
+TEST_CASE("Resolving URLs - local relative to qrc", "[url]")
 {
-  EXPECT_EQ(QUrl("qrc:/qml/assets/icons/foo.png"),
-            searchForResourceSearchPath(
-              QUrl("qrc:/qml/myfile.qml"), QUrl("assets/icons/foo.png"), {}));
-  EXPECT_EQ(QUrl("qrc:/assets/icons/foo.png"),
-            searchForResourceSearchPath(
-              QUrl("qrc:/qml/myfile.qml"), QUrl("/assets/icons/foo.png"), {}));
+  REQUIRE(QUrl("qrc:/qml/assets/icons/foo.png")
+          == searchForResourceSearchPath(
+               QUrl("qrc:/qml/myfile.qml"), QUrl("assets/icons/foo.png"), {}));
+  REQUIRE(QUrl("qrc:/assets/icons/foo.png")
+          == searchForResourceSearchPath(
+               QUrl("qrc:/qml/myfile.qml"), QUrl("/assets/icons/foo.png"), {}));
 }
 
-TEST(UrlUtils, resolveResourceUrl_relative_local_to_local_dir)
+TEST_CASE("Resolving URLs - relative local to local dir", "[url]")
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
     auto temppath = sandbox.path() + "/";
@@ -107,16 +107,16 @@ TEST(UrlUtils, resolveResourceUrl_relative_local_to_local_dir)
     auto absPath = tempDir.absoluteFilePath("assets/a.css");
     createFile(absPath);
 
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(temppath), QUrl("./assets/a.css"), {}));
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(temppath), QUrl("assets/a.css"), {}));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(temppath), QUrl("./assets/a.css"), {}));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(temppath), QUrl("assets/a.css"), {}));
   });
 }
 
-TEST(UrlUtils, resolveResourceUrl_relative_local_to_local_file)
+TEST_CASE("Resolving URLs - relative local to local file", "[url]")
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
     auto temppath = sandbox.path() + "/";
@@ -129,16 +129,16 @@ TEST(UrlUtils, resolveResourceUrl_relative_local_to_local_file)
 
     auto localFilePath = QDir(temppath).absoluteFilePath("some.qml");
 
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("./assets/a.css"), {}));
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("assets/a.css"), {}));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(localFilePath), QUrl("./assets/a.css"), {}));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(localFilePath), QUrl("assets/a.css"), {}));
   });
 }
 
-TEST(UrlUtils, resolveResourceUrl_relative_local_with_search_path)
+TEST_CASE("Resolving URLs - relative local with search path")
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
     auto temppath = sandbox.path() + "/";
@@ -160,25 +160,25 @@ TEST(UrlUtils, resolveResourceUrl_relative_local_with_search_path)
 
     // relative path not starting with "/" is not searched in path; if that is
     // not valid "." return as-is
-    EXPECT_EQ(QUrl("assets/a.css"),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile("."), QUrl("assets/a.css"), searchPath));
+    REQUIRE(QUrl("assets/a.css")
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile("."), QUrl("assets/a.css"), searchPath));
 
     // relative path not starting with "/" is not searched in path
     auto localFilePath = QDir(temppath).absoluteFilePath("some.qml");
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("assets/a.css"), searchPath));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(localFilePath), QUrl("assets/a.css"), searchPath));
 
     // relative path starting with "/" is looked up in search path, not resolved
     // against baseurl
-    EXPECT_EQ(QUrl::fromLocalFile(fooAbsPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("/assets/a.css"), searchPath));
+    REQUIRE(QUrl::fromLocalFile(fooAbsPath)
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile(localFilePath), QUrl("/assets/a.css"), searchPath));
   });
 }
 
-TEST(UrlUtils, resolveResourceUrl_relative_dotdot_local_with_search_path)
+TEST_CASE("Resolving URLs - relative .. local with search path", "[url]")
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
     auto temppath = sandbox.path() + "/";
@@ -197,26 +197,26 @@ TEST(UrlUtils, resolveResourceUrl_relative_dotdot_local_with_search_path)
       QStringList{tempDir.absoluteFilePath("foo/xyz/"), tempDir.absoluteFilePath("bar/")};
 
     // up-paths (../) are never resolved against search path
-    EXPECT_EQ(QUrl("../assets/a.css"),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile("."), QUrl("../assets/a.css"), searchPath));
+    REQUIRE(QUrl("../assets/a.css")
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile("."), QUrl("../assets/a.css"), searchPath));
 
     auto localFilePath = QDir(temppath).absoluteFilePath("xyz/some.qml");
-    EXPECT_EQ(QUrl::fromLocalFile(absPath),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile(localFilePath), QUrl("../assets/a.css"), searchPath));
+    REQUIRE(QUrl::fromLocalFile(absPath)
+            == searchForResourceSearchPath(QUrl::fromLocalFile(localFilePath),
+                                           QUrl("../assets/a.css"), searchPath));
 
     // relative paths starting with '/' must not contain '/../'.  They are returned as-is.
-    EXPECT_EQ(QUrl(), searchForResourceSearchPath(QUrl::fromLocalFile(localFilePath),
+    REQUIRE(QUrl() == searchForResourceSearchPath(QUrl::fromLocalFile(localFilePath),
                                                   QUrl("/../assets/a.css"), searchPath));
 
     // path "/" fails
-    EXPECT_EQ(QUrl(), searchForResourceSearchPath(
+    REQUIRE(QUrl() == searchForResourceSearchPath(
                         QUrl::fromLocalFile(localFilePath), QUrl("/"), searchPath));
   });
 }
 
-TEST(UrlUtils, resolveResourceUrl_non_resolvable_url_is_returned_as_is)
+TEST_CASE("Resolving URLs - a non resolvable URL is returned as is", "[url]")
 {
   testWithSandbox([](QTemporaryDir& sandbox) {
     auto temppath = sandbox.path() + "/";
@@ -226,8 +226,8 @@ TEST(UrlUtils, resolveResourceUrl_non_resolvable_url_is_returned_as_is)
                                   tempDir.absoluteFilePath("bar/"),
                                   tempDir.absolutePath()};
 
-    EXPECT_EQ(QUrl("../assets/a.css"),
-              searchForResourceSearchPath(
-                QUrl::fromLocalFile("."), QUrl("../assets/a.css"), searchPath));
+    REQUIRE(QUrl("../assets/a.css")
+            == searchForResourceSearchPath(
+                 QUrl::fromLocalFile("."), QUrl("../assets/a.css"), searchPath));
   });
 }
