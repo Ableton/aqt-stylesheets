@@ -30,7 +30,6 @@ SUPPRESS_WARNINGS
 #include <boost/algorithm/clamp.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -41,6 +40,7 @@ RESTORE_WARNINGS
 #include <iostream>
 #include <string>
 #include <unordered_map>
+
 
 namespace aqt
 {
@@ -378,17 +378,17 @@ ExprValue evaluateExpression(const Expression& expr)
     std::string("Unsupported expression '").append(expr.name).append("'"));
 }
 
-struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> {
-  boost::optional<QColor> operator()(const std::string& value)
+struct PropValueVisitor : public boost::static_visitor<std::optional<QColor>> {
+  std::optional<QColor> operator()(const std::string& value)
   {
     auto qvalue = QVariant(QString::fromStdString(value));
     if (qvalue.canConvert(QMetaType::QColor)) {
       return qvalue.value<QColor>();
     }
-    return boost::none;
+    return {};
   }
 
-  boost::optional<QColor> operator()(const Expression& expr)
+  std::optional<QColor> operator()(const Expression& expr)
   {
     auto value = evaluateExpression(expr);
     if (const QColor* color = boost::get<QColor>(&value)) {
@@ -404,7 +404,7 @@ struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> 
 
 //------------------------------------------------------------------------------
 
-boost::optional<QFont> PropertyValueConvertTraits<QFont>::convert(
+std::optional<QFont> PropertyValueConvertTraits<QFont>::convert(
   const PropertyValue& value) const
 {
   if (const std::string* str = boost::get<std::string>(&value)) {
@@ -414,65 +414,65 @@ boost::optional<QFont> PropertyValueConvertTraits<QFont>::convert(
       return fontDeclarationToFont(qvalue.toString());
     }
   }
-  return boost::none;
+  return {};
 }
 
-boost::optional<QColor> PropertyValueConvertTraits<QColor>::convert(
+std::optional<QColor> PropertyValueConvertTraits<QColor>::convert(
   const PropertyValue& value) const
 {
   PropValueVisitor visitor;
   return boost::apply_visitor(visitor, value);
 }
 
-boost::optional<QString> PropertyValueConvertTraits<QString>::convert(
+std::optional<QString> PropertyValueConvertTraits<QString>::convert(
   const PropertyValue& value) const
 {
   if (const std::string* str = boost::get<std::string>(&value)) {
     return QString::fromStdString(*str);
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<double> PropertyValueConvertTraits<double>::convert(
+std::optional<double> PropertyValueConvertTraits<double>::convert(
   const PropertyValue& value) const
 {
   if (const std::string* str = boost::get<std::string>(&value)) {
     try {
-      return boost::make_optional(std::stod(*str));
+      return std::make_optional(std::stod(*str));
     } catch (const std::invalid_argument&) {
     } catch (const std::out_of_range&) {
     }
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<bool> PropertyValueConvertTraits<bool>::convert(
+std::optional<bool> PropertyValueConvertTraits<bool>::convert(
   const PropertyValue& value) const
 {
   if (const std::string* str = boost::get<std::string>(&value)) {
     auto lstr = boost::algorithm::to_lower_copy(*str);
     if (lstr == kTrue || lstr == kYes) {
-      return boost::make_optional(true);
+      return std::make_optional(true);
     } else if (lstr == kFalse || lstr == kNo) {
-      return boost::make_optional(false);
+      return std::make_optional(false);
     }
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
+std::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
   const PropertyValue& value) const
 {
-  struct PropValueToUrlVisitor : public boost::static_visitor<boost::optional<QUrl>> {
-    boost::optional<QUrl> operator()(const std::string& str)
+  struct PropValueToUrlVisitor : public boost::static_visitor<std::optional<QUrl>> {
+    std::optional<QUrl> operator()(const std::string& str)
     {
       return QUrl(QString::fromStdString(str));
     }
 
-    boost::optional<QUrl> operator()(const Expression& expr)
+    std::optional<QUrl> operator()(const Expression& expr)
     {
       auto exprValue = evaluateExpression(expr);
       if (const QUrl* url = boost::get<QUrl>(&exprValue)) {

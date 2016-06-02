@@ -96,7 +96,7 @@ QVariant StyleSetProps::get(const QString& key) const
       try {
         auto conv = convertProperty<QString>(propValue);
         if (conv) {
-          result.push_back(conv.get());
+          result.push_back(conv.value());
         }
       } catch (ConvertException& e) {
         styleSheetsLogWarning() << e.what();
