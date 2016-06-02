@@ -71,6 +71,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKE_MACOSX_RPATH ON)
 
+# Check whether our compiler supports std::optional already
+try_compile(STD_OPTIONAL_COMPILE_SUCCESS "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_std_optional.cpp")
+if (STD_OPTIONAL_COMPILE_SUCCESS)
+  message(STATUS "Checking std::optional: yes")
+  add_definitions(-DABL_HAVE_STD_OPTIONAL)
+else()
+  message(STATUS "Checking std::optional: no")
+endif()
+
+
 enable_testing()
 
 find_package(Qt5Quick 5.3.0 REQUIRED)
