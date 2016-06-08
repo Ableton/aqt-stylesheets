@@ -24,7 +24,7 @@ else()
   add_definitions(-DNDEBUG=1)
 endif()
 
-add_definitions(-DBOOST_SPIRIT_USE_PHOENIX_V3=1)
+add_definitions(-DPEGLIB_NO_UNICODE_CHARS)
 
 add_library(StyleSheetParser
   Convert.hpp
@@ -40,7 +40,7 @@ add_library(StyleSheetParser
   Warnings.hpp
 )
 target_include_directories(StyleSheetParser PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include;${Boost_INCLUDE_DIRS}>")
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include;${PROJECT_SOURCE_DIR}/third-party;${Boost_INCLUDE_DIRS}>")
 target_compile_options(StyleSheetParser
   PUBLIC ${cxx11_options} ${warning_options})
 

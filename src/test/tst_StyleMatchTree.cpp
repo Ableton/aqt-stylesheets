@@ -298,7 +298,8 @@ TEST_CASE("Inherit properties from all matching selectors with parent", "[match]
   REQUIRE("3" == propertyAsString(pm, "propC"));
 }
 
-TEST_CASE("Inherit properties from all matching selectors with classed parents", "[match]")
+TEST_CASE("Inherit properties from all matching selectors with classed parents",
+          "[match]")
 {
   const std::string src =
     "          Bar { propA: 1; }\n"
