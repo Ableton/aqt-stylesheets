@@ -34,7 +34,7 @@ SUPPRESS_WARNINGS
 RESTORE_WARNINGS
 
 #include <fstream>
-#include <iostream>
+#include <ios>
 #include <sstream>
 
 namespace
