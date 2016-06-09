@@ -100,6 +100,29 @@ TEST_CASE("Parsing CSS from string", "[css][parse]")
   REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("red"));
 }
 
+TEST_CASE("Selectors with dashes and numbers", "[css][parse]")
+{
+  const std::string src =
+    "A-z { \n"
+    "  background1: red;\n"
+    "  base-2:  green;\n"
+    "  baSe_2:  yellow;\n"
+    "}\n";
+
+  StyleSheet ss = parseStdString(src);
+  REQUIRE(ss.propsets.size() == 1);
+
+  REQUIRE(ss.propsets[0].properties.size() == 3);
+  REQUIRE(ss.propsets[0].properties[0].name == "background1");
+  REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("red"));
+
+  REQUIRE(ss.propsets[0].properties[1].name == "base-2");
+  REQUIRE(getFirstValue(ss.propsets[0].properties[1].values) == std::string("green"));
+
+  REQUIRE(ss.propsets[0].properties[2].name == "baSe_2");
+  REQUIRE(getFirstValue(ss.propsets[0].properties[2].values) == std::string("yellow"));
+}
+
 TEST_CASE("Parsing CSS from string - different selector styles", "[css][parse]")
 {
   const std::string src =
@@ -260,6 +283,22 @@ TEST_CASE("Parsing CSS from string - CRLF newlines", "[css][parse]")
   REQUIRE(ss.propsets[1].properties.size() == 1);
 }
 
+TEST_CASE("Parsing CSS from string - numbers", "[css][parse]")
+{
+  const std::string src =
+    "X {\n"
+    "  def: 42; \n"
+    "  ghi: -127; \n"
+    "}\n";
+
+  StyleSheet ss = parseStdString(src);
+  REQUIRE(ss.propsets.size() == 1);
+  REQUIRE(ss.propsets[0].properties.size() == 2);
+
+  REQUIRE(getFirstValue(ss.propsets[0].properties[0].values) == std::string("42"));
+  REQUIRE(getFirstValue(ss.propsets[0].properties[1].values) == std::string("-127"));
+}
+
 TEST_CASE("Parsing CSS from string - mixed new lines", "[css][parse]")
 {
   const std::string src =
@@ -349,8 +388,8 @@ TEST_CASE("Parsing CSS from string - URL expressions", "[css][parse][expressions
   REQUIRE(1 == getNumberOfValues(ss.propsets[0].properties[0].values));
 
   REQUIRE(std::string("url") == getExpr(ss.propsets[0].properties[0].values, 0).name);
-  REQUIRE((std::vector<std::string>{"hello world"}) ==
-            getExpr(ss.propsets[0].properties[0].values, 0).args);
+  REQUIRE((std::vector<std::string>{"hello world"})
+          == getExpr(ss.propsets[0].properties[0].values, 0).args);
 }
 
 TEST_CASE("Parsing CSS from string - multiple expressions per property",
@@ -366,14 +405,14 @@ TEST_CASE("Parsing CSS from string - multiple expressions per property",
   REQUIRE(1 == ss.propsets[0].properties.size());
 
   REQUIRE(std::string("rgba") == getExpr(ss.propsets[0].properties[0].values, 0).name);
-  REQUIRE((std::vector<std::string>{"123", "45", "92", "0.1"}) ==
-            getExpr(ss.propsets[0].properties[0].values, 0).args);
+  REQUIRE((std::vector<std::string>{"123", "45", "92", "0.1"})
+          == getExpr(ss.propsets[0].properties[0].values, 0).args);
   REQUIRE(std::string("foo") == getExpr(ss.propsets[0].properties[0].values, 1).name);
   REQUIRE(getExpr(ss.propsets[0].properties[0].values, 1).args.empty());
 
   REQUIRE(std::string("hsla") == getExpr(ss.propsets[0].properties[0].values, 2).name);
-  REQUIRE((std::vector<std::string>{"320", "100%", "20%", "0.3"}) ==
-            getExpr(ss.propsets[0].properties[0].values, 2).args);
+  REQUIRE((std::vector<std::string>{"320", "100%", "20%", "0.3"})
+          == getExpr(ss.propsets[0].properties[0].values, 2).args);
 }
 
 /* Missing tests:

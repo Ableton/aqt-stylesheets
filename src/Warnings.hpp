@@ -119,9 +119,12 @@ THE SOFTWARE.
     __pragma(warning(disable: 4242)) \
     __pragma(warning(disable: 4244)) \
     __pragma(warning(disable: 4251)) \
+    __pragma(warning(disable: 4267)) \
     __pragma(warning(disable: 4365)) \
     __pragma(warning(disable: 4388)) \
+    __pragma(warning(disable: 4510)) \
     __pragma(warning(disable: 4555)) \
+    __pragma(warning(disable: 4610)) \
     __pragma(warning(disable: 4619)) \
     __pragma(warning(disable: 4628)) \
     __pragma(warning(disable: 4640)) \
