@@ -85,9 +85,12 @@ THE SOFTWARE.
 #elif defined(_MSC_VER)
 
   #if _MSC_VER < 1900
-    #define ABL_PRAGMA_MSVC_DISABLE_4459
+    #define ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS
   #else
-    #define ABL_PRAGMA_MSVC_DISABLE_4459 \
+    /**
+    * C4459: declaration of 'parameter' hides global declaration
+    */
+    #define ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS \
     __pragma(warning(disable: 4459))
   #endif
 
@@ -132,7 +135,7 @@ THE SOFTWARE.
     __pragma(warning(disable: 4714)) \
     __pragma(warning(disable: 4800)) \
     __pragma(warning(disable: 4826)) \
-    ABL_PRAGMA_MSVC_DISABLE_4459
+    ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS
 
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))
