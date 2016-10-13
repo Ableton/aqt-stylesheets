@@ -89,9 +89,11 @@ THE SOFTWARE.
   #else
     /**
     * C4459: declaration of 'parameter' hides global declaration
+    * C5031: #pragma warning(pop): likely mismatch, popping warning state pushed in different file (compiling source file <file>)
     */
     #define ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS \
-    __pragma(warning(disable: 4459))
+    __pragma(warning(disable: 4459)) \
+    __pragma(warning(disable: 5031))
   #endif
 
   /**
