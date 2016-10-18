@@ -26,18 +26,41 @@ THE SOFTWARE.
 
 #if defined(__clang__)
 
+  #if __has_warning("-Wcomma")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
+    _Pragma("clang diagnostic ignored \"-Wcomma\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA
+  #endif
+
   #if __has_warning("-Wdouble-promotion")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
     _Pragma("clang diagnostic ignored \"-Wdouble-promotion\"")
   #else
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION
   #endif
+
+  #if __has_warning("-Wexpansion-to-defined")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED \
+    _Pragma("clang diagnostic ignored \"-Wexpansion-to-defined\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED
+  #endif
+
   #if __has_warning("-Wreserved-id-macro")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO \
     _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"")
   #else
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO
   #endif
+
+  #if __has_warning("-Wundefined-func-template")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE \
+    _Pragma("clang diagnostic ignored \"-Wundefined-func-template\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE
+  #endif
+
   #if __has_warning("-Wunused-local-typedef")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF \
     _Pragma("clang diagnostic ignored \"-Wunused-local-typedef\"")
@@ -75,8 +98,11 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wunused-parameter\"") \
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \
     _Pragma("clang diagnostic ignored \"-Wweak-vtables\"") \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF
 
   #define RESTORE_WARNINGS \
