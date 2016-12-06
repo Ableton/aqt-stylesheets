@@ -9,8 +9,8 @@ Run this from the checkouts toplevel folder:
 
 ```
   $ cd aqt-stylesheets/
-  $ qmlscene -I qml examples/fonts/UseFonts1.0.qml
-  $ qmlscene -I qml examples/fonts/UseFonts1.1.qml
+  $ qmlscene -I build/lib/qml examples/fonts/UseFonts1.0.qml
+  $ qmlscene -I build/lib/qml examples/fonts/UseFonts1.1.qml
 ```
 
 In both cases you should see a nice big "AQT" logo on screen.

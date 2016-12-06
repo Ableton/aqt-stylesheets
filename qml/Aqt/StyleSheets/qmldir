@@ -3,4 +3,4 @@ module Aqt.StyleSheets
 StyleDebugMouseArea 1.0 StyleDebugMouseArea.qml
 StyleUtils 1.0 styleUtils.js
 
-plugin StylePlugin @PATH_TO_PLUGIN@
+plugin StylePlugin

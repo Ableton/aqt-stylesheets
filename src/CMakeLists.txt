@@ -73,32 +73,10 @@ set_target_properties(StylePlugin
 set_target_properties(StylePlugin
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${plugin_output})
 
-# rewrite qmldir to the plugin in the output folder (PATH_TO_PLUGIN is used
-# in qmldir.in)
-set(PATH_TO_PLUGIN "${PROJECT_BINARY_DIR}/output")
-configure_file(
-  "${PROJECT_SOURCE_DIR}/qml/Aqt/StyleSheets/qmldir.in"
-  "${PROJECT_SOURCE_DIR}/qml/Aqt/StyleSheets/qmldir"
-  @ONLY)
-unset(PATH_TO_PLUGIN)
-
-# prepare another qmldir, which we can use for installation
-set(PATH_TO_PLUGIN "")
-configure_file(
-  "${PROJECT_SOURCE_DIR}/qml/Aqt/StyleSheets/qmldir.in"
-  "${plugin_output}/qmldir"
-  @ONLY)
-unset(PATH_TO_PLUGIN)
-
-# TODO: Decide where to install plugins
-set(PLUGIN_INSTALL_DIR "lib/qml")
-
 install(TARGETS StylePlugin
   LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}/Aqt/StyleSheets")
-install(FILES "${plugin_output}/qmldir"
-  DESTINATION "${PLUGIN_INSTALL_DIR}/Aqt/StyleSheets")
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/qml/Aqt"
   DESTINATION "${PLUGIN_INSTALL_DIR}"
-  FILES_MATCHING REGEX ".*\\.(qml|js)$")
+  FILES_MATCHING REGEX "(qmldir|(.*\\.(qml|js)))$")
 
 add_subdirectory(test)

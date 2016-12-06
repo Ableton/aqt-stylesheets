@@ -17,7 +17,8 @@ build_script:
   - mkdir build && cd build
   - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
   - cmake --build . --config %CONFIGURATION%
+  - cmake --build . --config %CONFIGURATION% --target install
 
 test_script:
   - ctest -C %CONFIGURATION% -V
-  - qmlscene --quit -I ../qml ../examples/TestApp.qml
+  - qmlscene --quit -I lib/qml ../examples/TestApp.qml

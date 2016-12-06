@@ -38,13 +38,16 @@ Windows:
   mkdir build
   cd build
   cmake ..
-  cmake --build .
+  cmake --build . --config Release
+  cmake --build . --config Release --target install
 ```
+
+The resulting plugin is then found inside `build/lib/qml`
 
 The unit tests can be executed with ctest:
 
 ```
-  ctest -V
+  ctest -V -C Release
 ```
 
 You might set the following variables:
@@ -69,7 +72,7 @@ In the `examples` folder there's an example app, showing how to use some of the
 feature of the StylePlugin. You can run the app with:
 
 ```
-  qmlscene -I qml/ examples/TestApp.qml
+  qmlscene -I build/lib/qml examples/TestApp.qml
 ```
 
 While qmlscene is running you can change `examples/style.css` and watch the
@@ -81,7 +84,7 @@ application update.
 In the `benchmarks` folder there are benchmarks that can be run manually with:
 
 ```
-qmltestrunner -input benchmarks/benchmark_*.qml -import qml
+qmltestrunner -import build/lib/qml -input benchmarks/benchmark_*.qml
 ```
 
 
