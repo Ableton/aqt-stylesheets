@@ -15,6 +15,7 @@ before_script:
     - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION
 
 script:
-    - cmake --build .
-    - ctest -V
-    - qmlscene --quit -I ../qml ../examples/TestApp.qml
+    - cmake --build . --config $CONFIGURATION
+    - cmake --build . --config $CONFIGURATION --target install
+    - ctest -V -C $CONFIGURATION
+    - qmlscene --quit -I lib/qml ../examples/TestApp.qml

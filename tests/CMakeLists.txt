@@ -42,21 +42,21 @@ set_target_properties(AqtTestUtilsPlugin
 set_target_properties(AqtTestUtilsPlugin
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${plugin_output})
 
-set(PATH_TO_PLUGIN "${plugin_output}")
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/Aqt/Testing/qmldir.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/Aqt/Testing/qmldir"
-  @ONLY)
-unset(PATH_TO_PLUGIN)
-
 file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/test-*.qml")
 
 set(i 0)
 foreach(filename ${files})
   add_test(NAME "IntegrationTest_${i}"
-           COMMAND "${QMLTESTRUNNER_APP}" -import "${PROJECT_SOURCE_DIR}/qml"
+           COMMAND "${QMLTESTRUNNER_APP}"
                                  -import "${CMAKE_CURRENT_SOURCE_DIR}"
+                                 -import "${PLUGIN_INSTALL_DIR}"
                                  -input "${filename}"
            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tests")
   math(EXPR i "${i} + 1")
 endforeach()
+
+install(TARGETS AqtTestUtilsPlugin
+  LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}/Aqt/Testing")
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/tests/Aqt"
+  DESTINATION "${PLUGIN_INSTALL_DIR}"
+  FILES_MATCHING REGEX "(qmldir|(.*\\.(qml|js)))$")

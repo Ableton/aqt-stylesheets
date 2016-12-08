@@ -63,13 +63,22 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
     -Wno-weak-vtables
     )
 elseif(MSVC)
-  set(warning_options /WX /W4 /wd4275 /wd4503 /wd4512 /wd4714)
+  set(warning_options /WX /W4 /wd4127 /wd4275 /wd4503 /wd4512 /wd4714)
 endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKE_MACOSX_RPATH ON)
+
+# We install aqt-stylesheets within the build dir. It's up to you to
+# move it elsewhere.
+#
+# You can customize PLUGIN_INSTALL_DIR to be inside the Qt
+# distribution like all the other qml plugins, if you want to install
+# it system-wide.
+
+set(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/lib/qml")
 
 enable_testing()
 
