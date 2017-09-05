@@ -87,6 +87,10 @@ In the `benchmarks` folder there are benchmarks that can be run manually with:
 qmltestrunner -import build/lib/qml -input benchmarks/benchmark_*.qml
 ```
 
+## Maintainers
+
+* [@gck-ableton](https://github.com/gck-ableton)
+
 
 ## License
 
