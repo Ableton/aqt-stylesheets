@@ -4,9 +4,9 @@ StylesSheets is a library for Qt/QML that allows you to apply CSS stylesheets to
 QML applications.
 
 A singleton StyleEngine reads and parses a CSS file. QML components in your
-application can use the StyleSet attached object to request style properties. In
-doing so, the classname of the requesting object, its position in the component
-hierarchy, and its StyleSet.name info are used to build a selector path that is
+the application can use the StyleSet attached object to request style properties. In
+doing so, the class name of the requesting object, its position in the component
+hierarchy and its StyleSet.name info are used to build a selector path that is
 searched for in the CSS.
 
 Decoupling application visual style from QML code allows designers and
@@ -42,7 +42,7 @@ Windows:
   cmake --build . --config Release --target install
 ```
 
-The resulting plugin is then found inside `build/lib/qml`
+The resulting plugin is then found in `build/lib/qml`
 
 The unit tests can be executed with ctest:
 
@@ -69,7 +69,7 @@ Example:
 ## Examples
 
 In the `examples` folder there's an example app, showing how to use some of the
-feature of the StylePlugin. You can run the app with:
+features of the StylePlugin. You can run the app with:
 
 ```
   qmlscene -I build/lib/qml examples/TestApp.qml
