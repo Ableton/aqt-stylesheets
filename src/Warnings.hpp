@@ -47,6 +47,13 @@ THE SOFTWARE.
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED
   #endif
 
+  #if __has_warning("-Winconsistent-missing-destructor-override")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_INCONSISTENT_MISSING_DESTRUCTOR_OVERRIDE \
+    _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_INCONSISTENT_MISSING_DESTRUCTOR_OVERRIDE
+  #endif
+
   #if __has_warning("-Wreserved-id-macro")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO \
     _Pragma("clang diagnostic ignored \"-Wreserved-id-macro\"")
@@ -66,6 +73,13 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wunused-local-typedef\"")
   #else
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF
+  #endif
+
+  #if __has_warning("-Wzero-as-null-pointer-constant")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_ZERO_AS_NULL_POINTER_CONSTANT \
+    _Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_ZERO_AS_NULL_POINTER_CONSTANT
   #endif
 
   #define SUPPRESS_WARNINGS \
@@ -101,9 +115,12 @@ THE SOFTWARE.
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_INCONSISTENT_MISSING_DESTRUCTOR_OVERRIDE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE \
-    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_ZERO_AS_NULL_POINTER_CONSTANT \
+    /**/
 
   #define RESTORE_WARNINGS \
     _Pragma("clang diagnostic pop")
