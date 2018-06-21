@@ -222,6 +222,7 @@ Item {
                 compare(comp.rect.notExisting, undefined);
 
                 waitForRendering(comp);
+                waitForRendering(comp); // Wait again to make the test pass on Travis CI in Debug
                 compare(missingPropertiesSpy.count, 1);
                 compare(missingPropertiesSpy.signalArguments[0][0], "propertyNotFound");
             });
