@@ -2,20 +2,20 @@ language: cpp
 os: osx
 
 env:
-    matrix:
-        - CONFIGURATION=Debug
-        - CONFIGURATION=Release
+  matrix:
+    - CONFIGURATION=Debug
+    - CONFIGURATION=Release
 
 install:
-    - brew install qt5
-    - export PATH=/usr/local/opt/qt5/bin:$PATH
+  - brew install qt5
+  - export PATH=/usr/local/opt/qt5/bin:$PATH
 
 before_script:
-    - mkdir build && cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=$CONFIGURATION
 
 script:
-    - cmake --build . --config $CONFIGURATION
-    - cmake --build . --config $CONFIGURATION --target install
-    - ctest -V -C $CONFIGURATION
-    - qmlscene --quit -I lib/qml ../examples/TestApp.qml
+  - cmake --build . --config $CONFIGURATION
+  - cmake --build . --config $CONFIGURATION --target install
+  - ctest -V -C $CONFIGURATION
+  - qmlscene --quit -I lib/qml ../examples/TestApp.qml
