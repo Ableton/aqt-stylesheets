@@ -65,7 +65,7 @@ There are some things going on here:
    style engine), and pass it url of the style sheet to use
    (`styleSheetSource`).  Currently this can only be a local file url.
    This property is dynamic, so if you change its values during runtime the
-   style engine will reset itself to the style sheet.  It will will also
+   style engine will reset itself to the style sheet.  It will also
    watch the specified file, i.e. if you go to change it while the
    application is running it will automatically reload it and send property
    changes to all style listeners.
