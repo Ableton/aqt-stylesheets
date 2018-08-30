@@ -8,10 +8,8 @@ environment:
   matrix:
     - CMAKE_GENERATOR: "Visual Studio 12 2013"
       CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2013
-      CONFIGURATION: Release
     - CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
       CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2015_64
-      CONFIGURATION: Release
   BOOST_ROOT: C:\Libraries\boost_1_60_0
 
 install:
@@ -20,9 +18,9 @@ install:
 build_script:
   - mkdir build && cd build
   - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
-  - cmake --build . --config %CONFIGURATION%
-  - cmake --build . --config %CONFIGURATION% --target install
+  - cmake --build . --config Release
+  - cmake --build . --config Release --target install
 
 test_script:
-  - ctest -C %CONFIGURATION% -V
+  - ctest -C Release -V
   - qmlscene --quit -I lib/qml ../examples/TestApp.qml
