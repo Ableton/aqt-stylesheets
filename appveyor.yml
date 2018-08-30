@@ -6,11 +6,15 @@ clone_depth: 5
 
 environment:
   matrix:
-    - CMAKE_GENERATOR: "Visual Studio 12 2013"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      CMAKE_GENERATOR: "Visual Studio 12 2013"
+      BOOST_ROOT: C:\Libraries\boost_1_60_0
       CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2013
-    - CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BOOST_ROOT: C:\Libraries\boost_1_60_0
       CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2015_64
-  BOOST_ROOT: C:\Libraries\boost_1_60_0
 
 install:
   - set PATH=%PATH%;%CMAKE_PREFIX_PATH%\bin
