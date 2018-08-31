@@ -6,13 +6,20 @@ clone_depth: 5
 
 environment:
   matrix:
-    - CMAKE_GENERATOR: "Visual Studio 12 2013"
-      CMAKE_PREFIX_PATH: C:/Qt/5.6.3/msvc2013
-      CONFIGURATION: Release
-    - CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
-      CMAKE_PREFIX_PATH: C:/Qt/5.6.3/msvc2015_64
-      CONFIGURATION: Release
-  BOOST_ROOT: c:\Libraries\boost_1_60_0
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+      CMAKE_GENERATOR: "Visual Studio 12 2013"
+      BOOST_ROOT: C:\Libraries\boost_1_58_0
+      CMAKE_PREFIX_PATH: C:\Qt\5.3\msvc2013_opengl
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BOOST_ROOT: C:\Libraries\boost_1_60_0
+      CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2015_64
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
+      BOOST_ROOT: C:\Libraries\boost_1_67_0
+      CMAKE_PREFIX_PATH: C:\Qt\5.11.1\msvc2017_64
 
 install:
   - set PATH=%PATH%;%CMAKE_PREFIX_PATH%\bin
@@ -20,9 +27,9 @@ install:
 build_script:
   - mkdir build && cd build
   - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
-  - cmake --build . --config %CONFIGURATION%
-  - cmake --build . --config %CONFIGURATION% --target install
+  - cmake --build . --config Release
+  - cmake --build . --config Release --target install
 
 test_script:
-  - ctest -C %CONFIGURATION% -V
+  - ctest -C Release -V
   - qmlscene --quit -I lib/qml ../examples/TestApp.qml

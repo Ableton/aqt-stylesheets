@@ -135,60 +135,9 @@ THE SOFTWARE.
 
 #elif defined(_MSC_VER)
 
-  #if _MSC_VER < 1900
-    #define ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS
-  #else
-    /**
-    * C4459: declaration of 'parameter' hides global declaration
-    * C5031: #pragma warning(pop): likely mismatch, popping warning state pushed in different file (compiling source file <file>)
-    */
-    #define ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS \
-    __pragma(warning(disable: 4459)) \
-    __pragma(warning(disable: 5031))
-  #endif
-
-  /**
-  * C4100: 'identifier' : unreferenced formal parameter
-  * C4127: conditional expression is constant
-  * C4191: 'type cast' : unsafe conversion from 'function pointer type' to 'function pointer type'
-  *        Calling this function through the result pointer may cause your program to fail
-  * C4242: 'identifier' : conversion from 'type1' to 'type2', possible loss of data
-  * C4244: 'conversion' conversion from 'type1' to 'type2', possible loss of data
-  * C4251: 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
-  * C4365: 'action' : conversion from 'type_1' to 'type_2', signed/unsigned mismatch
-  * C4388: signed/unsigned mismatch
-  * C4459: declaration of 'identifier' hides global declaration
-  * C4555: expression has no effect; expected expression with side-effect
-  * C4619: #pragma warning : there is no warning number 'number'
-  * C4628: digraphs not supported with -Ze. Character sequence 'digraph' not interpreted as alternate token for 'char'
-  * C4640: 'instance' : construction of local static object is not thread-safe
-  * C4668: 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
-  * C4714: function 'function' marked as __forceinline not inlined
-  * C4800: 'type' : forcing value to bool 'true' or 'false' (performance warning)
-  * C4826: Conversion from 'type1 ' to 'type_2' is sign-extended. This may cause unexpected runtime behavior.
-  */
   #define SUPPRESS_WARNINGS \
-    __pragma(warning(push)) \
-    __pragma(warning(disable: 4100)) \
-    __pragma(warning(disable: 4127)) \
-    __pragma(warning(disable: 4191)) \
-    __pragma(warning(disable: 4242)) \
-    __pragma(warning(disable: 4244)) \
-    __pragma(warning(disable: 4251)) \
-    __pragma(warning(disable: 4267)) \
-    __pragma(warning(disable: 4365)) \
-    __pragma(warning(disable: 4388)) \
-    __pragma(warning(disable: 4510)) \
-    __pragma(warning(disable: 4555)) \
-    __pragma(warning(disable: 4610)) \
-    __pragma(warning(disable: 4619)) \
-    __pragma(warning(disable: 4628)) \
-    __pragma(warning(disable: 4640)) \
-    __pragma(warning(disable: 4668)) \
-    __pragma(warning(disable: 4714)) \
-    __pragma(warning(disable: 4800)) \
-    __pragma(warning(disable: 4826)) \
-    ABL_PRAGMA_DISABLE_MSVC_1900_WARNINGS
+    __pragma(warning(push, 0)) \
+    __pragma(warning(disable: 4244))
 
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))
