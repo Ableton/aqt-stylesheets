@@ -105,6 +105,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wheader-hygiene\"") \
     _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"") \
     _Pragma("clang diagnostic ignored \"-Wmissing-prototypes\"") \
+    _Pragma("clang diagnostic ignored \"-Wmissing-variable-declarations\"") \
     _Pragma("clang diagnostic ignored \"-Wold-style-cast\"") \
     _Pragma("clang diagnostic ignored \"-Wpadded\"") \
     _Pragma("clang diagnostic ignored \"-Wshadow\"") \
