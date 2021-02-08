@@ -137,7 +137,8 @@ THE SOFTWARE.
 
   #define SUPPRESS_WARNINGS \
     __pragma(warning(push, 0)) \
-    __pragma(warning(disable: 4244))
+    __pragma(warning(disable: 4244)) \
+    __pragma(warning(disable: 4866))
 
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))

@@ -39,6 +39,7 @@ namespace aqt
 namespace stylesheets
 {
 
+SUPPRESS_WARNINGS
 QUrl searchForResourceSearchPath(const QUrl& baseUrl,
                                  const QUrl& url,
                                  const QStringList& searchPath)
@@ -73,6 +74,7 @@ QUrl searchForResourceSearchPath(const QUrl& baseUrl,
 
   return url;
 }
+RESTORE_WARNINGS
 
 } // namespace stylesheets
 } // namespace aqt
