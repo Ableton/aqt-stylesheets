@@ -605,7 +605,7 @@ TEST_CASE("HSL colors", "[expressions]")
   REQUIRE(1 == pm.size());
   REQUIRE(120 == propertyAsColor(pm, "color").hslHue());
   REQUIRE(propertyAsColor(pm, "color").hslSaturationF() == Approx(1.0));
-  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.5));
+  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.5).margin(1e-5));
 }
 
 TEST_CASE("HSLA colors", "[expressions]")
@@ -622,6 +622,6 @@ TEST_CASE("HSLA colors", "[expressions]")
   REQUIRE(1 == pm.size());
   REQUIRE(359 == propertyAsColor(pm, "color").hslHue());
   REQUIRE(propertyAsColor(pm, "color").hslSaturationF() == Approx(0.97));
-  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.13));
+  REQUIRE(propertyAsColor(pm, "color").lightnessF() == Approx(0.13).margin(1e-5));
   REQUIRE(propertyAsColor(pm, "color").alphaF() == Approx(0.23));
 }

@@ -77,7 +77,7 @@ TEST_CASE("Convert to font", "[convert]")
   auto f = convertProperty<QFont>(
     PropertyValue(std::string("italic mixedcase light nohinting 12pt Times New Roman")));
 
-  REQUIRE(f);
+  REQUIRE(bool(f));
   REQUIRE(QLatin1String("Times New Roman") == f->family());
   REQUIRE(12 == f->pointSize());
   REQUIRE(f->italic());
@@ -91,7 +91,7 @@ TEST_CASE("Convert to font with partial specification", "[convert]")
 {
   auto f = convertProperty<QFont>(PropertyValue(std::string("12pt Arial")));
 
-  REQUIRE(f);
+  REQUIRE(bool(f));
   REQUIRE(QLatin1String("Arial") == f->family());
   REQUIRE(12 == f->pointSize());
   REQUIRE(!f->italic());
@@ -106,7 +106,7 @@ TEST_CASE("Convert to font with float size", "[convert]")
 {
   auto f = convertProperty<QFont>(PropertyValue(std::string("12.7pt Arial")));
 
-  REQUIRE(f);
+  REQUIRE(bool(f));
   REQUIRE(QLatin1String("Arial") == f->family());
   REQUIRE(f->pointSizeF() == Approx(12.7));
 }
@@ -115,7 +115,7 @@ TEST_CASE("Convert to font with pixelsize", "[convert]")
 {
   auto f = convertProperty<QFont>(PropertyValue(std::string("18px Arial")));
 
-  REQUIRE(f);
+  REQUIRE(bool(f));
   REQUIRE(QLatin1String("Arial") == f->family());
   REQUIRE(18 == f->pixelSize());
 }

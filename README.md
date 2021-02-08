@@ -29,7 +29,7 @@ Mac:
 
 Windows:
 
-  - Visual Studio 2013
+  - Visual Studio 2015
 
 
 ## Build and Test
