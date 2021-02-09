@@ -105,6 +105,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wheader-hygiene\"") \
     _Pragma("clang diagnostic ignored \"-Wmissing-noreturn\"") \
     _Pragma("clang diagnostic ignored \"-Wmissing-prototypes\"") \
+    _Pragma("clang diagnostic ignored \"-Wmissing-variable-declarations\"") \
     _Pragma("clang diagnostic ignored \"-Wold-style-cast\"") \
     _Pragma("clang diagnostic ignored \"-Wpadded\"") \
     _Pragma("clang diagnostic ignored \"-Wshadow\"") \
@@ -137,7 +138,8 @@ THE SOFTWARE.
 
   #define SUPPRESS_WARNINGS \
     __pragma(warning(push, 0)) \
-    __pragma(warning(disable: 4244))
+    __pragma(warning(disable: 4244)) \
+    __pragma(warning(disable: 4866))
 
   #define RESTORE_WARNINGS \
     __pragma(warning(pop))
