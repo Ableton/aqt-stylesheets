@@ -11,7 +11,7 @@ env:
     - CONFIGURATION=Release
 
 install:
-  - brew install qt5
+  - HOMEBREW_NO_AUTO_UPDATE=1 brew install qt5
   - export PATH=/usr/local/opt/qt5/bin:$PATH
 
 before_script:
