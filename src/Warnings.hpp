@@ -68,6 +68,20 @@ THE SOFTWARE.
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO
   #endif
 
+  #if __has_warning("-Wsuggest-destructor-override")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_DESTRUCTOR_OVERRIDE \
+    _Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_DESTRUCTOR_OVERRIDE
+  #endif
+
+  #if __has_warning("-Wsuggest-override")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_OVERRIDE \
+    _Pragma("clang diagnostic ignored \"-Wsuggest-override\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_OVERRIDE
+  #endif
+
   #if __has_warning("-Wundefined-func-template")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE \
     _Pragma("clang diagnostic ignored \"-Wundefined-func-template\"")
@@ -98,6 +112,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wdisabled-macro-expansion\"") \
     _Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"") \
     _Pragma("clang diagnostic ignored \"-Wdocumentation\"") \
+    _Pragma("clang diagnostic ignored \"-Wduplicate-enum\"") \
     _Pragma("clang diagnostic ignored \"-Wexit-time-destructors\"") \
     _Pragma("clang diagnostic ignored \"-Wextra-semi\"") \
     _Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
@@ -126,6 +141,8 @@ THE SOFTWARE.
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_INCONSISTENT_MISSING_DESTRUCTOR_OVERRIDE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_REDUNDANT_PARENS \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_RESERVED_ID_MACRO \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_DESTRUCTOR_OVERRIDE \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_SUGGEST_OVERRIDE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNDEFINED_FUNC_TEMPLATE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_UNUSED_LOCAL_TYPEDEF \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_ZERO_AS_NULL_POINTER_CONSTANT \
