@@ -170,7 +170,7 @@ class StyleEngineSetup : public QObject, public QQmlParserStatus
 public:
   /*! @cond DOXYGEN_IGNORE */
   explicit StyleEngineSetup(QObject* pParent = nullptr);
-  ~StyleEngineSetup();
+  ~StyleEngineSetup() override;
 
   QUrl styleSheetSource() const;
   void setStyleSheetSource(const QUrl& url);
@@ -203,9 +203,9 @@ public:
    * @deprecated Use StylesDirWatcher instead */
   QVariantList availableStyles();
 
-  virtual void classBegin();
-  virtual void componentComplete();
-/*! @endcond */
+  void classBegin() override;
+  void componentComplete() override;
+  /*! @endcond */
 
 Q_SIGNALS:
   /*! Fires when the style sheet is replaced or changed on the disk */
