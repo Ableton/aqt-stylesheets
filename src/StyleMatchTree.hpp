@@ -29,7 +29,6 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
-#include <QtCore/QVariant>
 RESTORE_WARNINGS
 
 #include <map>

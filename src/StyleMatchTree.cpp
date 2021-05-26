@@ -28,7 +28,6 @@ THE SOFTWARE.
 #include "Log.hpp"
 
 SUPPRESS_WARNINGS
-#include <QtCore/QtCore>
 #include <boost/assert.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/range/adaptor/reversed.hpp>
