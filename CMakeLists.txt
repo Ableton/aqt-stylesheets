@@ -26,7 +26,7 @@ set(StyleSheets_VERSION_MINOR 1)
 
 # Enable C++11
 include(CheckCXXCompilerFlag)
-if(WIN32)
+if(MSVC)
   # Check if we are using Visual Studio 2015 or later
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
     message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2015 or later required)")
