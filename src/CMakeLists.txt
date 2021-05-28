@@ -65,6 +65,10 @@ add_library(StylePlugin MODULE
 )
 target_link_libraries(StylePlugin StyleSheetParser Qt5::Quick)
 
+if(WIN32)
+  set_target_properties(StylePlugin PROPERTIES PREFIX "")
+endif()
+
 set(plugin_output "${PROJECT_BINARY_DIR}/output")
 set_target_properties(StylePlugin
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${plugin_output})

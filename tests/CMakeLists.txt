@@ -34,6 +34,10 @@ target_compile_options(AqtTestUtilsPlugin
 target_link_libraries(AqtTestUtilsPlugin
   Qt5::Qml Qt5::Test Qt5::QuickTest)
 
+if(WIN32)
+  set_target_properties(StylePlugin PROPERTIES PREFIX "")
+endif()
+
 set(plugin_output "${PROJECT_BINARY_DIR}/output")
 set_target_properties(AqtTestUtilsPlugin
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${plugin_output})
