@@ -33,6 +33,13 @@ THE SOFTWARE.
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA
   #endif
 
+  #if __has_warning("-Wcompound-token-split-by-space")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMPOUND_TOKEN_SPLIT_BY_SPACE \
+    _Pragma("clang diagnostic ignored \"-Wcompound-token-split-by-space\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMPOUND_TOKEN_SPLIT_BY_SPACE
+  #endif
+
   #if __has_warning("-Wdouble-promotion")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
     _Pragma("clang diagnostic ignored \"-Wdouble-promotion\"")
@@ -136,6 +143,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \
     _Pragma("clang diagnostic ignored \"-Wweak-vtables\"") \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMPOUND_TOKEN_SPLIT_BY_SPACE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_EXPANSION_TO_DEFINED \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_INCONSISTENT_MISSING_DESTRUCTOR_OVERRIDE \
