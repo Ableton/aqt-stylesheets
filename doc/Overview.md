@@ -65,7 +65,7 @@ There are some things going on here:
    style engine), and pass it url of the style sheet to use
    (`styleSheetSource`).  Currently this can only be a local file url.
    This property is dynamic, so if you change its values during runtime the
-   style engine will reset itself to the style sheet.  It will will also
+   style engine will reset itself to the style sheet.  It will also
    watch the specified file, i.e. if you go to change it while the
    application is running it will automatically reload it and send property
    changes to all style listeners.
@@ -115,7 +115,7 @@ So how is this working?
 
 The `StyleSet` attached property maintains a path for each object it is
 attached to.  This path is build from the *type name* and the *style class
-name(s)* (as set by the attached StyleSet.name property) of each item from
+name(s)* (as set by the attached `StyleSet.name property) of each item from
 the element attached to until the root of application.  You can show the
 path for each element using the `StyleSet.path` attached property, e.g. by
 adding a line like this to an element:
