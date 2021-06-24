@@ -28,13 +28,11 @@ THE SOFTWARE.
 #include "Log.hpp"
 
 SUPPRESS_WARNINGS
-#include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <QtCore/QtCore>
+#include <cassert>
+#include <functional>
+#include <variant>
 RESTORE_WARNINGS
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -509,7 +507,7 @@ PropertyMap mergeMatchResults(const MatchResult& result)
   Specificity lastSpec;
 
   for (const auto& tup : result) {
-    BOOST_ASSERT(lastSpec < getMatchSpecificity(tup)
+    assert(lastSpec < getMatchSpecificity(tup)
                  || lastSpec == getMatchSpecificity(tup));
 
     mergePropertiesIntoPropertyMap(
@@ -533,7 +531,7 @@ std::ostream& operator<<(std::ostream& os, const SourceLocation& srcloc)
 
 std::ostream& operator<<(std::ostream& os, const PropertyValues& values)
 {
-  class StreamVisitor : public boost::static_visitor<>
+  class StreamVisitor /*: public boost::static_visitor<>*/
   {
     std::ostream& mStream;
 
@@ -560,7 +558,7 @@ std::ostream& operator<<(std::ostream& os, const PropertyValues& values)
 
   StreamVisitor visitor(os);
   for (const auto& value : values) {
-    boost::apply_visitor(visitor, value);
+    std::visit(visitor, value);
     os << ", ";
   }
 
@@ -664,17 +662,47 @@ std::string pathToString(const UiItemPath& path)
   return ss.str();
 }
 
+struct PathElementHasher {
+  std::size_t operator()(const PathElement& v) const
+  {
+    return hash_value(v);
+  }
+};
+
+struct PathElementVectorHasher {
+  std::size_t operator()(const std::vector<PathElement>& v) const
+  {
+    std::size_t seed = 0;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+      seed ^= PathElementHasher{}(*it) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
+struct VectorHasher {
+  template <class T>
+  std::size_t operator()(const std::vector<T>& v) const
+  {
+    std::size_t seed = 0;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+      seed ^= std::hash<T>{}(*it) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
 std::size_t hash_value(const PathElement& pathElement)
 {
-  std::size_t seed = boost::hash<std::string>{}(pathElement.mTypeName);
-  boost::hash_combine(
-    seed, boost::hash<std::vector<std::string>>{}(pathElement.mClassNames));
+  std::size_t seed = std::hash<std::string>{}(pathElement.mTypeName);
+  seed ^=
+    VectorHasher{}(pathElement.mClassNames) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   return seed;
 }
 
 std::size_t UiItemPathHasher::operator()(const UiItemPath& path) const
 {
-  return boost::hash<UiItemPath>{}(path);
+  return PathElementVectorHasher{}(path);
 }
 
 } // namespace stylesheets
