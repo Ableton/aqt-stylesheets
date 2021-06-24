@@ -27,12 +27,7 @@ THE SOFTWARE.
 SUPPRESS_WARNINGS
 #include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <boost/algorithm/clamp.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/get.hpp>
-#include <boost/variant/static_visitor.hpp>
+#include <variant>
 RESTORE_WARNINGS
 
 #include <algorithm>
@@ -198,42 +193,61 @@ QFont fontDeclarationToFont(const QString& fontDecl)
 
 struct Undefined {
 };
-using ExprValue = boost::variant<Undefined, QColor, QUrl>;
+using ExprValue = std::variant<Undefined, QColor, QUrl>;
+
+int lexicalCastInt(const std::string& s)
+{
+  if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
+    throw ConvertException("lexicalCastInt expression with bad value");
+
+  char* p;
+  int val = strtol(s.c_str(), &p, 10);
+
+  if (*p != 0)
+    throw ConvertException("lexicalCastInt expression with bad value");
+  return val;
+}
+
+float lexicalCastFloat(const std::string& s)
+{
+  if (s.find('%') != std::string::npos)
+    throw ConvertException("lexicalCastFloat expression with bad value");
+  return std::stof(s);
+}
 
 int rgbColorOrPercentage(const std::string& arg)
 {
   if (!arg.empty() && arg.back() == '%') {
-    auto factor = boost::lexical_cast<float>(arg.substr(0, arg.size() - 1));
-    return boost::algorithm::clamp(int(std::round(255 * factor / 100.0f)), 0, 255);
+    auto factor = lexicalCastFloat(arg.substr(0, arg.size() - 1));
+    return std::clamp(int(std::round(255 * factor / 100.0f)), 0, 255);
   }
 
-  return boost::algorithm::clamp(boost::lexical_cast<int>(arg), 0, 255);
+  return std::clamp(lexicalCastInt(arg), 0, 255);
 }
 
 int transformAlphaFromFloatRatio(const std::string& arg)
 {
-  auto factor = boost::lexical_cast<float>(arg);
-  return boost::algorithm::clamp(int(std::round(256 * factor)), 0, 255);
+  auto factor = lexicalCastFloat(arg);
+  return std::clamp(int(std::round(256 * factor)), 0, 255);
 }
 
 double hslHue(const std::string& arg)
 {
-  return boost::algorithm::clamp(boost::lexical_cast<int>(arg) / 360.0, 0.0, 1.0);
+  return std::clamp(lexicalCastInt(arg) / 360.0, 0.0, 1.0);
 }
 
 double percentageToFactor(const std::string& arg)
 {
   if (!arg.empty() && arg.back() == '%') {
-    return boost::algorithm::clamp(
-      boost::lexical_cast<int>(arg.substr(0, arg.size() - 1)) / 100.0, 0.0, 1.0);
+    return std::clamp(lexicalCastInt(arg.substr(0, arg.size() - 1)) / 100.0, 0.0, 1.0);
   }
 
-  throw boost::bad_lexical_cast();
+  throw std::invalid_argument("");
 }
 
 double factorFromFloat(const std::string& arg)
 {
-  return boost::algorithm::clamp(boost::lexical_cast<double>(arg), 0.0, 1.0);
+  return std::clamp(std::stod(arg), 0.0, 1.0);
 }
 
 ExprValue makeRgbaColor(const std::vector<std::string>& args)
@@ -242,7 +256,10 @@ ExprValue makeRgbaColor(const std::vector<std::string>& args)
     try {
       return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
                     rgbColorOrPercentage(args[2]), transformAlphaFromFloatRatio(args[3]));
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kRgbaColorExpr).append("() expression with bad value"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kRgbaColorExpr).append("() expression with bad value"));
     }
@@ -258,7 +275,10 @@ ExprValue makeRgbColor(const std::vector<std::string>& args)
     try {
       return QColor(rgbColorOrPercentage(args[0]), rgbColorOrPercentage(args[1]),
                     rgbColorOrPercentage(args[2]), 0xff);
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kRgbColorExpr).append("() expression with bad value"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kRgbColorExpr).append("() expression with bad value"));
     }
@@ -275,7 +295,10 @@ ExprValue makeHslaColor(const std::vector<std::string>& args)
       color.setHslF(hslHue(args[0]), percentageToFactor(args[1]),
                     percentageToFactor(args[2]), factorFromFloat(args[3]));
       return color;
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kHslaColorExpr).append("() expression with bad values"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kHslaColorExpr).append("() expression with bad values"));
     }
@@ -293,7 +316,10 @@ ExprValue makeHslColor(const std::vector<std::string>& args)
       color.setHslF(
         hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kHslColorExpr).append("() expression with bad values"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kHslColorExpr).append("() expression with bad values"));
     }
@@ -311,7 +337,10 @@ ExprValue makeHsbaColor(const std::vector<std::string>& args)
       color.setHsvF(hslHue(args[0]), percentageToFactor(args[1]),
                     percentageToFactor(args[2]), factorFromFloat(args[3]));
       return color;
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kHslaColorExpr).append("() expression with bad values"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kHslaColorExpr).append("() expression with bad values"));
     }
@@ -329,7 +358,10 @@ ExprValue makeHsbColor(const std::vector<std::string>& args)
       color.setHsvF(
         hslHue(args[0]), percentageToFactor(args[1]), percentageToFactor(args[2]), 1.0);
       return color;
-    } catch (const boost::bad_lexical_cast&) {
+    } catch (const std::invalid_argument&) {
+      throw ConvertException(
+        std::string().append(kHslColorExpr).append("() expression with bad values"));
+    } catch (const std::out_of_range&) {
       throw ConvertException(
         std::string().append(kHslColorExpr).append("() expression with bad values"));
     }
@@ -377,20 +409,20 @@ ExprValue evaluateExpression(const Expression& expr)
     std::string("Unsupported expression '").append(expr.name).append("'"));
 }
 
-struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> {
-  boost::optional<QColor> operator()(const std::string& value)
+struct PropValueVisitor {
+  std::optional<QColor> operator()(const std::string& value)
   {
     auto qvalue = QVariant(QString::fromStdString(value));
     if (qvalue.canConvert(QMetaType::QColor)) {
       return qvalue.value<QColor>();
     }
-    return boost::none;
+    return {};
   }
 
-  boost::optional<QColor> operator()(const Expression& expr)
+  std::optional<QColor> operator()(const Expression& expr)
   {
     auto value = evaluateExpression(expr);
-    if (const QColor* color = boost::get<QColor>(&value)) {
+    if (const QColor* color = std::get_if<QColor>(&value)) {
       return *color;
     }
 
@@ -403,78 +435,80 @@ struct PropValueVisitor : public boost::static_visitor<boost::optional<QColor>> 
 
 //------------------------------------------------------------------------------
 
-boost::optional<QFont> PropertyValueConvertTraits<QFont>::convert(
+std::optional<QFont> PropertyValueConvertTraits<QFont>::convert(
   const PropertyValue& value) const
 {
-  if (const std::string* str = boost::get<std::string>(&value)) {
+  if (const std::string* str = std::get_if<std::string>(&value)) {
     QVariant qvalue = QVariant::fromValue(QString::fromStdString(*str));
 
     if (qvalue.canConvert(QMetaType::QString)) {
       return fontDeclarationToFont(qvalue.toString());
     }
   }
-  return boost::none;
+  return {};
 }
 
-boost::optional<QColor> PropertyValueConvertTraits<QColor>::convert(
+std::optional<QColor> PropertyValueConvertTraits<QColor>::convert(
   const PropertyValue& value) const
 {
   PropValueVisitor visitor;
-  return boost::apply_visitor(visitor, value);
+  return std::visit(visitor, value);
 }
 
-boost::optional<QString> PropertyValueConvertTraits<QString>::convert(
+std::optional<QString> PropertyValueConvertTraits<QString>::convert(
   const PropertyValue& value) const
 {
-  if (const std::string* str = boost::get<std::string>(&value)) {
+  if (const std::string* str = std::get_if<std::string>(&value)) {
     return QString::fromStdString(*str);
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<double> PropertyValueConvertTraits<double>::convert(
+std::optional<double> PropertyValueConvertTraits<double>::convert(
   const PropertyValue& value) const
 {
-  if (const std::string* str = boost::get<std::string>(&value)) {
+  if (const std::string* str = std::get_if<std::string>(&value)) {
     try {
-      return boost::make_optional(std::stod(*str));
+      return std::make_optional(std::stod(*str));
     } catch (const std::invalid_argument&) {
     } catch (const std::out_of_range&) {
     }
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<bool> PropertyValueConvertTraits<bool>::convert(
+std::optional<bool> PropertyValueConvertTraits<bool>::convert(
   const PropertyValue& value) const
 {
-  if (const std::string* str = boost::get<std::string>(&value)) {
-    auto lstr = boost::algorithm::to_lower_copy(*str);
+  if (const std::string* str = std::get_if<std::string>(&value)) {
+    std::string lstr = *str;
+    std::transform(lstr.begin(), lstr.end(), lstr.begin(),
+                               [](unsigned char c) { return std::tolower(c); });
     if (lstr == kTrue || lstr == kYes) {
-      return boost::make_optional(true);
+      return std::make_optional(true);
     } else if (lstr == kFalse || lstr == kNo) {
-      return boost::make_optional(false);
+      return std::make_optional(false);
     }
   }
 
-  return boost::none;
+  return {};
 }
 
-boost::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
+std::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
   const PropertyValue& value) const
 {
-  struct PropValueToUrlVisitor : public boost::static_visitor<boost::optional<QUrl>> {
-    boost::optional<QUrl> operator()(const std::string& str)
+  struct PropValueToUrlVisitor {
+    std::optional<QUrl> operator()(const std::string& str)
     {
       return QUrl(QString::fromStdString(str));
     }
 
-    boost::optional<QUrl> operator()(const Expression& expr)
+    std::optional<QUrl> operator()(const Expression& expr)
     {
       auto exprValue = evaluateExpression(expr);
-      if (const QUrl* url = boost::get<QUrl>(&exprValue)) {
+      if (const QUrl* url = std::get_if<QUrl>(&exprValue)) {
         return *url;
       }
 
@@ -484,14 +518,14 @@ boost::optional<QUrl> PropertyValueConvertTraits<QUrl>::convert(
   };
 
   PropValueToUrlVisitor visitor;
-  return boost::apply_visitor(visitor, value);
+  return std::visit(visitor, value);
 }
 
 //----------------------------------------------------------------------------------------
 
 namespace
 {
-struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
+struct PropValueToVariantVisitor {
   QVariant operator()(const std::string& value)
   {
     return QVariant(QString::fromStdString(value));
@@ -499,7 +533,7 @@ struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
 
   QVariant operator()(const Expression& expr)
   {
-    struct ExprValueToVariantVisitor : public boost::static_visitor<QVariant> {
+    struct ExprValueToVariantVisitor {
       QVariant operator()(const Undefined&)
       {
         return QVariant();
@@ -519,7 +553,7 @@ struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
     auto exprValue = evaluateExpression(expr);
 
     ExprValueToVariantVisitor visitor;
-    return boost::apply_visitor(visitor, exprValue);
+    return std::visit(visitor, exprValue);
   }
 };
 } // anon namespace
@@ -527,7 +561,7 @@ struct PropValueToVariantVisitor : public boost::static_visitor<QVariant> {
 QVariant convertValueToVariant(const PropertyValue& value)
 {
   PropValueToVariantVisitor visitor;
-  return boost::apply_visitor(visitor, value);
+  return std::visit(visitor, value);
 }
 
 QVariantList convertValueToVariantList(const PropertyValues& values)

@@ -25,7 +25,7 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <boost/variant/variant.hpp>
+#include <variant>
 RESTORE_WARNINGS
 
 #include <string>
@@ -46,7 +46,7 @@ public:
   std::vector<std::string> args;
 };
 
-using PropertyValue = boost::variant<std::string, Expression>;
+using PropertyValue = std::variant<std::string, Expression>;
 using PropertyValues = std::vector<PropertyValue>;
 
 class SourceLocation

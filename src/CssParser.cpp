@@ -25,10 +25,9 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <boost/variant/get.hpp>
-#include <cpp-peglib/peglib.h>
+#include "cpp-peglib/peglib.h"
+#include <variant>
 RESTORE_WARNINGS
-
 #include <cassert>
 #include <fstream>
 #include <ios>

@@ -25,8 +25,9 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <boost/variant/get.hpp>
-#include <boost/variant/variant.hpp>
+//#include <boost/variant/get.hpp>
+//#include <boost/variant/variant.hpp>
+#include <variant>
 #include <catch/catch.hpp>
 RESTORE_WARNINGS
 
@@ -57,7 +58,7 @@ std::string selectorName(const StyleSheet& ss,
 std::string getFirstValue(const PropertyValues& val, const std::string& def = "")
 {
   if (!val.empty()) {
-    if (const std::string* str = boost::get<std::string>(&val[0])) {
+    if (const std::string* str = std::get_if<std::string>(&val[0])) {
       return *str;
     }
   }
@@ -70,7 +71,7 @@ Expression getExpr(const PropertyValues& val,
                    const Expression& def = Expression{})
 {
   if (!val.empty()) {
-    if (const Expression* expr = boost::get<Expression>(&val[idx])) {
+    if (const Expression* expr = std::get_if<Expression>(&val[idx])) {
       return *expr;
     }
   }
