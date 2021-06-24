@@ -89,11 +89,6 @@ find_package(Qt5Qml 5.3.0 REQUIRED)
 find_package(Qt5Test 5.3.0 REQUIRED)
 find_package(Qt5QuickTest 5.3.0 REQUIRED)
 
-#if(DEFINED Boost_INCLUDE_DIR)
-#  get_filename_component(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIR} ABSOLUTE)
-#endif()
-#find_package(Boost 1.54 REQUIRED)
-
 include(FeatureSummary)
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
