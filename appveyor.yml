@@ -21,7 +21,7 @@ install:
 
 build_script:
   - mkdir build && cd build
-  - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
+  - cmake .. -G"%CMAKE_GENERATOR%"
   - cmake --build . --config Release
   - cmake --build . --config Release --target install
 
