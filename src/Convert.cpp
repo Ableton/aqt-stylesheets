@@ -198,7 +198,7 @@ using ExprValue = std::variant<Undefined, QColor, QUrl>;
 
 int lexicalCastInt(const std::string& s)
 {
-  if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
+  if (s.empty())
     throw ConvertException("lexicalCastInt expression with bad value");
 
   char* p;
