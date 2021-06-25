@@ -20,7 +20,6 @@ fewer lines of code through selectors that apply across many components.
 Dependencies:
 
   - Qt (>= 5.3)
-  - Boost (>= 1.54)
   - CMake (>= 2.8.12)
 
 Mac:
@@ -49,10 +48,6 @@ The unit tests can be executed with ctest:
 ```
   ctest -V -C Release
 ```
-
-You might set the following variables:
-
-- Boost_INCLUDE_DIR   to the folder, where Boost headers are found
 
 In case the CMake files shipped with Qt are not found, set the CMAKE_PREFIX_PATH
 to the Qt installation prefix. See the
