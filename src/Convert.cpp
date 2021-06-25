@@ -35,6 +35,7 @@ RESTORE_WARNINGS
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <cctype>
 
 namespace aqt
 {
