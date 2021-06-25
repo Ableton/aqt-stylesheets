@@ -29,9 +29,9 @@ set(CMAKE_CXX_STANDARD 17)
 # Enable C++17
 include(CheckCXXCompilerFlag)
 if(MSVC)
-  # Check if we are using Visual Studio 2015 or later
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
-    message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2015 or later required)")
+  # Check if we are using Visual Studio 2017 or later
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+    message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2017 or later required)")
   endif()
 else()
   set(cxx17_options -std=c++1z)

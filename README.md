@@ -28,7 +28,7 @@ Mac:
 
 Windows:
 
-  - Visual Studio 2015
+  - Visual Studio 2017
 
 
 ## Build and Test
