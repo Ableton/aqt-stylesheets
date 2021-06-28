@@ -24,19 +24,21 @@ project(StyleSheets CXX)
 set(StyleSheets_VERSION_MAJOR 0)
 set(StyleSheets_VERSION_MINOR 1)
 
-# Enable C++11
+set(CMAKE_CXX_STANDARD 17)
+
+# Enable C++17
 include(CheckCXXCompilerFlag)
 if(MSVC)
-  # Check if we are using Visual Studio 2015 or later
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
-    message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2015 or later required)")
+  # Check if we are using Visual Studio 2017 or later
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+    message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2017 or later required)")
   endif()
 else()
-  set(cxx11_options -std=c++11)
-  CHECK_CXX_COMPILER_FLAG(${cxx11_options} COMPILER_SUPPORTS_CXX11)
+  set(cxx17_options -std=c++1z)
+  CHECK_CXX_COMPILER_FLAG(${cxx17_options} COMPILER_SUPPORTS_CXX17)
 
-  if(NOT COMPILER_SUPPORTS_CXX11)
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has insufficient C++11 support. Please use a different C++ compiler.")
+  if(NOT COMPILER_SUPPORTS_CXX17)
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has insufficient C++17 support. Please use a different C++ compiler.")
   endif()
 endif()
 
@@ -52,8 +54,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
   set(warning_options
     -Werror
     -Weverything
-    -Wno-c++98-compat
-    -Wno-c++98-compat-pedantic
+    -Wno-c++1z-compat
+    -Wno-c++1z-compat-pedantic
     -Wno-disabled-macro-expansion
     -Wno-documentation-unknown-command
     -Wno-exit-time-destructors
@@ -86,11 +88,6 @@ find_package(Qt5Quick 5.3.0 REQUIRED)
 find_package(Qt5Qml 5.3.0 REQUIRED)
 find_package(Qt5Test 5.3.0 REQUIRED)
 find_package(Qt5QuickTest 5.3.0 REQUIRED)
-
-if(DEFINED Boost_INCLUDE_DIR)
-  get_filename_component(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIR} ABSOLUTE)
-endif()
-find_package(Boost 1.54 REQUIRED)
 
 include(FeatureSummary)
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)

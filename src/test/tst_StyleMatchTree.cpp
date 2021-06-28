@@ -27,7 +27,8 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
-#include <boost/variant/get.hpp>
+//#include <boost/variant/get.hpp>
+#include <variant>
 #include <catch/catch.hpp>
 #include <QtCore/QString>
 #include <QtGui/QColor>
@@ -43,7 +44,7 @@ namespace
 std::string propertyAsString(PropertyMap pm, const char* pPropertyName)
 {
   if (const std::string* str =
-        boost::get<std::string>(&pm[QString(pPropertyName)].mValues[0])) {
+        std::get_if<std::string>(&pm[QString(pPropertyName)].mValues[0])) {
     return *str;
   }
   return std::string();

@@ -6,14 +6,8 @@ clone_depth: 5
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
-      BOOST_ROOT: C:\Libraries\boost_1_60_0
-      CMAKE_PREFIX_PATH: C:\Qt\5.6.3\msvc2015_64
-
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
-      BOOST_ROOT: C:\Libraries\boost_1_67_0
       CMAKE_PREFIX_PATH: C:\Qt\5.11.3\msvc2017_64
 
 install:
@@ -21,7 +15,7 @@ install:
 
 build_script:
   - mkdir build && cd build
-  - cmake .. -G"%CMAKE_GENERATOR%" -DBoost_INCLUDE_DIR=%BOOST_ROOT%
+  - cmake .. -G"%CMAKE_GENERATOR%"
   - cmake --build . --config Release
   - cmake --build . --config Release --target install
 

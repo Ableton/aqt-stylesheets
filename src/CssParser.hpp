@@ -28,7 +28,6 @@ THE SOFTWARE.
 
 SUPPRESS_WARNINGS
 #include <QtCore/QString>
-#include <boost/variant/variant.hpp>
 RESTORE_WARNINGS
 
 #include <string>

@@ -57,12 +57,12 @@ TEST_CASE("Convert to QDouble", "[convert]")
 
 TEST_CASE("Convert to boolean", "[convert]")
 {
-  REQUIRE(convertProperty<bool>(PropertyValue(std::string("true"))).get());
-  REQUIRE(convertProperty<bool>(PropertyValue(std::string("True"))).get());
-  REQUIRE(convertProperty<bool>(PropertyValue(std::string("YES"))).get());
-  REQUIRE(convertProperty<bool>(PropertyValue(std::string("yEs"))).get());
-  REQUIRE(!convertProperty<bool>(PropertyValue(std::string("no"))).get());
-  REQUIRE(!convertProperty<bool>(PropertyValue(std::string("false"))).get());
+  REQUIRE(convertProperty<bool>(PropertyValue(std::string("true"))).value());
+  REQUIRE(convertProperty<bool>(PropertyValue(std::string("True"))).value());
+  REQUIRE(convertProperty<bool>(PropertyValue(std::string("YES"))).value());
+  REQUIRE(convertProperty<bool>(PropertyValue(std::string("yEs"))).value());
+  REQUIRE(!convertProperty<bool>(PropertyValue(std::string("no"))).value());
+  REQUIRE(!convertProperty<bool>(PropertyValue(std::string("false"))).value());
   REQUIRE(!convertProperty<bool>(PropertyValue(std::string("1"))));
   REQUIRE(!convertProperty<bool>(PropertyValue(std::string())));
 

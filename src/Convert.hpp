@@ -31,7 +31,7 @@ SUPPRESS_WARNINGS
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
-#include <boost/optional.hpp>
+#include <optional>
 RESTORE_WARNINGS
 
 #include <string>
@@ -65,36 +65,36 @@ struct PropertyValueConvertTraits;
 
 template <>
 struct PropertyValueConvertTraits<QFont> {
-  boost::optional<QFont> convert(const PropertyValue& value) const;
+  std::optional<QFont> convert(const PropertyValue& value) const;
 };
 
 template <>
 struct PropertyValueConvertTraits<QColor> {
-  boost::optional<QColor> convert(const PropertyValue& value) const;
+  std::optional<QColor> convert(const PropertyValue& value) const;
 };
 
 template <>
 struct PropertyValueConvertTraits<QString> {
-  boost::optional<QString> convert(const PropertyValue& value) const;
+  std::optional<QString> convert(const PropertyValue& value) const;
 };
 
 template <>
 struct PropertyValueConvertTraits<double> {
-  boost::optional<double> convert(const PropertyValue& value) const;
+  std::optional<double> convert(const PropertyValue& value) const;
 };
 
 template <>
 struct PropertyValueConvertTraits<bool> {
-  boost::optional<bool> convert(const PropertyValue& value) const;
+  std::optional<bool> convert(const PropertyValue& value) const;
 };
 
 template <>
 struct PropertyValueConvertTraits<QUrl> {
-  boost::optional<QUrl> convert(const PropertyValue& value) const;
+  std::optional<QUrl> convert(const PropertyValue& value) const;
 };
 
 template <typename T, typename Traits = PropertyValueConvertTraits<T>>
-boost::optional<T> convertProperty(const PropertyValue& value, Traits traits = Traits())
+std::optional<T> convertProperty(const PropertyValue& value, Traits traits = Traits())
 {
   return traits.convert(value);
 }
