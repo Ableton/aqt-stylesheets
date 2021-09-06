@@ -438,10 +438,10 @@ boost::optional<double> PropertyValueConvertTraits<double>::convert(
   const PropertyValue& value) const
 {
   if (const std::string* str = boost::get<std::string>(&value)) {
-    try {
-      return boost::make_optional(std::stod(*str));
-    } catch (const std::invalid_argument&) {
-    } catch (const std::out_of_range&) {
+    bool ok;
+    const auto doubleValue = QString::fromStdString(*str).toDouble(&ok);
+    if (ok) {
+      return boost::make_optional(doubleValue);
     }
   }
 
