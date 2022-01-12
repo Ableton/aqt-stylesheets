@@ -189,7 +189,7 @@ StyleSheet parseStdString(const std::string& data)
                           [](const SemanticValues& sv) { return sv.token(); };
 
   IDENT_INIT_CHAR <= cls("a-zA-Z_");
-  IDENT_CHAR      <= cls("-a-zA-Z0-9_");
+  IDENT_CHAR      <= cls("-#a-zA-Z0-9_");
 
   WS              <= zom(cho(cls(" \t"), END_OF_LINE, COMMENT));
   END             <= cho(END_OF_LINE, END_OF_FILE);
