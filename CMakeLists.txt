@@ -24,7 +24,7 @@ project(StyleSheets CXX)
 set(StyleSheets_VERSION_MAJOR 0)
 set(StyleSheets_VERSION_MINOR 1)
 
-# Enable C++11
+# Enable C++17
 include(CheckCXXCompilerFlag)
 if(MSVC)
   # Check if we are using Visual Studio 2015 or later
@@ -32,11 +32,11 @@ if(MSVC)
     message(FATAL_ERROR "You are using an unsupported Windows compiler! (Visual C++ 2015 or later required)")
   endif()
 else()
-  set(cxx11_options -std=c++11)
-  CHECK_CXX_COMPILER_FLAG(${cxx11_options} COMPILER_SUPPORTS_CXX11)
+  set(cxx17_options -std=c++17)
+  CHECK_CXX_COMPILER_FLAG(${cxx17_options} COMPILER_SUPPORTS_CXX17)
 
-  if(NOT COMPILER_SUPPORTS_CXX11)
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has insufficient C++11 support. Please use a different C++ compiler.")
+  if(NOT COMPILER_SUPPORTS_CXX17)
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has insufficient C++17 support. Please use a different C++ compiler.")
   endif()
 endif()
 
@@ -82,10 +82,8 @@ set(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/lib/qml")
 
 enable_testing()
 
-find_package(Qt5Quick 5.3.0 REQUIRED)
-find_package(Qt5Qml 5.3.0 REQUIRED)
-find_package(Qt5Test 5.3.0 REQUIRED)
-find_package(Qt5QuickTest 5.3.0 REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Quick Qml Test QuickTest REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick Qml Test QuickTest REQUIRED)
 
 if(DEFINED Boost_INCLUDE_DIR)
   get_filename_component(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIR} ABSOLUTE)

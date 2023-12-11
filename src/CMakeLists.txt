@@ -42,9 +42,9 @@ add_library(StyleSheetParser
 target_include_directories(StyleSheetParser PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include;${PROJECT_SOURCE_DIR}/third-party;${Boost_INCLUDE_DIRS}>")
 target_compile_options(StyleSheetParser
-  PUBLIC ${cxx11_options} ${warning_options})
+  PUBLIC ${cxx17_options} ${warning_options})
 
-target_link_libraries(StyleSheetParser Qt5::Quick)
+target_link_libraries(StyleSheetParser Qt${QT_VERSION_MAJOR}::Quick)
 
 add_library(StylePlugin MODULE
   StyleChecker.cpp
@@ -63,7 +63,7 @@ add_library(StylePlugin MODULE
   StylesDirWatcher.cpp
   StylesDirWatcher.hpp
 )
-target_link_libraries(StylePlugin StyleSheetParser Qt5::Quick)
+target_link_libraries(StylePlugin StyleSheetParser Qt${QT_VERSION_MAJOR}::Quick)
 
 if(WIN32)
   set_target_properties(StylePlugin PROPERTIES PREFIX "")
