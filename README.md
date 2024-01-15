@@ -99,5 +99,5 @@ Aqt StyleSheets is distributed under the MIT license (see LICENSE).
 
 ## CI Status
 
-Master: [![Build status](https://ci.appveyor.com/api/projects/status/6uv86juxwv7nlu3e/branch/master?svg=true)](https://ci.appveyor.com/project/gck-ableton/aqt-stylesheets/branch/master)
-[![Build Status](https://travis-ci.com/Ableton/aqt-stylesheets.svg?branch=master)](https://travis-ci.com/Ableton/aqt-stylesheets)
+Main: [![Build status](https://ci.appveyor.com/api/projects/status/6uv86juxwv7nlu3e/branch/main?svg=true)](https://ci.appveyor.com/project/gck-ableton/aqt-stylesheets/branch/main)
+[![Build Status](https://travis-ci.com/Ableton/aqt-stylesheets.svg?branch=main)](https://travis-ci.com/Ableton/aqt-stylesheets)
