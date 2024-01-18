@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include "Warnings.hpp"
 
 SUPPRESS_WARNINGS
+#include <QtCore/QRegularExpression>
 #include <QtGui/QColor>
 #include <QtGui/QFont>
 #include <boost/algorithm/clamp.hpp>
@@ -148,10 +149,10 @@ FontSize takeFontSizeFromTokenList(QStringList& tokens)
   if (!tokens.isEmpty()) {
     const QString sizeStr = tokens.takeFirst();
 
-    if (sizeStr.contains(QRegExp("^\\d+px$"))) {
-      fontSize.pixelSize = sizeStr.split(QRegExp("px")).at(0).toInt();
-    } else if (sizeStr.contains(QRegExp("^\\d+(\\.\\d+)?pt$"))) {
-      fontSize.pointSize = sizeStr.split(QRegExp("pt")).at(0).toDouble();
+    if (sizeStr.contains(QRegularExpression("^\\d+px$"))) {
+      fontSize.pixelSize = sizeStr.split(QRegularExpression("px")).at(0).toInt();
+    } else if (sizeStr.contains(QRegularExpression("^\\d+(\\.\\d+)?pt$"))) {
+      fontSize.pointSize = sizeStr.split(QRegularExpression("pt")).at(0).toDouble();
     } else {
       tokens.prepend(sizeStr);
     }
@@ -173,7 +174,11 @@ font: "italic smallcaps bold 16px Times New Roman"
 */
 QFont fontDeclarationToFont(const QString& fontDecl)
 {
-  QStringList tokens = fontDecl.split(QRegExp("\\s* \\s*"), QString::SkipEmptyParts);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  QStringList tokens = fontDecl.split(QRegularExpression("\\s* \\s*"), QString::SkipEmptyParts);
+#else
+  QStringList tokens = fontDecl.split(QRegularExpression("\\s* \\s*"), Qt::SkipEmptyParts);
+#endif
 
   const QFont::Style fontStyle = takeFontStyleFromTokenList(tokens);
   const QFont::Capitalization capMode = takeCapitalizationStyleFromTokenList(tokens);

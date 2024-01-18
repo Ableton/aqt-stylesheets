@@ -30,9 +30,12 @@ add_library(AqtTestUtilsPlugin MODULE
   TestUtils.cpp
 )
 target_compile_options(AqtTestUtilsPlugin
-  PUBLIC ${cxx11_options} ${warning_options})
+  PUBLIC ${cxx17_options} ${warning_options})
 target_link_libraries(AqtTestUtilsPlugin
-  Qt5::Qml Qt5::Test Qt5::QuickTest)
+  Qt${QT_VERSION_MAJOR}::Qml
+  Qt${QT_VERSION_MAJOR}::Test
+  Qt${QT_VERSION_MAJOR}::QuickTest
+)
 
 if(WIN32)
   set_target_properties(StylePlugin PROPERTIES PREFIX "")
