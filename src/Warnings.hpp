@@ -26,6 +26,13 @@ THE SOFTWARE.
 
 #if defined(__clang__)
 
+  #if __has_warning("-Wcast-function-type-strict")
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_CAST_FUNCTION_TYPE_STRICT \
+    _Pragma("clang diagnostic ignored \"-Wcast-function-type-strict\"")
+  #else
+    #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_CAST_FUNCTION_TYPE_STRICT
+  #endif
+
   #if __has_warning("-Wcomma")
     #define ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
     _Pragma("clang diagnostic ignored \"-Wcomma\"")
@@ -149,6 +156,7 @@ THE SOFTWARE.
     _Pragma("clang diagnostic ignored \"-Wunused-parameter\"") \
     _Pragma("clang diagnostic ignored \"-Wused-but-marked-unused\"") \
     _Pragma("clang diagnostic ignored \"-Wweak-vtables\"") \
+    ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_CAST_FUNCTION_TYPE_STRICT \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMMA \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_COMPOUND_TOKEN_SPLIT_BY_SPACE \
     ABL_PRAGMA_CLANG_DIAGNOSTIC_IGNORED_DOUBLE_PROMOTION \
