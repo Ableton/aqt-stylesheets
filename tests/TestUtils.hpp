@@ -59,9 +59,11 @@ public:
   {
     if (pattern.userType() == QMetaType::QRegularExpression) {
       QTest::ignoreMessage(QtMsgType(level), pattern.toRegularExpression());
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     } else if (pattern.userType() == QMetaType::QRegExp) {
       QTest::ignoreMessage(
         QtMsgType(level), QRegularExpression(pattern.toRegExp().pattern()));
+#endif
     } else {
       QTest::ignoreMessage(QtMsgType(level), pattern.toString().toUtf8().data());
     }
